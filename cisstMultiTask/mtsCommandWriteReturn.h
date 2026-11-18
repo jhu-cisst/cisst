@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandWriteReturn_h
 
 #include <cisstMultiTask/mtsCommandBase.h>
+#include <cisstMultiTask/mtsCallable.h>
 #include <string>
 
 // Always include last
@@ -54,16 +55,15 @@ public:
     typedef mtsCommandWriteReturn ThisType;
 
     /*! Callable type */
-    typedef mtsCallableWriteReturnBase CallableType;
+    typedef mtsCallableWriteReturn CallableType;
 
 private:
     /*! Private copy constructor to prevent copies */
     mtsCommandWriteReturn(const ThisType & CMN_UNUSED(other));
 
 protected:
-    /*! The pointer to member function of the receiver class that
-      is to be invoked for a particular instance of the command. */
-    mtsCallableWriteReturnBase * Callable;
+    /*! The callable object to be invoked for a particular instance of the command. */
+    mtsCallableWriteReturn Callable;
 
 public:
     /*! The constructor. Does nothing. */
@@ -72,11 +72,9 @@ public:
     mtsCommandWriteReturn(const std::string & name);
 
     /*! The constructor.
-      \param action Pointer to the member function that is to be called
-      by the invoker of the command
-      \param classInstantiation Pointer to the receiver of the command
+      \param callable Callable object to be invoked by the command
       \param name A string to identify the command. */
-    mtsCommandWriteReturn(mtsCallableWriteReturnBase * callable, const std::string & name,
+    mtsCommandWriteReturn(const mtsCallableWriteReturn & callable, const std::string & name,
                           const mtsGenericObject * argumentPrototype,
                           const mtsGenericObject * resultPrototype);
 
@@ -101,7 +99,7 @@ public:
       Execute method which will queue the command.  When the command
       is de-queued, one needs access to the callable object to call
       the final method or function. */
-    mtsCallableWriteReturnBase * GetCallable(void) const;
+    const mtsCallableWriteReturn & GetCallable(void) const;
 
     /* documented in base class */
     size_t NumberOfArguments(void) const;

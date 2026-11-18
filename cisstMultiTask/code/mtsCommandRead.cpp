@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsCommandRead.h>
-#include <cisstMultiTask/mtsCallableReadBase.h>
 
 
 mtsCommandRead::mtsCommandRead(void):
@@ -28,13 +27,12 @@ mtsCommandRead::mtsCommandRead(void):
 
 mtsCommandRead::mtsCommandRead(const std::string & name):
     BaseType(name),
-    Callable(0),
     ArgumentPrototype(0)
 {
 }
 
 
-mtsCommandRead::mtsCommandRead(mtsCallableReadBase * callable,
+mtsCommandRead::mtsCommandRead(const mtsCallableRead & callable,
                                const std::string & name,
                                const mtsGenericObject * argumentPrototype):
     BaseType(name),
@@ -53,13 +51,13 @@ mtsCommandRead::~mtsCommandRead()
 mtsExecutionResult mtsCommandRead::Execute(mtsGenericObject & argument)
 {
     if (this->IsEnabled()) {
-        return this->Callable->Execute(argument);
+        return this->Callable(argument);
     }
     return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 
-mtsCallableReadBase * mtsCommandRead::GetCallable(void) const
+const mtsCallableRead & mtsCommandRead::GetCallable(void) const
 {
     return this->Callable;
 }
@@ -93,8 +91,7 @@ void mtsCommandRead::ToStream(std::ostream & outputStream) const
 {
     outputStream << "mtsCommandRead: ";
     if (this->Callable) {
-        outputStream << this->Name << "(" << this->GetArgumentPrototype()->Services()->GetName() << "&) const using \""
-                     << *Callable << "\" currently "
+        outputStream << this->Name << "(" << this->GetArgumentPrototype()->Services()->GetName() << "&) const currently "
                      << (this->IsEnabled() ? "enabled" : "disabled");
     } else {
         outputStream << "not associated to a callable object";

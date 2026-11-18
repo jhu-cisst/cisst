@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
+using namespace std::chrono_literals;
+
 CMN_IMPLEMENT_SERVICES(mtsIntervalStatistics);
 
 mtsIntervalStatistics::mtsIntervalStatistics():
@@ -35,11 +37,7 @@ mtsIntervalStatistics::mtsIntervalStatistics():
     mComputeTimeMax(0.0),
     mNumberOfSamples(0),
     mNumberOfOverruns(0),
-    mStatisticsInterval(
-        std::chrono::duration_cast<Clock_t::duration>(
-            std::chrono::duration<double>(1.0)
-        )),
-    mCallback(0)
+    mStatisticsInterval(1s)
 {
     Reset();
 }
@@ -196,7 +194,7 @@ void mtsIntervalStatistics::Update(const double period, const double computeTime
 
         // finally call user code to act on updated data
         if (mCallback) {
-            mCallback->Execute();
+            mCallback();
         }
 
         // reset

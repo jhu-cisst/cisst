@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandVoidReturn.h>
 #include <cisstMultiTask/mtsCommandRead.h>
-#include <cisstMultiTask/mtsCallableReadBase.h>
 #include <cisstMultiTask/mtsQueue.h>
 
 // Always include last
@@ -74,7 +73,7 @@ private:
 
 public:
 
-    mtsCommandQueuedVoidReturnBase(CallableType * callable, const std::string & name,
+    mtsCommandQueuedVoidReturnBase(const CallableType & callable, const std::string & name,
                                    const mtsGenericObject * resultPrototype,
                                    mtsMailBox * mailBox, size_t size);
 

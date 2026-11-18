@@ -92,7 +92,7 @@ mtsCommandVoid* mtsEventReceiverVoid::GetCommand(void)
 {
     if (!Command) {
         Command = std::make_unique<mtsCommandVoid>(
-            new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this),
+            mtsMakeCallableVoid(&mtsEventReceiverVoid::EventHandler, this),
             Name
         );
     }

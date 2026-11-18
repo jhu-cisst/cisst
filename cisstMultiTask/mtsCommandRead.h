@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandBase.h>
+#include <cisstMultiTask/mtsCallable.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 // Always include last
@@ -48,14 +49,14 @@ public:
     typedef mtsCommandRead ThisType;
 
     /*! Callable type */
-    typedef mtsCallableReadBase CallableType;
+    typedef mtsCallableRead CallableType;
 
 private:
     /*! Private copy constructor to prevent copies */
     inline mtsCommandRead(const ThisType & CMN_UNUSED(other));
 
 protected:
-    mtsCallableReadBase * Callable;
+    mtsCallableRead Callable;
 
     const mtsGenericObject * ArgumentPrototype;
 
@@ -71,7 +72,7 @@ public:
       by the invoker of the command
       \param name A string to identify the command
       \param argumentPrototype An instance of the argument being used */
-    mtsCommandRead(mtsCallableReadBase * callable,
+    mtsCommandRead(const mtsCallableRead & callable,
                    const std::string & name,
                    const mtsGenericObject * argumentPrototype);
 
@@ -95,7 +96,7 @@ public:
       Execute method which will queue the command.  When the command
       is de-queued, one needs access to the callable object to call
       the final method or function. */
-    mtsCallableReadBase * GetCallable(void) const;
+    const mtsCallableRead & GetCallable(void) const;
 
     virtual const mtsGenericObject * GetArgumentPrototype(void) const;
     // GetResultPrototype is same as GetArgumentPrototype, but provided for

@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <cisstMultiTask/mtsCommandQualifiedRead.h>
-#include <cisstMultiTask/mtsCallableQualifiedReadBase.h>
 
 
 mtsCommandQualifiedRead::mtsCommandQualifiedRead(void):
@@ -28,13 +27,12 @@ mtsCommandQualifiedRead::mtsCommandQualifiedRead(void):
 
 mtsCommandQualifiedRead::mtsCommandQualifiedRead(const std::string & name):
     BaseType(name),
-    Callable(0),
     Argument1Prototype(0),
     Argument2Prototype(0)
 {}
 
 
-mtsCommandQualifiedRead::mtsCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
+mtsCommandQualifiedRead::mtsCommandQualifiedRead(const mtsCallableQualifiedRead & callable,
                                                  const std::string & name,
                                                  const mtsGenericObject * argument1Prototype,
                                                  const mtsGenericObject * argument2Prototype):
@@ -61,7 +59,7 @@ mtsExecutionResult mtsCommandQualifiedRead::Execute(const mtsGenericObject & arg
                                                     mtsGenericObject & argument2)
 {
     if (this->IsEnabled()) {
-        return this->Callable->Execute(argument1, argument2);
+        return this->Callable(argument1, argument2);
     }
     return mtsExecutionResult::COMMAND_DISABLED;
 }
@@ -91,7 +89,7 @@ const mtsGenericObject * mtsCommandQualifiedRead::GetResultPrototype(void) const
 }
 
 
-mtsCallableQualifiedReadBase * mtsCommandQualifiedRead::GetCallable(void) const
+const mtsCallableQualifiedRead & mtsCommandQualifiedRead::GetCallable(void) const
 {
     return this->Callable;
 }
@@ -115,8 +113,7 @@ void mtsCommandQualifiedRead::ToStream(std::ostream & outputStream) const
     if (this->Callable) {
         outputStream << this->Name << "(const "
                      << this->GetArgument1Prototype()->Services()->GetName() << "&, "
-                     << this->GetArgument2Prototype()->Services()->GetName() << "&) const using \""
-                     << *Callable << "\" currently "
+                     << this->GetArgument2Prototype()->Services()->GetName() << "&) const currently "
                      << (this->IsEnabled() ? "enabled" : "disabled");
     } else {
         outputStream << "not associated to a callable object";

@@ -56,26 +56,18 @@ typedef enum {MTS_BLOCKING, MTS_NOT_BLOCKING} mtsBlockingType;
 // commands
 class mtsCommandBase;
 
-// void callables and commands
-class mtsCallableVoidBase;
-template <class _classType> class mtsCallableVoidMethod;
-class mtsCallableVoidFunction;
+// void commands
 class mtsCommandVoid;
 class mtsCommandQueuedVoid;
 class mtsFunctionVoid;
 
-// void return callables and commands
-class mtsCallableVoidReturnBase;
-template <class _classType, class _returnType> class mtsCallableVoidReturnMethod;
+// void return commands
 class mtsCommandVoidReturn;
 template <class _Base> class mtsCommandQueuedVoidReturnBase;
 typedef mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn> mtsCommandQueuedVoidReturn;
 class mtsFunctionVoidReturn;
 
 // read commands
-class mtsCallableReadBase;
-template <class _classType, class _argumentType> class mtsCallableReadMethod;
-template <class _classType, class _argumentType> class mtsCallableReadReturnVoidMethod;
 class mtsCommandRead;
 class mtsFunctionRead;
 typedef mtsCommandQueuedVoidReturnBase<mtsCommandRead> mtsCommandQueuedRead;
@@ -86,17 +78,12 @@ template <class _classType, class _argumentType> class mtsCommandWrite;
 class mtsFunctionWrite;
 
 // write with returned value commands
-class mtsCallableWriteReturnBase;
-template <class _classType, class _argumentType, class _returnType> class mtsCallableWriteReturnMethod;
 class mtsCommandWriteReturn;
 template <class _Base> class mtsCommandQueuedWriteReturnBase;
 typedef mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn> mtsCommandQueuedWriteReturn;
 class mtsFunctionWriteReturn;
 
 // qualified read commands
-class mtsCallableQualifiedReadBase;
-template <class _classType, class _argument1Type, class _argument2Type> class mtsCallableQualifiedReadMethod;
-template <class _classType, class _argument1Type, class _argument2Type> class mtsCallableQualifiedReadReturnVoidMethod;
 class mtsCommandQualifiedRead;
 typedef mtsCommandQueuedWriteReturnBase<mtsCommandQualifiedRead> mtsCommandQueuedQualifiedRead;
 class mtsFunctionQualifiedRead;
@@ -119,9 +106,7 @@ class mtsMessage;
 
 // interfaces and tasks
 class mtsInterfaceProvided;
-class mtsInterfaceOutput;
 class mtsInterfaceRequired;
-class mtsInterfaceInput;
 
 class mtsCommandState;
 class mtsComponent;

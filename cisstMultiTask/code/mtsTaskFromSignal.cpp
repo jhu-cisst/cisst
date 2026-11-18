@@ -26,16 +26,14 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsTaskFromSignal::mtsTaskFromSignal(const std::string & name,
                                      unsigned int sizeStateTable):
-    mtsTaskContinuous(name, sizeStateTable),
-    PostCommandQueuedCallable(0)
+    mtsTaskContinuous(name, sizeStateTable)
 {
     this->Init();
 }
 
 
 mtsTaskFromSignal::mtsTaskFromSignal(const mtsTaskConstructorArg & arg):
-    mtsTaskContinuous(arg.Name, arg.StateTableSize),
-    PostCommandQueuedCallable(0)
+    mtsTaskContinuous(arg.Name, arg.StateTableSize)
 {
     this->Init();
 }
@@ -43,11 +41,8 @@ mtsTaskFromSignal::mtsTaskFromSignal(const mtsTaskConstructorArg & arg):
 
 void mtsTaskFromSignal::Init(void)
 {
-    this->PostCommandQueuedCallable = new mtsCallableVoidMethod<mtsTaskFromSignal>(&mtsTaskFromSignal::PostCommandQueuedMethod,
-                                                                                   this);
-    if (!this->PostCommandQueuedCallable) {
-        CMN_LOG_CLASS_INIT_ERROR << "constructor: can't create post command queued callable based on method." << std::endl;
-    }
+    this->PostCommandQueuedCallable = mtsMakeCallableVoid(&mtsTaskFromSignal::PostCommandQueuedMethod,
+                                                          this);
 }
 
 
@@ -135,7 +130,7 @@ mtsInterfaceProvided * mtsTaskFromSignal::AddInterfaceProvidedWithoutSystemEvent
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
         || (queueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
-        mtsCallableVoidBase * postCommandQueuedCallable = this->PostCommandQueuedCallable;
+        mtsCallableVoid postCommandQueuedCallable = this->PostCommandQueuedCallable;
         // If the internal provided interface (i.e., for the Manager Component Client), then the "post command queued"
         // callable object should be the one defined in mtsTask, which processes the mailbox if the task is not active.
         // Note that if the task is active, we always wait for the task's DoRunInternal method to process this mailbox.

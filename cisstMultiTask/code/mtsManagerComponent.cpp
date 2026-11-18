@@ -25,8 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsInterfaceOutput.h>
-#include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -494,9 +492,9 @@ void mtsManagerComponent::GetNamesOfInterfaces(
         interfaces.ProcessName = arg.ProcessName;
         interfaces.ComponentName = arg.ComponentName;
         // Get a list of required interfaces
-        interfaces.InterfaceRequiredNames = component->GetNamesOfInterfacesRequiredOrInput();
+        interfaces.InterfaceRequiredNames = component->GetNamesOfInterfacesRequired();
         // Get a list of provided interfaces
-        interfaces.InterfaceProvidedNames =  component->GetNamesOfInterfacesProvidedOrOutput();
+        interfaces.InterfaceProvidedNames = component->GetNamesOfInterfacesProvided();
     }
     else {
         CMN_LOG_CLASS_RUN_ERROR << "GetNamesOfInterfaces: did not find component \""
@@ -511,7 +509,7 @@ void mtsManagerComponent::GetDescriptionsOfInterfaces(
     if (component) {
         std::vector<std::string>::const_iterator it;
         // Get a list of required interfaces
-        std::vector<std::string> interfaceRequiredNames = component->GetNamesOfInterfacesRequiredOrInput();
+        std::vector<std::string> interfaceRequiredNames = component->GetNamesOfInterfacesRequired();
         for (it = interfaceRequiredNames.begin(); it != interfaceRequiredNames.end(); ++it) {
             mtsInterfaceRequired * required = component->GetInterfaceRequired(*it);
             if (required) {
@@ -524,7 +522,7 @@ void mtsManagerComponent::GetDescriptionsOfInterfaces(
             }
         }
         // Get a list of provided interfaces
-        std::vector<std::string> interfaceProvidedNames = component->GetNamesOfInterfacesProvidedOrOutput();
+        std::vector<std::string> interfaceProvidedNames = component->GetNamesOfInterfacesProvided();
         for (it = interfaceProvidedNames.begin(); it != interfaceProvidedNames.end(); ++it) {
             mtsInterfaceProvided * provided = component->GetInterfaceProvided(*it);
             if (provided) {
@@ -562,20 +560,6 @@ void mtsManagerComponent::GetListOfConnections(std::vector<mtsDescriptionConnect
                 mtsDescriptionConnection conn("", itComp->first, *itReq,
                                               "", provided->GetComponent()->GetName(), provided->GetName(),
                                               required->GetConnectionID());
-                listOfConnections.push_back(conn);
-            }
-        }
-        // Get a list of input interfaces
-        std::vector<std::string> interfaceInputNames = component->GetNamesOfInterfacesInput();
-        typename std::vector<std::string>::const_iterator itIn;
-        for (itIn = interfaceInputNames.begin(); itIn != interfaceInputNames.end(); ++itIn) {
-            const mtsInterfaceInput * input = component->GetInterfaceInput(*itIn);
-            CMN_ASSERT(input);
-            const mtsInterfaceOutput * output = input->GetConnectedInterface();
-            if (output) {
-                mtsDescriptionConnection conn("", itComp->first, *itIn,
-                                              "", output->GetComponent()->GetName(), output->GetName(),
-                                              input->GetConnectionID());
                 listOfConnections.push_back(conn);
             }
         }
@@ -713,20 +697,18 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
         return false;
     }
 
-    // First, try to figure out if the interface is either provided or output
+    // First, try to find the provided interface
     mtsInterfaceProvided * serverInterfaceProvided = serverComponent->GetInterfaceProvided(serverInterfaceName);
-    mtsInterfaceOutput * serverInterfaceOutput = serverComponent->GetInterfaceOutput(serverInterfaceName);
-    if (!serverInterfaceProvided && !serverInterfaceOutput) {
+    if (!serverInterfaceProvided) {
         // test for swapped interfaces
-        CMN_LOG_CLASS_INIT_DEBUG << "ComponentConnect: looking for provided/output interface in first component as well" << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "ComponentConnect: looking for provided interface in first component as well" << std::endl;
         serverInterfaceProvided = clientComponent->GetInterfaceProvided(clientInterfaceName);
-        serverInterfaceOutput = clientComponent->GetInterfaceOutput(clientInterfaceName);
-        if (!serverInterfaceProvided && !serverInterfaceOutput) {
-            options = serverComponent->GetNamesOfInterfacesProvidedOrOutput();
+        if (!serverInterfaceProvided) {
+            options = serverComponent->GetNamesOfInterfacesProvided();
             if (options.size() == 0) {
-                allOptions << "no provided/output interface available for this component";
+                allOptions << "no provided interface available for this component";
             } else {
-                allOptions << "available provided/output interface(s): ";
+                allOptions << "available provided interface(s): ";
                 std::copy(options.begin(), options.end(), output);
             }
             return false;
@@ -737,16 +719,15 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
         }
     }
 
-    // Now, handle the connections.  First, we look for connection between required/provided interfaces.  Then, we look
-    // for connection between input/output interfaces.
-    if (serverInterfaceProvided) {
+    // Handle connection between required/provided interfaces.
+    {
         mtsInterfaceRequired * clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceName);
         if (!clientInterfaceRequired) {
-            options = clientComponent->GetNamesOfInterfacesRequiredOrInput();
+            options = clientComponent->GetNamesOfInterfacesRequired();
             if (options.size() == 0) {
-                allOptions << "no required/input interface available for this component";
+                allOptions << "no required interface available for this component";
             } else {
-                allOptions << "available required/input interface(s): ";
+                allOptions << "available required interface(s): ";
                 std::copy(options.begin(), options.end(), output);
             }
             return false;
@@ -855,39 +836,6 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
                                      << serverComponentName << ":" << serverInterfaceName << std::endl;
         }
     }
-    else {  // Input/Output connection
-        if (!serverInterfaceOutput) {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentConnect: failed to connect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceName << " - "
-                                     << serverComponentName << ":" << serverInterfaceName
-                                     << ", server does not have provided or output interface." << std::endl;
-            return false;
-        }
-        mtsInterfaceInput * clientInterfaceInput = clientComponent->GetInterfaceInput(clientInterfaceName);
-        if (!clientInterfaceInput) {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentConnect: failed to connect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceName << " - "
-                                     << serverComponentName << ":" << serverInterfaceName
-                                     << ", client does not have input interface." << std::endl;
-            return false;
-        }
-        if (clientInterfaceInput->ConnectTo(serverInterfaceOutput)) {
-            // Assign ConnectionID
-            clientInterfaceInput->ConnectionID = ConnectionID;
-            CMN_LOG_CLASS_INIT_VERBOSE << "ComponentConnect: component \""
-                                       << this->GetName()
-                                       << "\" input interface \"" << clientInterfaceName
-                                       << "\" successfully connected to output interface \""
-                                       << serverInterfaceName << "\"" << std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentConnect: component \""
-                                     << this->GetName()
-                                     << "\" input interface \"" << clientInterfaceName
-                                     << "\" failed to connect to output interface \""
-                                     << serverInterfaceName << "\"" << std::endl;
-            return false;
-        }
-    }
 
     // Successful connection, now update data structures
 
@@ -925,14 +873,12 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
     }
 
     mtsInterfaceProvided * serverInterfaceProvided = serverComponent->GetInterfaceProvided(serverInterfaceName);
-    mtsInterfaceOutput * serverInterfaceOutput = serverComponent->GetInterfaceOutput(serverInterfaceName);
-    if (!serverInterfaceProvided && !serverInterfaceOutput) {
+    if (!serverInterfaceProvided) {
         // test for swapped interfaces
-        CMN_LOG_CLASS_INIT_DEBUG << "ComponentDisconnect: looking for provided/output interface in first component as well" << std::endl;
+        CMN_LOG_CLASS_INIT_DEBUG << "ComponentDisconnect: looking for provided interface in first component as well" << std::endl;
         serverInterfaceProvided = clientComponent->GetInterfaceProvided(clientInterfaceName);
-        serverInterfaceOutput = clientComponent->GetInterfaceOutput(clientInterfaceName);
-        if (!serverInterfaceProvided && !serverInterfaceOutput) {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentDisconnect: failed to get provided/output interface \"" << serverInterfaceName << "\""
+        if (!serverInterfaceProvided) {
+            CMN_LOG_CLASS_INIT_ERROR << "ComponentDisconnect: failed to get provided interface \"" << serverInterfaceName << "\""
                                      << " in component \"" << serverComponentName << "\"" << std::endl;
             return false;
         } else {
@@ -942,10 +888,9 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
         }
     }
 
-    // Now, handle the disconnection.  First, we look for connection between required/provided interfaces.  Then, we look
-    // for connection between input/output interfaces.
+    // Handle disconnection between required/provided interfaces.
     ConnectionIDType thisConnectionID = InvalidConnectionID;
-    if (serverInterfaceProvided) {
+    {
         mtsInterfaceRequired *clientInterfaceRequired = clientComponent->GetInterfaceRequired(clientInterfaceName);
         if (!clientInterfaceRequired) {
             CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: failed to disconnect interfaces: "
@@ -1059,39 +1004,6 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
             return false;
         }
     }
-    else {  // Input/Output connection
-        if (!serverInterfaceOutput) {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentDisconnect: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceName << " - "
-                                     << serverComponentName << ":" << serverInterfaceName
-                                     << ", server does not have provided or output interface." << std::endl;
-            return false;
-        }
-        mtsInterfaceInput *clientInterfaceInput = clientComponent->GetInterfaceInput(clientInterfaceName);
-        if (!clientInterfaceInput) {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentDisconnect: failed to disconnect interfaces: "
-                                     << clientComponentName << ":" << clientInterfaceName << " - "
-                                     << serverComponentName << ":" << serverInterfaceName
-                                     << ", client does not have input interface." << std::endl;
-            return false;
-        }
-        if (clientInterfaceInput->Disconnect()) {
-            thisConnectionID = clientInterfaceInput->ConnectionID;
-            clientInterfaceInput->ConnectionID = InvalidConnectionID;
-            CMN_LOG_CLASS_INIT_VERBOSE << "ComponentDisconnect: component \""
-                                       << this->GetName()
-                                       << "\" input interface \"" << clientInterfaceName
-                                       << "\" successfully disconnected from output interface \""
-                                       << serverInterfaceName << "\"" << std::endl;
-        } else {
-            CMN_LOG_CLASS_INIT_ERROR << "ComponentDisconnect: component \""
-                                     << this->GetName()
-                                     << "\" input interface \"" << clientInterfaceName
-                                     << "\" failed to disconnect from output interface \""
-                                     << serverInterfaceName << "\"" << std::endl;
-            return false;
-        }
-    }
 
     mtsDescriptionConnection description(
         "", clientComponentName, clientInterfaceName,
@@ -1124,24 +1036,6 @@ bool mtsManagerComponent::FindByConnectionID(mtsDescriptionConnection & arg) con
                     arg.Server.ProcessName = "";
                     arg.Server.ComponentName = provided->GetComponent()->GetName();
                     arg.Server.InterfaceName = provided->GetName();
-                    return true;
-                }
-            }
-        }
-        // Get a list of input interfaces
-        std::vector<std::string> interfaceInputNames = component->GetNamesOfInterfacesInput();
-        typename std::vector<std::string>::const_iterator itIn;
-        for (itIn = interfaceInputNames.begin(); itIn != interfaceInputNames.end(); ++itIn) {
-            const mtsInterfaceInput * input = component->GetInterfaceInput(*itIn);
-            if (input && (input->ConnectionID == arg.ConnectionID)) {
-                const mtsInterfaceOutput * output = input->GetConnectedInterface();
-                if (output) {
-                    arg.Client.ProcessName = "";
-                    arg.Client.ComponentName = itComp->first;
-                    arg.Client.InterfaceName = *itIn;
-                    arg.Server.ProcessName = "";
-                    arg.Server.ComponentName = output->GetComponent()->GetName();
-                    arg.Server.InterfaceName = output->GetName();
                     return true;
                 }
             }

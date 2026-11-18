@@ -32,13 +32,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsConfig.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsInterfaceOutput.h>
 #include <cisstMultiTask/mtsTaskContinuous.h>
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
 #include <cisstMultiTask/mtsTaskFromSignal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
-#include <cisstMultiTask/mtsInterfaceInput.h>
 #include <cisstMultiTask/mtsManagerComponent.h>
 #include <cisstMultiTask/mtsManagerComponentServices.h>
 #include <cisstCommon/cmnAssert.h>

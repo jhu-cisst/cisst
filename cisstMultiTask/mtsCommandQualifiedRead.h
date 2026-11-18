@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandBase.h>
+#include <cisstMultiTask/mtsCallable.h>
 
 
 /*!
@@ -46,14 +47,14 @@ class CISST_EXPORT mtsCommandQualifiedRead: public mtsCommandBase
     typedef mtsCommandQualifiedRead ThisType;
 
     /*! Callable type */
-    typedef mtsCallableQualifiedReadBase CallableType;
+    typedef mtsCallableQualifiedRead CallableType;
 
 private:
     /*! Private copy constructor to prevent copies */
     inline mtsCommandQualifiedRead(const ThisType & CMN_UNUSED(other));
 
 protected:
-    mtsCallableQualifiedReadBase * Callable;
+    mtsCallableQualifiedRead Callable;
 
     /*! Argument 1 prototype */
     const mtsGenericObject * Argument1Prototype;
@@ -72,7 +73,7 @@ public:
       by the invoker of the command
       \param interface Pointer to the receiver of the command
       \param name A string to identify the command. */
-    mtsCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
+    mtsCommandQualifiedRead(const mtsCallableQualifiedRead & callable,
                             const std::string & name,
                             const mtsGenericObject * argument1Prototype,
                             const mtsGenericObject * argument2Prototype);
@@ -98,7 +99,7 @@ public:
       Execute method which will queue the command.  When the command
       is de-queued, one needs access to the callable object to call
       the final method or function. */
-    mtsCallableQualifiedReadBase * GetCallable(void) const;
+    const mtsCallableQualifiedRead & GetCallable(void) const;
 
     const mtsGenericObject * GetArgument1Prototype(void) const;
 

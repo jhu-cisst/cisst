@@ -201,12 +201,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     mtsInterfaceProvided * AddInterfaceProvidedUsingMailbox(const std::string & interfaceProvidedName,
                                                             mtsMailBox * mailBox);
 
-    mtsInterfaceInput * AddInterfaceInputExisting(const std::string & interfaceInputName,
-                                                  mtsInterfaceInput * interfaceInput);
-
-    mtsInterfaceOutput * AddInterfaceOutputExisting(const std::string & interfaceOutputName,
-                                                    mtsInterfaceOutput * interfaceOutput);
-
     /*! Kill all separate log, if any.  This method should be used in
       the destructor.  Once it has been called, any call to log might crash. */
     void KillSeparateLogFile(void);
@@ -320,44 +314,22 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         return this->AddInterfaceProvided(interfaceProvidedName);
     }
 
-    /*! Method to add an output interface to the component. */
-    virtual mtsInterfaceOutput * AddInterfaceOutput(const std::string & interfaceOutputName);
-
     /*! Return the list of provided interfaces.  This returns a list
       of names.  To retrieve the actual interface, use
       GetInterfaceProvided with the provided interface name. */
-    //@{
-    std::vector<std::string> GetNamesOfInterfacesProvidedOrOutput(void) const;
     std::vector<std::string> GetNamesOfInterfacesProvided(void) const;
-    std::vector<std::string> GetNamesOfInterfacesOutput(void) const;
-    //@}
 
     /*! Check if there is any interface with the given name */
     bool InterfaceExists(const std::string & interfaceName, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_VERBOSE) const;
 
-    /*! Check if there is any interface provided or output with the given name */
-    bool InterfaceProvidedOrOutputExists(const std::string & interfaceName, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_VERBOSE) const;
-
-    /*! Check if there is any interface required or input with the given name */
-    bool InterfaceRequiredOrInputExists(const std::string & interfaceName, cmnLogLevel lod = CMN_LOG_LEVEL_INIT_VERBOSE) const;
-
     /*! Get a provided interface identified by its name */
     mtsInterfaceProvided * GetInterfaceProvided(const std::string & interfaceProvidedName) const;
-
-    /*! Get an output interface identified by its name */
-    mtsInterfaceOutput * GetInterfaceOutput(const std::string & interfaceOutputName) const;
 
     /*! Get the total number of provided interfaces */
     size_t GetNumberOfInterfacesProvided(void) const;
 
-    /*! Get the total number of output interfaces */
-    size_t GetNumberOfInterfacesOutput(void) const;
-
     /*! Remove a provided interface identified by its name */
     bool RemoveInterfaceProvided(const std::string & interfaceProvidedName);
-
-    /*! Remove an output interface identified by its name */
-    //bool RemoveInterfaceOutput(const std::string & interfaceOutputName);
 
     /*! Add a required interface.  This interface will later on be
       connected to another task and use the provided interface of the
@@ -375,15 +347,8 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         return this->AddInterfaceRequired(requiredInterfaceName);
     }
 
-    /*! Add an input interface. */
-    virtual mtsInterfaceInput * AddInterfaceInput(const std::string & interfaceInputName);
-
     /*! Provide a list of existing required interfaces (by names) */
-    //@{
-    std::vector<std::string> GetNamesOfInterfacesRequiredOrInput(void) const;
     std::vector<std::string> GetNamesOfInterfacesRequired(void) const;
-    std::vector<std::string> GetNamesOfInterfacesInput(void) const;
-    //@}
 
     /*! Get a pointer on the provided interface that has been
       connected to a given required interface (defined by its name).
@@ -394,20 +359,11 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     /*! Get a required interface identified by its name */
     mtsInterfaceRequired * GetInterfaceRequired(const std::string & interfaceRequiredName);
 
-    /*! Get an input interface identified by its name */
-    mtsInterfaceInput * GetInterfaceInput(const std::string & interfaceInputName) const;
-
     /*! Get the total number of required interfaces */
     size_t GetNumberOfInterfacesRequired(void) const;
 
-    /*! Get the total number of input interfaces */
-    size_t GetNumberOfInterfacesInput(void) const;
-
     /*! Remove a required interface identified by its name */
     bool RemoveInterfaceRequired(const std::string & interfaceRequiredName);
-
-    /*! Remove an input interface identified by its name */
-    //bool RemoveInterfaceInput(const std::string & interfaceInputName);
 
     /*! Return a pointer to state table with the given name. */
     mtsStateTable * GetStateTable(const std::string & stateTableName);
@@ -492,25 +448,15 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     std::ofstream * LogFile;
     //@}
 
-    /*! Map of provided and output interfaces.  Used to store pointers
-      on all provided interfaces.  Separate lists of provided and
-      output interfaces are maintained for efficiency. */
-    //@{
+    /*! Map of provided interfaces.  Used to store pointers
+      on all provided interfaces. */
     typedef cmnNamedMap<mtsInterfaceProvided> InterfacesProvidedMapType;
     InterfacesProvidedMapType InterfacesProvided;
-    typedef cmnNamedMap<mtsInterfaceOutput> InterfacesOutputMapType;
-    InterfacesOutputMapType InterfacesOutput;
-    //@}
 
     /*! Map of required interfaces.  Used to store pointers on all
-      required interfaces.   Separate lists of required and
-      input interfaces are maintained for efficiency. */
-    //@{
+      required interfaces. */
     typedef cmnNamedMap<mtsInterfaceRequired> InterfacesRequiredMapType;
     InterfacesRequiredMapType InterfacesRequired;
-    typedef cmnNamedMap<mtsInterfaceInput> InterfacesInputMapType;
-    InterfacesInputMapType InterfacesInput;
-    //@}
 
     /*! Map of state tables, includes the default StateTable under the
       name "StateTable" */

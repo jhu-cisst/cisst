@@ -25,12 +25,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsIntervalStatistics_h
 #define _mtsIntervalStatistics_h
 
+#include <functional>
+
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
-#include <cisstMultiTask/mtsCallableVoidMethod.h>
 
 #include <cisstMultiTask/mtsExport.h>
 
@@ -121,14 +122,16 @@ public:
     void Update(double sample, double computeTime);
 
     /*! Set callback to act on updated statistics */
-    void SetCallback(mtsCallableVoidBase * callback) {
+    void SetCallback(const std::function<void(void)> & callback) {
         mCallback = callback;
     }
 
     template <class __classType>
     void SetCallback(void (__classType::*method)(void),
                             __classType * classInstantiation) {
-        this->SetCallback(new mtsCallableVoidMethod<__classType>(method, classInstantiation));
+        mCallback = [method, classInstantiation](void) {
+            (classInstantiation->*method)();
+        };
     }
 
     void Reset();
@@ -188,7 +191,7 @@ private:
     Clock_t::duration mStatisticsInterval;
 
     /*! optional callback */
-    mtsCallableVoidBase * mCallback;
+    std::function<void(void)> mCallback;
 
 public:
     mtsIntervalStatistics();

@@ -27,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsCommandVoidReturn_h
 
 #include <cisstMultiTask/mtsCommandBase.h>
+#include <cisstMultiTask/mtsCallable.h>
 #include <string>
 
 // Always include last
@@ -54,16 +55,15 @@ public:
     typedef mtsCommandVoidReturn ThisType;
 
     /*! Callable type. */
-    typedef mtsCallableVoidReturnBase CallableType;
+    typedef mtsCallableVoidReturn CallableType;
 
 private:
     /*! Private copy constructor to prevent copies */
     mtsCommandVoidReturn(const ThisType & CMN_UNUSED(other));
 
 protected:
-    /*! The pointer to member function of the receiver class that
-      is to be invoked for a particular instance of the command. */
-    mtsCallableVoidReturnBase * Callable;
+    /*! The callable object to be invoked for a particular instance of the command. */
+    mtsCallableVoidReturn Callable;
 
 public:
     /*! The constructor. Does nothing. */
@@ -72,11 +72,10 @@ public:
     mtsCommandVoidReturn(const std::string & name);
 
     /*! The constructor.
-      \param action Pointer to the member function that is to be called
-      by the invoker of the command
-      \param classInstantiation Pointer to the receiver of the command
-      \param name A string to identify the command. */
-    mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable, const std::string & name,
+      \param callable Callable object to be invoked by the command
+      \param name A string to identify the command.
+      \param resultPrototype Prototype for the result object. */
+    mtsCommandVoidReturn(const mtsCallableVoidReturn & callable, const std::string & name,
                          const mtsGenericObject * resultPrototype);
 
     /*! The destructor. Does nothing */
@@ -98,7 +97,7 @@ public:
       Execute method which will queue the command.  When the command
       is de-queued, one needs access to the callable object to call
       the final method or function. */
-    mtsCallableVoidReturnBase * GetCallable(void) const;
+    const mtsCallableVoidReturn & GetCallable(void) const;
 
     /* documented in base class */
     size_t NumberOfArguments(void) const;

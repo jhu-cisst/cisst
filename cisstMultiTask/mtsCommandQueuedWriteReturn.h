@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
 #include <cisstMultiTask/mtsCommandQualifiedRead.h>
-#include <cisstMultiTask/mtsCallableQualifiedReadBase.h>
 #include <cisstMultiTask/mtsQueue.h>
 
 // Always include last
@@ -78,7 +77,7 @@ private:
 public:
 
     /*! Constructor */
-    mtsCommandQueuedWriteReturnBase(CallableType * callable, const std::string & name,
+    mtsCommandQueuedWriteReturnBase(const CallableType & callable, const std::string & name,
                                     const mtsGenericObject * argumentPrototype,
                                     const mtsGenericObject * resultPrototype,
                                     mtsMailBox * mailBox, size_t size);

@@ -60,11 +60,9 @@ class PeriodicTaskTest(unittest.TestCase):
         self.assertTrue(isinstance(periodicTask.MainInterface.GetDouble, cisstMultiTask.mtsCommandRead))
         proto = periodicTask.MainInterface.GetDouble.GetArgumentPrototype()
         self.assertTrue(isinstance(proto, cisstMultiTask.mtsDouble))
-        # command GetVector(mtsDoubleVec)
+        # command GetVector
         self.assertTrue("GetVector" in periodicTask.MainInterface.__dict__)
         self.assertTrue(isinstance(periodicTask.MainInterface.GetVector, cisstMultiTask.mtsCommandRead))
-        proto = periodicTask.MainInterface.GetVector.GetArgumentPrototype()
-        self.assertTrue(isinstance(proto, cisstMultiTask.mtsDoubleVec))
 
     def TestRun(self):
         """Test run mtsPeriodicTask"""

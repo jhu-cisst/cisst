@@ -18,13 +18,12 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandQueuedVoidReturn.h>
-#include <cisstMultiTask/mtsCallableVoidReturnBase.h>
 #include <cisstMultiTask/mtsCommandWriteBase.h>
 #include <cisstMultiTask/mtsMailBox.h>
 
 
 template <class _Base>
-mtsCommandQueuedVoidReturnBase<_Base>::mtsCommandQueuedVoidReturnBase(CallableType * callable, const std::string & name,
+mtsCommandQueuedVoidReturnBase<_Base>::mtsCommandQueuedVoidReturnBase(const CallableType & callable, const std::string & name,
                                                                       const mtsGenericObject * resultPrototype,
                                                                       mtsMailBox * mailBox, size_t size):
     BaseType(callable, name, resultPrototype),
@@ -138,8 +137,8 @@ template <class _Base>
 void mtsCommandQueuedVoidReturnBase<_Base>::ToStream(std::ostream & outputStream) const {
     outputStream << GetClassName() << ": MailBox \""
                  << this->GetMailBoxName()
-                 << "\" for command(void) with result using " << *(this->Callable)
-                 << " currently " << (this->IsEnabled() ? "enabled" : "disabled");
+                 << "\" for command(void) with result \"" << this->Name
+                 << "\" currently " << (this->IsEnabled() ? "enabled" : "disabled");
 }
 
 // Force instantiation of these two types

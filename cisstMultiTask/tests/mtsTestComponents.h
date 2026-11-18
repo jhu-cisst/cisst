@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>

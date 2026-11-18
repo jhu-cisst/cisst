@@ -60,7 +60,7 @@ class CISST_EXPORT mtsCommandQueuedVoid: public mtsCommandVoid
  public:
     mtsCommandQueuedVoid(void);
 
-    mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
+    mtsCommandQueuedVoid(const mtsCallableVoid & callable,
                          const std::string & name,
                          mtsMailBox * mailBox,
                          size_t size);

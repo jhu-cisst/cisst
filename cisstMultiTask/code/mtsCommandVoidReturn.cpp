@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandVoidReturn.h>
-#include <cisstMultiTask/mtsCallableVoidReturnMethod.h>
 
 mtsCommandVoidReturn::mtsCommandVoidReturn(void)
 {}
@@ -31,7 +30,7 @@ mtsCommandVoidReturn::mtsCommandVoidReturn(const std::string & name):
 {}
 
 
-mtsCommandVoidReturn::mtsCommandVoidReturn(mtsCallableVoidReturnBase * callable,
+mtsCommandVoidReturn::mtsCommandVoidReturn(const mtsCallableVoidReturn & callable,
                                            const std::string & name,
                                            const mtsGenericObject * resultPrototype):
     BaseType(name),
@@ -49,13 +48,13 @@ mtsCommandVoidReturn::~mtsCommandVoidReturn()
 mtsExecutionResult mtsCommandVoidReturn::Execute(mtsGenericObject & result)
 {
     if (this->IsEnabled()) {
-        return this->Callable->Execute(result);
+        return this->Callable(result);
     }
     return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 
-mtsCallableVoidReturnBase * mtsCommandVoidReturn::GetCallable(void) const
+const mtsCallableVoidReturn & mtsCommandVoidReturn::GetCallable(void) const
 {
     return this->Callable;
 }
@@ -83,8 +82,7 @@ void mtsCommandVoidReturn::ToStream(std::ostream & outputStream) const
 {
     outputStream << "mtsCommandVoidReturn: ";
     if (this->Callable) {
-        outputStream << this->Name << "(" << this->GetResultPrototype()->Services()->GetName() << " &) using "
-                     << *Callable << "\" currently "
+        outputStream << this->Name << "(" << this->GetResultPrototype()->Services()->GetName() << " &) currently "
                      << (this->IsEnabled() ? "enabled" : "disabled");
     } else {
         outputStream << "not associated to a callable object";

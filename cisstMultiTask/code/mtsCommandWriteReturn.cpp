@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandWriteReturn.h>
-#include <cisstMultiTask/mtsCallableWriteReturnMethod.h>
 
 mtsCommandWriteReturn::mtsCommandWriteReturn(void)
 {}
@@ -31,7 +30,7 @@ mtsCommandWriteReturn::mtsCommandWriteReturn(const std::string & name):
 {}
 
 
-mtsCommandWriteReturn::mtsCommandWriteReturn(mtsCallableWriteReturnBase * callable,
+mtsCommandWriteReturn::mtsCommandWriteReturn(const mtsCallableWriteReturn & callable,
                                              const std::string & name,
                                              const mtsGenericObject * argumentPrototype,
                                              const mtsGenericObject * resultPrototype):
@@ -57,13 +56,13 @@ mtsExecutionResult mtsCommandWriteReturn::Execute(const mtsGenericObject & argum
                                                   mtsGenericObject & result)
 {
     if (this->IsEnabled()) {
-        return this->Callable->Execute(argument, result);
+        return this->Callable(argument, result);
     }
     return mtsExecutionResult::COMMAND_DISABLED;
 }
 
 
-mtsCallableWriteReturnBase * mtsCommandWriteReturn::GetCallable(void) const
+const mtsCallableWriteReturn & mtsCommandWriteReturn::GetCallable(void) const
 {
     return this->Callable;
 }
@@ -98,8 +97,7 @@ void mtsCommandWriteReturn::ToStream(std::ostream & outputStream) const
     outputStream << "mtsCommandWriteReturn: ";
     if (this->Callable) {
         outputStream << this->Name << "(const " << this->GetArgumentPrototype()->Services()->GetName() << " & , "
-                     << this->GetResultPrototype()->Services()->GetName() << " &) using "
-                     << *Callable << "\" currently "
+                     << this->GetResultPrototype()->Services()->GetName() << " &) currently "
                      << (this->IsEnabled() ? "enabled" : "disabled");
     } else {
         outputStream << "not associated to a callable object";

@@ -33,7 +33,7 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsInterfaceProvided::mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                                            mtsInterfaceQueueingPolicy queueingPolicy,
-                                           mtsCallableVoidBase * postCommandQueuedCallable) :
+                                           const mtsCallableVoid & postCommandQueuedCallable) :
     BaseType(name, component),
     MailBox(0),
     QueueingPolicy(queueingPolicy),
@@ -354,7 +354,7 @@ bool mtsInterfaceProvided::UseQueueBasedOnInterfacePolicy(mtsCommandQueueingPoli
 }
 
 
-mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCallableVoidBase * callable,
+mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(const mtsCallableVoid & callable,
                                                       const std::string & name,
                                                       mtsCommandQueueingPolicy queueingPolicy)
 {
@@ -406,7 +406,7 @@ mtsCommandVoid * mtsInterfaceProvided::AddCommandVoid(mtsCommandVoid * command)
 }
 
 
-mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(mtsCallableVoidReturnBase * callable,
+mtsCommandVoidReturn * mtsInterfaceProvided::AddCommandVoidReturn(const mtsCallableVoidReturn & callable,
                                                                   const std::string & name,
                                                                   const mtsGenericObject * resultPrototype,
                                                                   mtsCommandQueueingPolicy queueingPolicy)
@@ -500,7 +500,7 @@ mtsCommandWriteBase * mtsInterfaceProvided::AddCommandWrite(mtsCommandWriteBase 
 }
 
 
-mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCallableWriteReturnBase * callable,
+mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(const mtsCallableWriteReturn & callable,
                                                                     const std::string & name,
                                                                     const mtsGenericObject * argumentPrototype,
                                                                     const mtsGenericObject * resultPrototype,
@@ -554,7 +554,7 @@ mtsCommandWriteReturn * mtsInterfaceProvided::AddCommandWriteReturn(mtsCommandWr
 }
 
 
-mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCallableReadBase * callable,
+mtsCommandRead * mtsInterfaceProvided::AddCommandRead(const mtsCallableRead & callable,
                                                       const std::string & name,
                                                       const mtsGenericObject * argumentPrototype)
 {
@@ -591,7 +591,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandRead(mtsCommandRead * command)
 }
 
 
-mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
+mtsCommandQualifiedRead * mtsInterfaceProvided::AddCommandQualifiedRead(const mtsCallableQualifiedRead & callable,
                                                                         const std::string & name,
                                                                         const mtsGenericObject * argument1Prototype,
                                                                         const mtsGenericObject * argument2Prototype)
