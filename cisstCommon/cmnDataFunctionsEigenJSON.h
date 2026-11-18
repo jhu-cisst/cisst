@@ -49,8 +49,21 @@ public:
     {
         // get the matrix size from JSON and resize
         const size_t rows = jsonValue.size();
+        if (rows == 0) {
+            if (DataType::RowsAtCompileTime == Eigen::Dynamic) {
+                const size_t target_cols = (DataType::ColsAtCompileTime == Eigen::Dynamic) ? 0 : (size_t)DataType::ColsAtCompileTime;
+                matrix.resize(0, target_cols);
+                return;
+            }
+            if (DataType::RowsAtCompileTime == 1 && DataType::ColsAtCompileTime == Eigen::Dynamic) {
+                matrix.resize(1, 0);
+                return;
+            }
+            cmnThrow("cmnDataJSON<Eigen::PlainObjectBase>::DeSerializeText: rows doesn't match compile time size");
+        }
+
         const bool is_matrix = jsonValue[0].isArray();
-        const size_t cols = (rows == 0) ? 0 : (is_matrix ? jsonValue[0].size() : 1);
+        const size_t cols = is_matrix ? jsonValue[0].size() : 1;
         if (DataType::RowsAtCompileTime != Eigen::Dynamic && rows != (size_t)DataType::RowsAtCompileTime) {
             cmnThrow("cmnDataJSON<Eigen::PlainObjectBase>::DeSerializeText: rows doesn't match compile time size");
         }
