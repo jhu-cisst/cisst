@@ -254,7 +254,7 @@ bool cmnSearchPath::GetCisstRoot(std::filesystem::path& result)
 {
 #if (CISST_OS == CISST_WINDOWS)
     #include <wchar.h>
-    const whcar_t* value = _wgetenv("CISST_ROOT");
+    const wchar_t* value = _wgetenv(L"CISST_ROOT");
     if (!value) { return false; }
 
     result = std::filesystem::path(value);

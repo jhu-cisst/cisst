@@ -42,7 +42,9 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     cmnSearchPath path;
     path.AddFromEnvironment("PATH", cmnSearchPath::Position::TAIL);
     path.Add(std::string(CISST_BINARY_DIR) + std::string("/bin/") + CMAKE_CFG_INTDIR_WITH_QUOTES);
-    std::filesystem::path command = path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX);
+    std::string command = pathToUTF8(
+        path.Find(std::string("cisstOSAbstractionTestsPipeExecUtility") + CISST_EXECUTABLE_SUFFIX)
+    );
     CPPUNIT_ASSERT(!command.empty());
 
     /* Test opening twice, make sure it fails the second time */

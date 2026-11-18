@@ -380,7 +380,7 @@ bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
 {
     cmnSearchPath configPath(std::filesystem::current_path());
     // make sure the file exists
-    std::string fullname = configPath.Find(filename);
+    std::filesystem::path fullname = configPath.Find(filename);
     if (fullname == "") {
         CMN_LOG_CLASS_INIT_ERROR << "ConfigureJSON: file \"" << filename
                                  << "\" not found in path: "<< std::endl
@@ -388,7 +388,7 @@ bool mtsManagerLocal::ConfigureJSON(const std::string & filename)
         return false;
     }
     // extract path of main json config file to search other files relative to it
-    std::string configDir = fullname.substr(0, fullname.find_last_of('/'));
+    std::filesystem::path configDir = fullname.parent_path();
     configPath.Add(configDir, cmnSearchPath::Position::HEAD);
 
     // open json file
@@ -497,12 +497,12 @@ bool mtsManagerLocal::ConfigureComponentJSON(const Json::Value & componentConfig
     } else {
         std::string configParam = configureParameter.asString();
         // see if we can find a file corresponding to string
-        std::string configFile = configPath.Find(configParam);
+        std::filesystem::path configFile = configPath.Find(configParam);
         if (configFile == "") {
             // else pass the string as-is
             component->Configure(configParam);
         } else {
-            component->Configure(configFile);
+            component->Configure(pathToUTF8(configFile));
         }
     }
     // add if need, it is possible ctor or Configure already added the component itself to manager

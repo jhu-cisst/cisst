@@ -16,8 +16,8 @@
   --- end cisst license ---
 */
 
-#include <cisstCommon/cmnAssert.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
+
 #include <string.h>
 #include <chrono>
 
@@ -37,6 +37,9 @@
 #include <process.h>
 #include <windows.h>
 #endif
+
+#include <cisstCommon/cmnAssert.h>
+#include <cisstOSAbstraction/osaTime.h>
 
 enum {READ_END = 0, WRITE_END = 1};
 
@@ -495,7 +498,7 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
     int result;
     char lastChar = stopChar+1; // dummy value that's not stopChar
     const auto timeout_duration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(timeoutSec));
-    const std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now() + timeout_duration;
+    std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now() + timeout_duration;
     // Normally, the Read method is blocking, which makes it difficult to support a timeout
     // (i.e., a call to Read can block well beyond the timeout period).
 
@@ -553,7 +556,7 @@ int osaPipeExec::ReadUntil(char * buffer, int length, char stopChar, double time
                                     << " bytes after child process ended" << std::endl;
                 break;
             }
-            double timeLeft = (end_time-std::chrono::steady_clock::now()).count();
+            double timeLeft = durationToSeconds(end_time-std::chrono::steady_clock::now());
             DWORD timeout_msec = static_cast<DWORD>(1000.0*timeLeft/100.0 + 0.5);
             DWORD ret = MsgWaitForMultipleObjects(1, handles, FALSE, timeout_msec, QS_ALLEVENTS);
             if (ret == WAIT_OBJECT_0) {

@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <ctime>
 #include <iomanip>
+#include <sstream>
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnUnits.h>
