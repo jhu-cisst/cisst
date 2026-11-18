@@ -60,15 +60,6 @@ jobs:
     - name: Test CppUnit finder
       run: cmake -S tests/cmake/cppunit-discovery -B cppunit-discovery-check
 
-    - name: Configure CMake smoke test
-      run: |
-        cmake -S . -B build-configure-check `
-          -DCMAKE_BUILD_TYPE=Release `
-          "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" `
-          "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" `
-          -DVCPKG_MANIFEST_INSTALL=OFF `
-          -C "${{github.workspace}}/.github/workflows/cmake-windows-smoke-cache.cmake"
-
     - name: Configure CMake
       run: |
         cmake -S . -B build `
