@@ -26,9 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstOSAbstraction/osaThread.h>
 
 #include <cisstMultiTask/mtsCommandBase.h>
-
-#include <cisstMultiTask/mtsCallableVoidMethod.h>
-#include <cisstMultiTask/mtsCallableVoidFunction.h>
+#include <cisstMultiTask/mtsCallable.h>
 #include <cisstMultiTask/mtsCommandVoid.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
@@ -369,7 +367,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
 
     bool AddEventReceiver(const std::string & eventName, mtsEventReceiverWrite & receiver, mtsRequiredType required = MTS_REQUIRED);
 
-    mtsCommandVoid * AddEventHandlerVoid(mtsCallableVoidBase * callable,
+    mtsCommandVoid * AddEventHandlerVoid(const mtsCallableVoid & callable,
                                          const std::string & eventName,
                                          mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
     template <class __classType>
@@ -377,15 +375,13 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
                                                     __classType * classInstantiation,
                                                     const std::string & eventName,
                                                     mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY) {
-        mtsCallableVoidBase * callable = new mtsCallableVoidMethod<__classType>(method, classInstantiation);
-        return this->AddEventHandlerVoid(callable, eventName, queueingPolicy);
+        return this->AddEventHandlerVoid(mtsMakeCallableVoid(method, classInstantiation), eventName, queueingPolicy);
     }
 
     inline mtsCommandVoid * AddEventHandlerVoid(void (*function)(void),
                                                 const std::string & eventName,
                                                 mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY) {
-        mtsCallableVoidBase * callable = new mtsCallableVoidFunction(function);
-        return this->AddEventHandlerVoid(callable, eventName, queueingPolicy);
+        return this->AddEventHandlerVoid(mtsMakeCallableVoid(function), eventName, queueingPolicy);
     }
 
     template <class __classType, class __argumentType>

@@ -55,7 +55,7 @@ class CISST_EXPORT mtsTaskFromSignal: public mtsTaskContinuous
     void PostCommandQueuedMethod(void);
 
     /*! Callable created around the PostCommandQueuedMethod. */
-    mtsCallableVoidBase * PostCommandQueuedCallable;
+    mtsCallableVoid PostCommandQueuedCallable;
 
  public:
     /*! Create a task with name 'name' and set the state table size.

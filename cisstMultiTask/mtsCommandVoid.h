@@ -28,6 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandBase.h>
+#include <cisstMultiTask/mtsCallable.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -54,20 +55,17 @@ private:
     mtsCommandVoid(const ThisType & CMN_UNUSED(other));
 
 protected:
-    /*! The pointer to member function of the receiver class that
-      is to be invoked for a particular instance of the command. */
-    mtsCallableVoidBase * Callable;
+    /*! The callable object to be invoked for a particular instance of the command. */
+    mtsCallableVoid Callable;
 
 public:
     /*! The constructor. Does nothing. */
     mtsCommandVoid(void);
 
     /*! The constructor.
-      \param action Pointer to the member function that is to be called
-      by the invoker of the command
-      \param classInstantiation Pointer to the receiver of the command
+      \param callable Callable object to be invoked by the command
       \param name A string to identify the command. */
-    mtsCommandVoid(mtsCallableVoidBase * callable, const std::string & name);
+    mtsCommandVoid(const mtsCallableVoid & callable, const std::string & name);
 
     /*! The destructor. Does nothing */
     virtual ~mtsCommandVoid();
@@ -88,7 +86,7 @@ public:
       Execute method which will queue the command.  When the command
       is de-queued, one needs access to the callable object to call
       the final method or function. */
-    mtsCallableVoidBase * GetCallable(void) const;
+    const mtsCallableVoid & GetCallable(void) const;
 
     /* documented in base class */
     void ToStream(std::ostream & outputStream) const;

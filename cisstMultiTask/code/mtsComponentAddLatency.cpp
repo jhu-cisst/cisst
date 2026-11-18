@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentAddLatency.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
-#include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
+#include <cisstMultiTask/mtsCallable.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 
@@ -56,15 +56,10 @@ class mtsComponentAddLatencyDelayedQualifiedRead
 {
 public:
     inline mtsComponentAddLatencyDelayedQualifiedRead(const std::string & name):
-        Callable(0),
         Name(name)
     {}
 
     inline ~mtsComponentAddLatencyDelayedQualifiedRead() {
-        if (this->Callable) {
-            delete this->Callable;
-            this->Callable = 0;
-        }
     }
 
     inline bool Method(const mtsGenericObject & qualifier,
@@ -77,7 +72,7 @@ public:
     }
 
     mtsFunctionQualifiedRead Function;
-    mtsCallableQualifiedReadBase * Callable;
+    mtsCallableQualifiedRead Callable;
 
 protected:
     std::string Name;
@@ -323,7 +318,7 @@ bool mtsComponentAddLatency::AddCommandQualifiedReadDelayedInternal(const mtsGen
     mtsComponentAddLatencyDelayedQualifiedRead * delayedQualifiedRead
         = new mtsComponentAddLatencyDelayedQualifiedRead(commandRequiredName);
     interfaceRequired->AddFunction(commandRequiredName, delayedQualifiedRead->Function, MTS_REQUIRED);
-    delayedQualifiedRead->Callable = new mtsCallableQualifiedReadMethodGeneric<mtsComponentAddLatencyDelayedQualifiedRead>(&mtsComponentAddLatencyDelayedQualifiedRead::Method, delayedQualifiedRead);
+    delayedQualifiedRead->Callable = mtsMakeCallableQualifiedRead(&mtsComponentAddLatencyDelayedQualifiedRead::Method, delayedQualifiedRead);
     interfaceProvided->AddCommandQualifiedRead(delayedQualifiedRead->Callable,
                                                commandProvidedName == "" ? commandRequiredName : commandProvidedName,
                                                &qualifier,

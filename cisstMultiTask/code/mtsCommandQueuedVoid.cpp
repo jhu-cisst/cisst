@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
-#include <cisstMultiTask/mtsCallableVoidBase.h>
 
 mtsCommandQueuedVoid::mtsCommandQueuedVoid(void):
     BaseType(),
@@ -27,7 +26,7 @@ mtsCommandQueuedVoid::mtsCommandQueuedVoid(void):
 {}
 
 
-mtsCommandQueuedVoid::mtsCommandQueuedVoid(mtsCallableVoidBase * callable,
+mtsCommandQueuedVoid::mtsCommandQueuedVoid(const mtsCallableVoid & callable,
                                            const std::string & name,
                                            mtsMailBox * mailBox,
                                            size_t size):
@@ -126,6 +125,6 @@ void mtsCommandQueuedVoid::ToStream(std::ostream & outputStream) const
 {
     outputStream << "mtsCommandQueuedVoid: Mailbox \""
                  << this->GetMailBoxName()
-                 << "\" for command(void) using " << *(this->Callable)
-                 << " currently " << (this->IsEnabled() ? "enabled" : "disabled");
+                 << "\" for command(void) \"" << this->Name
+                 << "\" currently " << (this->IsEnabled() ? "enabled" : "disabled");
 }

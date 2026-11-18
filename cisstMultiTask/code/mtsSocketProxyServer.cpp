@@ -300,7 +300,7 @@ FinishedEventList::FinishedEventList(size_t size, mtsMailBox *mbox, size_t mbox_
     char buf[32];
     mtsStdString stringPrototype;
     for (size_t i = 0; i < size; i++) {
-        mtsCallableQualifiedReadBase *callable = new mtsCallableQualifiedReadMethodGeneric<FinishedEventEntry>(&FinishedEventEntry::SerializeFilter, &List[i]);
+        mtsCallableQualifiedRead callable = mtsMakeCallableQualifiedRead(&FinishedEventEntry::SerializeFilter, &List[i]);
         // mtsCommandQualifiedRead, input is arg, output is mtsStdString
         sprintf(buf, "FinishedEventEntryFilter%zu", i);
         mtsCommandQualifiedRead *filter = new mtsCommandQualifiedRead(callable, buf, 0, &stringPrototype);
@@ -1307,11 +1307,11 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
 
     // GetInterfaceDescription
     FunctionReadProxy *functionReadProxy;
-    mtsCallableReadBase *callableRead;
+    mtsCallableRead callableRead;
     mtsCommandRead *commandRead;
 
     //InterfaceDescription.CommandsRead.push_back(CommandReadElement("GetInterfaceDescription", interfaceDescriptionSerialized));
-    callableRead = new mtsCallableReadMethod<mtsSocketProxyServer, mtsInterfaceProvidedDescription>(&mtsSocketProxyServer::GetInterfaceDescription, this);
+    callableRead = mtsMakeCallableRead(&mtsSocketProxyServer::GetInterfaceDescription, this);
     commandRead = new mtsCommandRead(callableRead, "GetInterfaceDescription", descProxy);
     SpecialCommands.push_back(commandRead);
     functionReadProxy = new FunctionReadProxy(this, interfaceDescriptionSerialized);
@@ -1320,11 +1320,11 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
 
     // GetHandleXXXX commands
     FunctionQualifiedReadProxy *functionQualifiedReadProxy;
-    mtsCallableQualifiedReadBase *callableQualifiedRead;
+    mtsCallableQualifiedRead callableQualifiedRead;
     mtsCommandQualifiedRead *commandQualifiedRead;
     struct {
         std::string name;
-        mtsCallableQualifiedReadMethod<mtsSocketProxyServer, std::string, std::string>::ActionType action;
+        bool (mtsSocketProxyServer::*action)(const std::string &, std::string &) const;
     } GetHandleInfo[6] = { { "GetHandleVoid", &mtsSocketProxyServer::GetHandleVoid},
                            { "GetHandleRead", &mtsSocketProxyServer::GetHandleRead},
                            { "GetHandleWrite", &mtsSocketProxyServer::GetHandleWrite},
@@ -1333,7 +1333,7 @@ void mtsSocketProxyServer::AddSpecialCommands(void)
                            { "GetHandleWriteReturn", &mtsSocketProxyServer::GetHandleWriteReturn} };
     for (int i = 0; i < 6; i++) {
         //InterfaceDescription.CommandsQualifiedRead.push_back(CommandQualifiedReadElement(GetHandleInfo[i].name, stringSerialized, stringSerialized));
-        callableQualifiedRead = new mtsCallableQualifiedReadMethod<mtsSocketProxyServer, std::string, std::string>(GetHandleInfo[i].action, this);
+        callableQualifiedRead = mtsMakeCallableQualifiedRead(GetHandleInfo[i].action, this);
         commandQualifiedRead = new mtsCommandQualifiedRead(callableQualifiedRead, GetHandleInfo[i].name, stringProxy, stringProxy);
         SpecialCommands.push_back(commandQualifiedRead);
         functionQualifiedReadProxy = new FunctionQualifiedReadProxy(this, stringSerialized, stringSerialized);

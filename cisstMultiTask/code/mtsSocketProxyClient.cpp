@@ -26,8 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnAssert.h>
 #include <cisstMultiTask/mtsSocketProxyClient.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <cisstMultiTask/mtsCallableReadMethod.h>
-#include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
+#include <cisstMultiTask/mtsCallable.h>
 #include <cisstMultiTask/mtsCommandQueuedVoidReturn.h>
 #include <cisstMultiTask/mtsCommandQueuedWriteReturn.h>
 
@@ -328,7 +327,11 @@ public:
 
 class CommandWrapperRead : public CommandWrapperBase {
 public:
-    typedef mtsCallableReadMethodGeneric<CommandWrapperRead> CallableType;
+    typedef mtsCallableRead CallableType;
+
+    static CallableType MakeCallable(CommandWrapperRead * wrapper) {
+        return mtsMakeCallableRead(&CommandWrapperRead::Method, wrapper);
+    }
 
     CommandWrapperRead(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) { }
@@ -359,7 +362,11 @@ public:
 
 class CommandWrapperQualifiedRead : public CommandWrapperBase {
 public:
-    typedef mtsCallableQualifiedReadMethodGeneric<CommandWrapperQualifiedRead> CallableType;
+    typedef mtsCallableQualifiedRead CallableType;
+
+    static CallableType MakeCallable(CommandWrapperQualifiedRead * wrapper) {
+        return mtsMakeCallableQualifiedRead(&CommandWrapperQualifiedRead::Method, wrapper);
+    }
 
     CommandWrapperQualifiedRead(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) {}
@@ -394,7 +401,11 @@ public:
 
 class CommandWrapperVoidReturn : public CommandWrapperBase {
 public:
-    typedef mtsCallableVoidReturnMethodGeneric<CommandWrapperVoidReturn> CallableType;
+    typedef mtsCallableVoidReturn CallableType;
+
+    static CallableType MakeCallable(CommandWrapperVoidReturn * wrapper) {
+        return mtsMakeCallableVoidReturn(&CommandWrapperVoidReturn::Method, wrapper);
+    }
 
     CommandWrapperVoidReturn(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) { }
@@ -427,7 +438,11 @@ public:
 
 class CommandWrapperWriteReturn : public CommandWrapperBase {
 public:
-    typedef mtsCallableWriteReturnMethodGeneric<CommandWrapperWriteReturn> CallableType;
+    typedef mtsCallableWriteReturn CallableType;
+
+    static CallableType MakeCallable(CommandWrapperWriteReturn * wrapper) {
+        return mtsMakeCallableWriteReturn(&CommandWrapperWriteReturn::Method, wrapper);
+    }
 
     CommandWrapperWriteReturn(const std::string &name, osaSocket &socket, mtsSocketProxyClient *proxy)
         : CommandWrapperBase(name, socket, proxy) { }
@@ -469,18 +484,16 @@ public:
 
 class mtsCommandQueuedVoidProxy : public mtsCommandQueuedVoid
 {
-    typedef mtsCallableVoidMethod<CommandWrapperVoid> CallableType;
     CommandWrapperVoid *commandWrapper;
 
 public:
     // This class takes ownership of the wrapper and deletes it in the destructor
     mtsCommandQueuedVoidProxy(const std::string &name, CommandWrapperVoid *wrapper, mtsMailBox *mailBox, size_t size) :
-        mtsCommandQueuedVoid(new CallableType(&CommandWrapperVoid::Method, wrapper), name, mailBox, size), commandWrapper(wrapper)
+        mtsCommandQueuedVoid(mtsMakeCallableVoid(&CommandWrapperVoid::Method, wrapper), name, mailBox, size), commandWrapper(wrapper)
     {}
 
     ~mtsCommandQueuedVoidProxy()
     {
-        delete this->Callable;   // in base class, mtsCommandVoid
         delete commandWrapper;
     }
 
@@ -562,12 +575,11 @@ class mtsCommandQueuedVoidReturnBaseProxy : public _Base
 public:
     // This class takes ownership of the wrapper and deletes it in the destructor
     mtsCommandQueuedVoidReturnBaseProxy(const std::string &name, _Wrapper *wrapper, const mtsGenericObject *resultPrototype, mtsMailBox *mailBox, size_t size) :
-        BaseType(new CallableType(&WrapperType::Method, wrapper), name, resultPrototype, mailBox, size), commandWrapper(wrapper)
+        BaseType(_Wrapper::MakeCallable(wrapper), name, resultPrototype, mailBox, size), commandWrapper(wrapper)
     {}
 
     ~mtsCommandQueuedVoidReturnBaseProxy()
     {
-        delete this->Callable;  // in base class
         delete commandWrapper;
     }
 
@@ -604,13 +616,12 @@ public:
     mtsCommandQueuedWriteReturnBaseProxy(const std::string &name, WrapperType *wrapper,
                                          const mtsGenericObject *argumentPrototype, const mtsGenericObject *resultPrototype,
                                          mtsMailBox *mailBox, size_t size) :
-        BaseType(new CallableType(&WrapperType::Method, wrapper), name, argumentPrototype, resultPrototype, mailBox, size),
+        BaseType(_Wrapper::MakeCallable(wrapper), name, argumentPrototype, resultPrototype, mailBox, size),
         commandWrapper(wrapper)
     {}
 
     ~mtsCommandQueuedWriteReturnBaseProxy()
     {
-        delete this->Callable;  // in base class
         delete commandWrapper;
     }
 

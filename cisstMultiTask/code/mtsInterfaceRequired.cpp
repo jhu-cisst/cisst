@@ -952,7 +952,7 @@ bool mtsInterfaceRequired::AddEventReceiver(const std::string & eventName, mtsEv
 }
 
 
-mtsCommandVoid * mtsInterfaceRequired::AddEventHandlerVoid(mtsCallableVoidBase * callable,
+mtsCommandVoid * mtsInterfaceRequired::AddEventHandlerVoid(const mtsCallableVoid & callable,
                                                            const std::string & eventName,
                                                            mtsEventQueueingPolicy queueingPolicy)
 {

@@ -18,9 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnAssert.h>
 #include <cisstMultiTask/mtsMailBox.h>
-#include <cisstMultiTask/mtsCallableVoidBase.h>
-#include <cisstMultiTask/mtsCallableVoidReturnBase.h>
-#include <cisstMultiTask/mtsCallableWriteReturnBase.h>
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedVoidReturn.h>
 #include <cisstMultiTask/mtsCommandQueuedWrite.h>
@@ -29,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 mtsMailBox::mtsMailBox(const std::string & name,
                        size_t size,
-                       mtsCallableVoidBase * postCommandQueuedCallable):
+                       const mtsCallableVoid & postCommandQueuedCallable):
     CommandQueue(size, 0),
     Name(name),
     PostCommandQueuedCallable(postCommandQueuedCallable),
@@ -53,7 +50,7 @@ bool mtsMailBox::Write(mtsCommandBase * command)
     bool result;
     result = (CommandQueue.Put(command) != 0);
     if (this->PostCommandQueuedCallable) {
-        this->PostCommandQueuedCallable->Execute();
+        this->PostCommandQueuedCallable();
     }
     return result;
 }
@@ -90,7 +87,7 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandVoid);
                isBlocking = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
                finishedEvent = commandVoid->FinishedEventGet();
-               result = commandVoid->GetCallable()->Execute();
+               result = commandVoid->GetCallable()();
                break;
            case 1:
                commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(*command);
@@ -114,7 +111,7 @@ bool mtsMailBox::ExecuteNext(void)
                    resultPointer = commandRead->ReturnGet();
                    finishedEvent = commandRead->FinishedEventGet();
                    isBlockingReturn = true;
-                   result = commandRead->GetCallable()->Execute(*resultPointer);
+                   result = commandRead->GetCallable()(*resultPointer);
                }
                break;
            case 2:
@@ -126,7 +123,7 @@ bool mtsMailBox::ExecuteNext(void)
                finishedEvent = commandQualifiedRead->FinishedEventGet();
                isBlockingReturn = true;
                try {
-                   result = commandQualifiedRead->GetCallable()->Execute( *(commandQualifiedRead->ArgumentPeek()), *resultPointer);
+                   result = commandQualifiedRead->GetCallable()( *(commandQualifiedRead->ArgumentPeek()), *resultPointer);
                }
                catch (...) {
                    commandQualifiedRead->ArgumentGet();  // Remove from parameter queue
@@ -146,7 +143,7 @@ bool mtsMailBox::ExecuteNext(void)
                resultPointer = commandVoidReturn->ReturnGet();
                finishedEvent = commandVoidReturn->FinishedEventGet();
                isBlockingReturn = true;
-               result = commandVoidReturn->GetCallable()->Execute(*resultPointer);
+               result = commandVoidReturn->GetCallable()(*resultPointer);
                break;
            case 1:
                commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(*command);
@@ -155,7 +152,7 @@ bool mtsMailBox::ExecuteNext(void)
                finishedEvent = commandWriteReturn->FinishedEventGet();
                isBlockingReturn = true;
                try {
-                   result = commandWriteReturn->GetCallable()->Execute( *(commandWriteReturn->ArgumentPeek()), *resultPointer);
+                   result = commandWriteReturn->GetCallable()( *(commandWriteReturn->ArgumentPeek()), *resultPointer);
                }
                catch (...) {
                    commandWriteReturn->ArgumentGet();  // Remove from parameter queue

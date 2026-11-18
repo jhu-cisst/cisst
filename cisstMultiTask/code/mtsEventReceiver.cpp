@@ -154,7 +154,7 @@ mtsEventReceiverVoid::~mtsEventReceiverVoid()
 mtsCommandVoid * mtsEventReceiverVoid::GetCommand(void)
 {
     if (!Command) {
-        Command = new mtsCommandVoid(new mtsCallableVoidMethod<mtsEventReceiverVoid>(&mtsEventReceiverVoid::EventHandler, this), Name);
+        Command = new mtsCommandVoid(mtsMakeCallableVoid(&mtsEventReceiverVoid::EventHandler, this), Name);
     }
     return Command;
 }

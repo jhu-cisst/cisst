@@ -101,7 +101,7 @@ protected:
     void * ReturnValue;
 
     /*! Callable object used when queueing. */
-    mtsCallableVoidBase * InterfaceProvidedToManagerCallable;
+    mtsCallableVoid InterfaceProvidedToManagerCallable;
 
     /*! Get pointer to manager component services, which extends the internal required interface
       to the Manager Component Client (MCS).  Returns a const pointer; internal methods

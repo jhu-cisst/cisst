@@ -26,11 +26,10 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsMailBox_h
 
 #include <cisstMultiTask/mtsQueue.h>
+#include <cisstMultiTask/mtsCallable.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-class mtsExecutionResult;
 
 class CISST_EXPORT mtsMailBox
 {
@@ -43,7 +42,7 @@ class CISST_EXPORT mtsMailBox
       to be provided when the mail box is constructed.  This
       mechanism is used by mtsTaskFromSignal to wake up the task's
       thread. */
-    mtsCallableVoidBase * PostCommandQueuedCallable;
+    mtsCallableVoid PostCommandQueuedCallable;
 
     /*! Command executed after a command is de-queued.  This is
       used for blocking commands in order to trigger an event sent
@@ -65,7 +64,7 @@ class CISST_EXPORT mtsMailBox
 public:
     mtsMailBox(const std::string & name,
                size_t size,
-               mtsCallableVoidBase * postCommandQueuedCallable = 0);
+               const mtsCallableVoid & postCommandQueuedCallable = mtsCallableVoid());
 
     ~mtsMailBox(void);
 

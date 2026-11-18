@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandVoid.h>
-#include <cisstMultiTask/mtsCallableVoidBase.h>
 
 
 mtsCommandVoid::mtsCommandVoid(const ThisType & CMN_UNUSED(other)):
@@ -27,12 +26,11 @@ mtsCommandVoid::mtsCommandVoid(const ThisType & CMN_UNUSED(other)):
 
 
 mtsCommandVoid::mtsCommandVoid(void):
-    BaseType(),
-    Callable(0)
+    BaseType()
 {}
 
 
-mtsCommandVoid::mtsCommandVoid(mtsCallableVoidBase * callable, const std::string & name):
+mtsCommandVoid::mtsCommandVoid(const mtsCallableVoid & callable, const std::string & name):
     BaseType(name),
     Callable(callable)
 {}
@@ -45,7 +43,7 @@ mtsCommandVoid::~mtsCommandVoid()
 mtsExecutionResult mtsCommandVoid::Execute(mtsBlockingType CMN_UNUSED(blocking))
 {
     if (this->IsEnabled()) {
-        return this->Callable->Execute();
+        return this->Callable();
     }
     return mtsExecutionResult::COMMAND_DISABLED;
 }
@@ -55,7 +53,7 @@ void mtsCommandVoid::ToStream(std::ostream & outputStream) const
 {
     outputStream << "mtsCommandVoid: ";
     if (this->Callable) {
-        outputStream << this->Name << "(void) using " << *Callable << " currently "
+        outputStream << this->Name << "(void) currently "
                      << (this->IsEnabled() ? "enabled" : "disabled");
     } else {
         outputStream << "not associated to a callable object";
@@ -63,7 +61,7 @@ void mtsCommandVoid::ToStream(std::ostream & outputStream) const
 }
 
 
-mtsCallableVoidBase * mtsCommandVoid::GetCallable(void) const
+const mtsCallableVoid & mtsCommandVoid::GetCallable(void) const
 {
     return this->Callable;
 }

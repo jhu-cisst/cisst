@@ -31,14 +31,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsMailBox.h>
 #include <cisstMultiTask/mtsStateTable.h>
 #include <cisstMultiTask/mtsStateTableFilter.h>
-#include <cisstMultiTask/mtsCallableVoidMethod.h>
-#include <cisstMultiTask/mtsCallableVoidFunction.h>
-#include <cisstMultiTask/mtsCallableVoidReturnMethod.h>
-#include <cisstMultiTask/mtsCallableWriteReturnMethod.h>
-#include <cisstMultiTask/mtsCallableReadMethod.h>
-#include <cisstMultiTask/mtsCallableReadReturnVoidMethod.h>
-#include <cisstMultiTask/mtsCallableQualifiedReadMethod.h>
-#include <cisstMultiTask/mtsCallableQualifiedReadReturnVoidMethod.h>
+#include <cisstMultiTask/mtsCallable.h>
 #include <cisstMultiTask/mtsCommandQualifiedRead.h>
 #include <cisstMultiTask/mtsCommandWrite.h>
 #include <cisstMultiTask/mtsMulticastCommandWrite.h>
@@ -155,7 +148,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
       performs a wakeup (signal) on the task's thread. */
     mtsInterfaceProvided(const std::string & name, mtsComponent * component,
                          mtsInterfaceQueueingPolicy queueingPolicy,
-                         mtsCallableVoidBase * postCommandQueuedCallable = 0);
+                         const mtsCallableVoid & postCommandQueuedCallable = mtsCallableVoid());
 
     /*! Default Destructor. */
     virtual ~mtsInterfaceProvided();
@@ -271,7 +264,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                            __classType * classInstantiation,
                                            const std::string & commandName,
                                            mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
-        return this->AddCommandVoid(new mtsCallableVoidMethod<__classType>(method, classInstantiation), commandName, queueingPolicy);
+        return this->AddCommandVoid(mtsMakeCallableVoid(method, classInstantiation), commandName, queueingPolicy);
     }
 
     /*! Add a void command to the provided interface based on a void
@@ -285,7 +278,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     inline mtsCommandVoid * AddCommandVoid(void (*function)(void),
                                            const std::string & commandName,
                                            mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
-        return this->AddCommandVoid(new mtsCallableVoidFunction(function), commandName, queueingPolicy);
+        return this->AddCommandVoid(mtsMakeCallableVoid(function), commandName, queueingPolicy);
     }
 
     /*! Add a void command with result. */
@@ -296,7 +289,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                        const std::string & commandName,
                                                        const __resultType & resultPrototype,
                                                        mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
-        return this->AddCommandVoidReturn(new mtsCallableVoidReturnMethod<__classType, __resultType>(method, classInstantiation),
+        return this->AddCommandVoidReturn(mtsMakeCallableVoidReturn(method, classInstantiation),
                                           commandName,
                                           mtsGenericTypes<__resultType>::ConditionalCreate(resultPrototype, commandName),
                                           queueingPolicy);
@@ -307,7 +300,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                        __classType * classInstantiation,
                                                        const std::string & commandName,
                                                        mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
-        return this->AddCommandVoidReturn(new mtsCallableVoidReturnMethod<__classType, __resultType>(method, classInstantiation),
+        return this->AddCommandVoidReturn(mtsMakeCallableVoidReturn(method, classInstantiation),
                                           commandName,
                                           mtsGenericTypes<__resultType>::ConditionalCreate(__resultType(), commandName),
                                           queueingPolicy);
@@ -355,7 +348,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                          const __argumentType & argumentPrototype,
                                                          const __resultType & resultPrototype,
                                                          mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
-        return this->AddCommandWriteReturn(new mtsCallableWriteReturnMethod<__classType, __argumentType, __resultType>(method, classInstantiation),
+        return this->AddCommandWriteReturn(mtsMakeCallableWriteReturn(method, classInstantiation),
                                           commandName,
                                           mtsGenericTypes<__argumentType>::ConditionalCreate(argumentPrototype, commandName),
                                           mtsGenericTypes<__resultType>::ConditionalCreate(resultPrototype, commandName),
@@ -367,7 +360,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                          __classType * classInstantiation,
                                                          const std::string & commandName,
                                                          mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
-        return this->AddCommandWriteReturn(new mtsCallableWriteReturnMethod<__classType, __argumentType, __resultType>(method, classInstantiation),
+        return this->AddCommandWriteReturn(mtsMakeCallableWriteReturn(method, classInstantiation),
                                            commandName,
                                            mtsGenericTypes<__argumentType>::ConditionalCreate(__argumentType(), commandName),
                                            mtsGenericTypes<__resultType>::ConditionalCreate(__resultType(), commandName),
@@ -390,7 +383,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                            __classType * classInstantiation,
                                            const std::string & commandName,
                                            const __argumentType & argumentPrototype) {
-        return this->AddCommandRead(new mtsCallableReadReturnVoidMethod<__classType, __argumentType>(method, classInstantiation),
+        return this->AddCommandRead(mtsMakeCallableRead(method, classInstantiation),
                                     commandName,
                                     mtsGenericTypes<__argumentType>::ConditionalCreate(argumentPrototype, commandName));
     }
@@ -400,7 +393,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                            __classType * classInstantiation,
                                            const std::string & commandName)
     {
-        return this->AddCommandRead(new mtsCallableReadReturnVoidMethod<__classType, __argumentType>(method, classInstantiation),
+        return this->AddCommandRead(mtsMakeCallableRead(method, classInstantiation),
                                     commandName,
                                     mtsGenericTypes<__argumentType>::ConditionalCreate(__argumentType(), commandName));
     }
@@ -465,7 +458,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                              const std::string & commandName,
                                                              const __argument1Type & argument1Prototype,
                                                              const __argument2Type & argument2Prototype) {
-        return this->AddCommandQualifiedRead(new mtsCallableQualifiedReadReturnVoidMethod<__classType, __argument1Type, __argument2Type>(method, classInstantiation),
+        return this->AddCommandQualifiedRead(mtsMakeCallableQualifiedRead(method, classInstantiation),
                                              commandName,
                                              mtsGenericTypes<__argument1Type>::ConditionalCreate(argument1Prototype, commandName),
                                              mtsGenericTypes<__argument2Type>::ConditionalCreate(argument2Prototype, commandName));
@@ -475,7 +468,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
     inline mtsCommandQualifiedRead * AddCommandQualifiedRead(void (__classType::*method)(const __argument1Type &, __argument2Type &) const,
                                                              __classType * classInstantiation,
                                                              const std::string & commandName) {
-        return this->AddCommandQualifiedRead(new mtsCallableQualifiedReadReturnVoidMethod<__classType, __argument1Type, __argument2Type>(method, classInstantiation),
+        return this->AddCommandQualifiedRead(mtsMakeCallableQualifiedRead(method, classInstantiation),
                                              commandName,
                                              mtsGenericTypes<__argument1Type>::ConditionalCreate(__argument1Type(), commandName),
                                              mtsGenericTypes<__argument2Type>::ConditionalCreate(__argument2Type(), commandName));
@@ -491,8 +484,7 @@ class CISST_EXPORT mtsInterfaceProvided: public mtsInterface {
                                                          const __filteredType & filteredPrototype,
                                                          mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY) {
         std::string commandNameFilter(commandName + "Filter");
-        return this->AddCommandFilteredWrite(new mtsCommandQualifiedRead(new mtsCallableQualifiedReadReturnVoidMethod<__classType, __argumentType, __filteredType>
-                                                                         (premethod, classInstantiation),
+        return this->AddCommandFilteredWrite(new mtsCommandQualifiedRead(mtsMakeCallableQualifiedRead(premethod, classInstantiation),
                                                                          commandNameFilter,
                                                                          mtsGenericTypes<__argumentType>::ConditionalCreate(argumentPrototype, commandName),
                                                                          mtsGenericTypes<__filteredType>::ConditionalCreate(filteredPrototype, commandName)),
@@ -718,7 +710,7 @@ protected: // PK TEMP
     std::vector<mtsStateTableFilterBase *> StateTableFilters;
 
     /*! Post command queued command */
-    mtsCallableVoidBase * PostCommandQueuedCallable;
+    mtsCallableVoid PostCommandQueuedCallable;
 
     struct {
         mtsFunctionWrite StatusEvent;
@@ -731,11 +723,11 @@ protected: // PK TEMP
 
     mtsMailBox * GetMailBox(void);
 
-    mtsCommandVoid * AddCommandVoid(mtsCallableVoidBase * callable,
+    mtsCommandVoid * AddCommandVoid(const mtsCallableVoid & callable,
                                     const std::string & name,
                                     mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
 
-    mtsCommandVoidReturn * AddCommandVoidReturn(mtsCallableVoidReturnBase * callable,
+    mtsCommandVoidReturn * AddCommandVoidReturn(const mtsCallableVoidReturn & callable,
                                                 const std::string & name,
                                                 const mtsGenericObject * resultPrototype,
                                                 mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
@@ -743,7 +735,7 @@ protected: // PK TEMP
     mtsCommandWriteBase * AddCommandWrite(mtsCommandWriteBase * command,
                                           mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
 
-    mtsCommandWriteReturn * AddCommandWriteReturn(mtsCallableWriteReturnBase * callable,
+    mtsCommandWriteReturn * AddCommandWriteReturn(const mtsCallableWriteReturn & callable,
                                                   const std::string & name,
                                                   const mtsGenericObject * argumentPrototype,
                                                   const mtsGenericObject * resultPrototype,
@@ -753,11 +745,11 @@ protected: // PK TEMP
                                                   mtsCommandWriteBase * command,
                                                   mtsCommandQueueingPolicy queueingPolicy = MTS_INTERFACE_COMMAND_POLICY);
 
-    mtsCommandRead * AddCommandRead(mtsCallableReadBase * callable,
+    mtsCommandRead * AddCommandRead(const mtsCallableRead & callable,
                                     const std::string & name,
                                     const mtsGenericObject * argumentPrototype);
 
-    mtsCommandQualifiedRead * AddCommandQualifiedRead(mtsCallableQualifiedReadBase * callable,
+    mtsCommandQualifiedRead * AddCommandQualifiedRead(const mtsCallableQualifiedRead & callable,
                                                       const std::string & name,
                                                       const mtsGenericObject * argument1Prototype,
                                                       const mtsGenericObject * argument2Prototype);
@@ -808,9 +800,9 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadState(const mtsStateTable &
         return 0;
     }
     // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
-    this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<AccessorType, mtsStateIndex, FinalType>(&AccessorType::Get, stateAccessor),
+    this->AddCommandQualifiedRead(mtsMakeCallableQualifiedRead<AccessorType, mtsStateIndex, FinalType>(&AccessorType::Get, stateAccessor),
                                   commandName, new mtsStateIndex, new FinalType(stateData));
-    return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetLatest, stateAccessor),
+    return this->AddCommandRead(mtsMakeCallableRead<AccessorType, FinalType>(&AccessorType::GetLatest, stateAccessor),
                                 commandName, new FinalType(stateData));
 }
 
@@ -834,9 +826,9 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandFilteredReadStateInternal(const
     // Store filter object (only used for cleanup)
     StateTableFilters.push_back(stf);
     // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
-    this->AddCommandQualifiedRead(new mtsCallableQualifiedReadMethod<FilterType, mtsStateIndex, _outputType>(&FilterType::GetFiltered, stf),
+    this->AddCommandQualifiedRead(mtsMakeCallableQualifiedRead<FilterType, mtsStateIndex, _outputType>(&FilterType::GetFiltered, stf),
                                   commandName, new mtsStateIndex, new FinalType);
-    return this->AddCommandRead(new mtsCallableReadMethod<FilterType, _outputType>(&FilterType::GetLatestFiltered, stf),
+    return this->AddCommandRead(mtsMakeCallableRead<FilterType, _outputType>(&FilterType::GetLatestFiltered, stf),
                                 commandName, new FinalType);
 }
 
@@ -883,7 +875,7 @@ mtsCommandRead * mtsInterfaceProvided::AddCommandReadStateDelayed(const mtsState
         return 0;
     }
     // NOTE: qualified-read and read destructors will free the memory allocated below for the prototype objects.
-    return this->AddCommandRead(new mtsCallableReadMethod<AccessorType, FinalType>(&AccessorType::GetDelayed, stateAccessor),
+    return this->AddCommandRead(mtsMakeCallableRead<AccessorType, FinalType>(&AccessorType::GetDelayed, stateAccessor),
                                 commandName, new FinalType(stateData));
 }
 

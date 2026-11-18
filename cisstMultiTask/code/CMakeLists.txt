@@ -102,19 +102,7 @@ set (SOURCE_FILES
 # all header files
 set (HEADER_FILES
 
-     mtsCallableQualifiedReadBase.h
-     mtsCallableQualifiedReadMethod.h
-     mtsCallableQualifiedReadReturnVoidMethod.h
-     mtsCallableReadBase.h
-     mtsCallableReadMethod.h
-     mtsCallableReadReturnVoidMethod.h
-     mtsCallableVoidBase.h
-     mtsCallableVoidFunction.h
-     mtsCallableVoidMethod.h
-     mtsCallableVoidReturnBase.h
-     mtsCallableVoidReturnMethod.h
-     mtsCallableWriteReturnBase.h
-     mtsCallableWriteReturnMethod.h
+     mtsCallable.h
 
      mtsCollectorBase.h
      mtsCollectorEvent.h

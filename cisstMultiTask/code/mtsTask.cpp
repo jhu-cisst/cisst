@@ -166,10 +166,7 @@ void mtsTask::CleanupInternal() {
     // Perform Cleanup on all interfaces provided
     InterfacesProvided.ForEachVoid(&mtsInterfaceProvided::Cleanup);
 
-    if (InterfaceProvidedToManagerCallable) {
-        delete InterfaceProvidedToManagerCallable;
-        InterfaceProvidedToManagerCallable = 0;
-    }
+    InterfaceProvidedToManagerCallable = nullptr;
 
     ChangeState(mtsComponentState::FINISHED);
     CMN_LOG_CLASS_INIT_VERBOSE << "CleanupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
@@ -292,7 +289,7 @@ mtsTask::mtsTask(const std::string & name,
     RunEventCalled(false)
 {
     this->AddStateTable(&this->StateTable);
-    this->InterfaceProvidedToManagerCallable = new mtsCallableVoidMethod<mtsTask>(&mtsTask::ProcessManagerCommandsIfNotActive, this);
+    this->InterfaceProvidedToManagerCallable = mtsMakeCallableVoid(&mtsTask::ProcessManagerCommandsIfNotActive, this);
     // ExecIn interface is optional; does not need a mailbox
     ExecIn = this->AddInterfaceRequiredUsingMailbox(mtsManagerComponentBase::InterfaceNames::InterfaceExecIn, 0, MTS_OPTIONAL);
     if (ExecIn) {
@@ -367,7 +364,7 @@ mtsInterfaceProvided * mtsTask::AddInterfaceProvidedWithoutSystemEvents(const st
     mtsInterfaceProvided * interfaceProvided;
     if ((queueingPolicy == MTS_COMPONENT_POLICY)
         || (queueingPolicy == MTS_COMMANDS_SHOULD_BE_QUEUED)) {
-        mtsCallableVoidBase * postCommandQueuedCallable = 0;
+        mtsCallableVoid postCommandQueuedCallable;
         if (interfaceProvidedName == mtsManagerComponentBase::GetNameOfInterfaceInternalProvided())
             postCommandQueuedCallable = InterfaceProvidedToManagerCallable;
         interfaceProvided = new mtsInterfaceProvided(interfaceProvidedName, this, MTS_COMMANDS_SHOULD_BE_QUEUED, postCommandQueuedCallable);
