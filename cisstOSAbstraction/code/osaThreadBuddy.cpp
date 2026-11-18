@@ -29,11 +29,26 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <windows.h>
 
-#else // POSIX
+#elif (CISST_OS == CISST_DARWIN)
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#include <mach/thread_policy.h>
+#include <pthread.h>
 
-#include <sys/time.h>
-#include <sys/select.h>
-#include <unistd.h>
+namespace {
+    inline uint64_t ns_to_mach_ticks(uint64_t ns) {
+        static mach_timebase_info_data_t timebase = {0, 0};
+        if (timebase.denom == 0) {
+            mach_timebase_info(&timebase);
+        }
+        // Cast to __uint128_t to prevent overflow on long uptimes
+        return static_cast<uint64_t>((static_cast<__uint128_t>(ns) * timebase.denom) / timebase.numer);
+    }
+}
+
+#else // LINUX
+
+#include <time.h>
 
 constexpr int64_t NSEC_PER_SEC = 1'000'000'000LL;
 
@@ -53,6 +68,9 @@ public:
 #if (CISST_OS == CISST_WINDOWS)
     HANDLE WaitTimer = NULL;
     DWORD period_ms = 0;
+#elif (CISST_OS == CISST_DARWIN)
+    uint64_t due_time_ticks;
+    uint64_t period_ticks = 0;
 #else
     struct timespec due_time;
     int64_t period_ns = 0;
@@ -68,6 +86,9 @@ public:
         from last due time. This means if period is overrun slightly,
         next loop has shorter budget. */
     void waitForTimer();
+
+    /* Call hen resuming loop after suspension*/
+    void resume();
 };
 
 osaThreadBuddyInternals::osaThreadBuddyInternals() {
@@ -100,8 +121,9 @@ osaThreadBuddyInternals::~osaThreadBuddyInternals() {
 void osaThreadBuddyInternals::setTimerPeriod(double period_in_seconds) {
 #if (CISST_OS == CISST_WINDOWS)
     LARGE_INTEGER DueTime;
-    DueTime.QuadPart = 0LL; // start timer immediately
     period_ms = static_cast<LONG>(period_in_seconds * 1000.0);
+    // periodic timer will first fire one period from now
+    DueTime.QuadPart = -static_cast<LONGLONG>(period_ms) * 10000LL;
     BOOL success = SetWaitableTimer(WaitTimer, &DueTime, (LONG)period_ms, NULL, NULL, FALSE);
 
     if (!success) {
@@ -111,6 +133,9 @@ void osaThreadBuddyInternals::setTimerPeriod(double period_in_seconds) {
                           << std::endl;
         return;
     }
+#elif (CISST_OS == CISST_DARWIN)
+    period_ticks = ns_to_mach_ticks(period_in_seconds * 1e9);
+    due_time_ticks = mach_absolute_time();
 #else
     period_ns = static_cast<int64_t>(period_in_seconds * 1e9);
     clock_gettime(CLOCK_MONOTONIC, &due_time);
@@ -121,9 +146,19 @@ void osaThreadBuddyInternals::waitForTimer() {
 #if (CISST_OS == CISST_WINDOWS)
     if (period_ms == 0) { return; }
     WaitForSingleObject(WaitTimer, INFINITE);
+#elif (CISST_OS == CISST_DARWIN)
+    if (period_ticks == 0) { return; }
+    due_time_ticks += period_ticks;
+    mach_wait_until(due_time_ticks);
 #else
     posix_timespec_add_ns(due_time, period_ns);
-    clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &due_time, NULL);
+    // Loop on EINTR
+    while (clock_nanosleep(
+        CLOCK_MONOTONIC,
+        TIMER_ABSTIME, 
+        &due_time,
+        NULL
+    ) == EINTR) {}
 #endif
 }
 
@@ -190,6 +225,7 @@ void osaThreadBuddy::MakeSoftRealTime(void)
 
 void osaThreadBuddy::Resume(void) 
 {
+    internals->setTimerPeriod(Period);
     IsSuspended = false;
 }
 

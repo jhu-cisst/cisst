@@ -75,23 +75,26 @@ void osaSleep(double duration_in_seconds)
     // No need to loop, will ignore signals
     WaitForSingleObject(timer, INFINITE);
     CloseHandle(timer);
-#else
-    struct timespec ts;
-    ts.tv_sec = static_cast<long>(duration_in_seconds);
-    ts.tv_nsec = static_cast<long>((duration_in_seconds-ts.tv_sec) * NSEC_PER_SEC);
+#else // POSIX
+    const auto total_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::duration<double>(duration_in_seconds)
+    );
+    const auto secs = std::chrono::duration_cast<std::chrono::seconds>(total_ns);
+    const auto nsecs = total_ns - secs;
 
-    int result = EINTR;
-    while (result == EINTR) {
-        result = clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);
-    }
+    struct timespec req;
+    req.tv_sec = static_cast<time_t>(secs.count());
+    req.tv_nsec = static_cast<long>(nsecs.count());
 
-    if (result != 0) {
-        CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
-                          << "clock_nanosleep failed with error: "
-                          << result
-                          << std::endl;
-        return;
+    while (nanosleep(&req, &req) != 0) {
+        if (errno != EINTR) {
+            CMN_LOG_RUN_ERROR << CMN_LOG_DETAILS
+                            << "nanosleep failed with error: "
+                            << errno
+                            << std::endl;
+            return;
+        }
     }
-#endif
+#endif // CISST_OS != CISST_WINDOWS
 
 }

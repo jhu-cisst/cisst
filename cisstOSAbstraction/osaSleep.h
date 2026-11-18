@@ -42,9 +42,8 @@ http://www.cisst.org/cisst/license.txt.
   \ingroup cisstOSAbstraction
 
   Execute a wait or sleep. This is intended for general purpose use; no time
-  guarantees are made on any OS.  Within a thread, it is preferable to call
-  osaThread::Sleep.  The mtsTask class provides mtsTask::Sleep, which invokes
-  osaThread::Sleep.
+  guarantees are made on any OS.  If you need high-frequency sleeps for loop
+  timing, use osaThreadBuddy instead.
 
   \param duration_in_seconds Time in seconds to sleep */
 void CISST_EXPORT osaSleep(double duration_in_seconds);
