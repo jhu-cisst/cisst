@@ -13,10 +13,9 @@
 
 project (cisstCommonPython)
 
-# create wrappers using swig
-cisst_add_swig_module (MODULE cisstCommon
-                       INTERFACE_DIRECTORY ..
-                       FOLDER cisstCommon
-                       HEADER_FILES ../cmnPython.h
-                       MODULE_LINK_LIBRARIES cisstCommon
-                       INSTALL_FILES 1)
+# create wrappers using pybind11
+cisst_add_pybind11_module (MODULE cisstCommonPython
+                            FOLDER cisstCommon
+                            SOURCES cisstCommonPybind.cpp ${cisstCommon_CISST_DG_PYTHON_SRCS}
+                            MODULE_LINK_LIBRARIES cisstCommon
+                            INSTALL_FILES)

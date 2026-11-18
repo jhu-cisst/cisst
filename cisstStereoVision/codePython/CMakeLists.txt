@@ -14,18 +14,4 @@
 
 project (cisstStereoVisionPython)
 
-# set dependencies
-SET(DEPENDENCIES cisstCommon cisstVector cisstOSAbstraction cisstMultiTask)
-
-# Could also use CISST_SVL_HAS_CISSTNETLIB, which is in cache
-IF(CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-    SET(DEPENDENCIES ${DEPENDENCIES} cisstNumerical)
-ENDIF(CISST_cisstNumerical AND CISST_HAS_CISSTNETLIB)
-
-# create wrappers using swig
-cisst_add_swig_module (MODULE cisstStereoVision
-                       INTERFACE_DIRECTORY ..
-                       FOLDER cisstStereoVision
-                       HEADER_FILES ../svlPython.h
-                       MODULE_LINK_LIBRARIES cisstStereoVision ${DEPENDENCIES}
-                       INSTALL_FILES 1)
+message (WARNING "cisstStereoVisionPython has not been migrated to pybind11 yet.")

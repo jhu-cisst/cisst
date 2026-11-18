@@ -43,6 +43,9 @@ int main(int argc, char* argv[])
     std::string codeName;
     options.AddOptionOneValue("c", "code-file", "generated code filename",
                               cmnCommandLineOptions::REQUIRED_OPTION, &codeName);
+    std::string pythonFile;
+    options.AddOptionOneValue("p", "python-file", "generated pybind11 C++ binding file",
+                              cmnCommandLineOptions::OPTIONAL_OPTION, &pythonFile);
 
     options.AddOptionNoValue("v", "verbose", "verbose output");
 
@@ -115,6 +118,20 @@ int main(int argc, char* argv[])
     } else {
         std::cout << "Error, can't open file (write) \"" << codeFull << "\"" << std::endl;
         return -1;
+    }
+
+    if (options.IsSet("python-file")) {
+        std::ofstream python(pythonFile.c_str());
+        if (python.is_open()) {
+            if (verbose) {
+                std::cout << "cisstDataGenerator: generating python binding file \"" << pythonFile << "\"" << std::endl;
+            }
+            file.GeneratePython(python);
+            python.close();
+        } else {
+            std::cout << "Error, can't open file (write) \"" << pythonFile << "\"" << std::endl;
+            return -1;
+        }
     }
 
     return 0;

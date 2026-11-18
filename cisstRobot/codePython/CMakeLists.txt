@@ -13,10 +13,9 @@
 
 project (cisstRobotPython)
 
-# create wrappers using swig
-cisst_add_swig_module (MODULE cisstRobot
-                       INTERFACE_DIRECTORY ..
-                       FOLDER cisstRobot
-                       HEADER_FILES ../robPython.h
-                       MODULE_LINK_LIBRARIES cisstRobot cisstCommon
-                       INSTALL_FILES 1)
+# create wrappers using pybind11
+cisst_add_pybind11_module (MODULE cisstRobotPython
+                            FOLDER cisstRobot
+                            SOURCES cisstRobotPybind.cpp
+                            MODULE_LINK_LIBRARIES cisstRobot cisstCommon
+                            INSTALL_FILES)

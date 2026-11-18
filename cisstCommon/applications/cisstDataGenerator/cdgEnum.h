@@ -37,6 +37,7 @@ public:
     bool Validate(std::string & errorMessage) override;
     void GenerateHeader(std::ostream & outputStream) const override;
     void GenerateCode(std::ostream & outputStream) const override;
+    void GeneratePython(std::ostream & outputStream) const override;
 
     void GenerateDataFunctionsHeader(std::ostream & outputStream, const std::string & attribute) const;
     void GenerateDataFunctionsCode(std::ostream & outputStream) const;

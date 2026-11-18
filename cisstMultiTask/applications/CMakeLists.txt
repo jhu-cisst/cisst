@@ -18,8 +18,8 @@ cisst_offer_application (cisstMultiTask ComponentGenerator OFF)
 cisst_offer_application (cisstMultiTask ComponentManager ON)
 
 # Python dependent applications
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_PYTHON)
   cisst_offer_application (cisstMultiTask IREComponent ON)
-else (CISST_HAS_SWIG_PYTHON)
+else (CISST_HAS_PYTHON)
   cisst_do_not_offer_application (cisstMultiTask IREComponent)
-endif (CISST_HAS_SWIG_PYTHON)
+endif (CISST_HAS_PYTHON)

@@ -13,12 +13,11 @@
 
 project (cisstParameterTypesPython)
 
-cisst_add_swig_module (MODULE cisstParameterTypes
-                       INTERFACE_DIRECTORY ..
-                       FOLDER cisstParameterTypes
-                       HEADER_FILES ../prmPython.h
-                       MODULE_LINK_LIBRARIES cisstParameterTypes
-                                             cisstMultiTask
-                                             cisstOSAbstraction
-                                             cisstCommon
-                       INSTALL_FILES 1)
+cisst_add_pybind11_module (MODULE cisstParameterTypesPython
+                           FOLDER cisstParameterTypes
+                           SOURCES cisstParameterTypesPybind.cpp ${cisstParameterTypes_CISST_DG_PYTHON_SRCS}
+                           MODULE_LINK_LIBRARIES cisstParameterTypes
+                                                 cisstMultiTask
+                                                 cisstOSAbstraction
+                                                 cisstCommon
+                           INSTALL_FILES)

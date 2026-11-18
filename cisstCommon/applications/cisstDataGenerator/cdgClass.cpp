@@ -949,3 +949,28 @@ std::string cdgClass::CMN_UNUSED_wrapped(const std::string & parameter) const
     }
     return "CMN_UNUSED(" + parameter + ")";
 }
+
+
+void cdgClass::GeneratePython(std::ostream & outputStream) const
+{
+    const std::string name = this->GetFieldValue("name");
+    const std::string fullName = this->ClassWithNamespace();
+    outputStream << "    {" << std::endl
+                 << "        pybind11::class_<" << fullName;
+    for (size_t index = 0; index < BaseClasses.size(); index++) {
+        outputStream << ", " << BaseClasses[index]->GetFieldValue("type");
+    }
+    outputStream << "> cls(m, \"" << name << "\");" << std::endl
+                 << "        cls.def(pybind11::init<>());" << std::endl
+                 << "        cls.def(\"__copy__\", [](const " << fullName << " & self) { return " << fullName << "(self); });" << std::endl;
+    if (this->GetFieldValue("generate-human-readable") == "true") {
+        outputStream << "        cls.def(\"__repr__\", [](const " << fullName << " & self) { return self.HumanReadable(); });" << std::endl;
+    }
+    for (size_t index = 0; index < Enums.size(); index++) {
+        Enums[index]->GeneratePython(outputStream);
+    }
+    for (size_t index = 0; index < Members.size(); index++) {
+        Members[index]->GeneratePython(outputStream);
+    }
+    outputStream << "    }" << std::endl;
+}

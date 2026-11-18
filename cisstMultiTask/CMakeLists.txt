@@ -24,7 +24,7 @@ add_subdirectory (code)
 # Applications
 add_subdirectory (applications)
 
-# SWIG Python wrappers and tests
+# Python wrappers and tests
 cisst_offer_python (cisstMultiTask)
 cisst_offer_tests_python (cisstMultiTask)
 

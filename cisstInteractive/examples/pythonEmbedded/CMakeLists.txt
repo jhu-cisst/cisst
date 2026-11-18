@@ -14,7 +14,8 @@ project (pythonEmbedded)
 set (REQUIRED_CISST_LIBRARIES cisstCommon)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
-if (cisst_FOUND AND CISST_HAS_SWIG_PYTHON)
+if (cisst_FOUND AND CISST_HAS_PYTHON)
+  message (WARNING "pythonEmbedded example has not been migrated to pybind11 yet.")
 
   # Create myDerivedClass as a shared library
   add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)

@@ -33,17 +33,10 @@ target_link_libraries (cisstMultiTaskPythonTest ${CISST_LIBRARIES_NEEDED})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 
 # We are using C++ code
-cisst_add_swig_module (MODULE cisstMultiTaskPythonTest
-                       FOLDER "cisstMultiTask/tests"
-                       MODULE_LINK_LIBRARIES cisstCommon cisstMultiTaskPythonTest)
-
-# Copy the .py file generated to wherever the libraries are
-add_custom_command (TARGET cisstMultiTaskPythonTestPython
-                    POST_BUILD
-                    COMMAND ${CMAKE_COMMAND}
-                    ARGS -E copy
-                            ${CMAKE_CURRENT_BINARY_DIR}/cisstMultiTaskPythonTest.py
-                            ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstMultiTaskPythonTest.py)
+cisst_add_pybind11_module (MODULE cisstMultiTaskPythonTestPython
+                           FOLDER "cisstMultiTask/tests"
+                           SOURCES cisstMultiTaskPythonTestPybind.cpp
+                           MODULE_LINK_LIBRARIES cisstCommon cisstMultiTask cisstMultiTaskPythonTest)
 
 # Create the scripts from .in
 set (LIB cisstMultiTask)

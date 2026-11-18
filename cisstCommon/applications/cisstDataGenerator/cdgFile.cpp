@@ -358,6 +358,27 @@ void cdgFile::GenerateCode(std::ostream & outputStream) const
 }
 
 
+void cdgFile::GeneratePython(std::ostream & outputStream) const
+{
+    GenerateMessage(outputStream);
+
+    std::string bindName = HeaderGuard;
+    if (bindName.size() > 2 && bindName.substr(bindName.size() - 2) == "_h") {
+        bindName.resize(bindName.size() - 2);
+    }
+
+    outputStream << "#include <pybind11/pybind11.h>" << std::endl
+                 << "#include <pybind11/eigen.h>" << std::endl
+                 << "#include <pybind11/stl.h>" << std::endl
+                 << "#include <" << Header << ">" << std::endl
+                 << std::endl
+                 << "void cdgBind_" << bindName << "(pybind11::module & m)" << std::endl
+                 << "{" << std::endl;
+    this->Global->GeneratePython(outputStream);
+    outputStream << "}" << std::endl;
+}
+
+
 void cdgFile::DisplaySyntax(std::ostream & outputStream) const
 {
     std::unique_ptr<cdgGlobal> global = std::make_unique<cdgGlobal>(0);

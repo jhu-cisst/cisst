@@ -16,7 +16,7 @@ project (cisstParameterTypesLibs)
 
 add_subdirectory (code)
 
-# SWIG Python wrappers
+# Python wrappers
 cisst_offer_python (cisstParameterTypes)
 
 if (CISST_HAS_QT)

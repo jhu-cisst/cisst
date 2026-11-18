@@ -53,6 +53,7 @@ public:
     void GenerateIncludes(std::ostream & output) const override;
     void GenerateHeader(std::ostream & output) const override;
     void GenerateCode(std::ostream & output) const override;
+    void GeneratePython(std::ostream & output) const override;
 
 private:
     cdgGlobal(void); // make sure constructor with line number is always used.

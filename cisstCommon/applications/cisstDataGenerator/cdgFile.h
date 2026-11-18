@@ -40,6 +40,7 @@ public:
     bool Validate(std::string & errorMessage);
     void GenerateHeader(std::ostream & outputStream) const;
     void GenerateCode(std::ostream & outputStream) const;
+    void GeneratePython(std::ostream & outputStream) const;
     void DisplaySyntax(std::ostream & outputStream) const;
 
 protected:

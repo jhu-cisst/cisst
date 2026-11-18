@@ -248,3 +248,26 @@ void cdgMember::GenerateCode(std::ostream & outputStream) const
                      << std::endl;
     }
 }
+
+
+void cdgMember::GeneratePython(std::ostream & outputStream) const
+{
+    if (IsCArray) {
+        return;
+    }
+    const std::string name = this->GetFieldValue("name");
+    const std::string accessors = this->GetFieldValue("accessors");
+    const std::string visibility = this->GetFieldValue("visibility");
+
+    if ((visibility == "public") && (accessors == "none")) {
+        outputStream << "        cls.def_readwrite(\"" << name << "\", &" << this->ClassName << "::" << MemberName << ");" << std::endl;
+        return;
+    }
+    if ((accessors == "all") || (accessors == "set-get")) {
+        outputStream << "        cls.def(\"Get" << name << "\", [](const " << this->ClassName << " & self) { return self.Get" << name << "(); });" << std::endl
+                     << "        cls.def(\"Set" << name << "\", []( " << this->ClassName << " & self, const std::decay_t<decltype(std::declval<" << this->ClassName << ">().Get" << name << "())> & v) { self.Set" << name << "(v); });" << std::endl;
+    }
+    if ((accessors == "all") || (accessors == "references")) {
+        outputStream << "        cls.def(\"" << name << "\", [](const " << this->ClassName << " & self) -> decltype(auto) { return self." << name << "(); }, pybind11::return_value_policy::reference_internal);" << std::endl;
+    }
+}

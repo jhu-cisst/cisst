@@ -13,9 +13,4 @@
 
 project (cisstMeshPython)
 
-cisst_add_swig_module (MODULE cisstMesh
-                       INTERFACE_DIRECTORY ..
-                       FOLDER cisstMesh
-                       HEADER_FILES ../mshPython.h
-                       MODULE_LINK_LIBRARIES cisstCommon cisstVector cisstNumerical cisstMesh
-                       INSTALL_FILES 1)
+message (WARNING "cisstMeshPython has not been migrated to pybind11 yet.")

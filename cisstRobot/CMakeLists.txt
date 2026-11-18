@@ -16,5 +16,5 @@ add_subdirectory (code)
 
 target_link_libraries(cisstRobot Eigen3::Eigen orocos-kdl)
 
-# SWIG Python wrappers
+# Python wrappers
 cisst_offer_python (cisstRobot)

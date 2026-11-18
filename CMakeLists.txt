@@ -182,7 +182,7 @@ if (CISST_CATKIN_BUILT)
   set (CISST_cisstMesh         OFF  CACHE BOOL "")
   set (CISST_cisstInteractive  ON  CACHE BOOL "")
   set (CISST_HAS_JSON          ON  CACHE BOOL "")
-  set (CISST_HAS_SWIG_PYTHON   ON  CACHE BOOL "" FORCE)
+  set (CISST_HAS_PYTHON        ON  CACHE BOOL "" FORCE)
   set (CISST_BUILD_SHARED_LIBS ON  CACHE BOOL "" FORCE)
   set (IS_SHARED SHARED)
   set (BUILD_SHARED_LIBS SHARED)
@@ -208,10 +208,10 @@ else (CMAKE_CL_64)
 endif (CMAKE_CL_64)
 
 
-# cisstInteractive requires SWIG/Python wrappers; enabling it forces CISST_HAS_SWIG_PYTHON
-option (CISST_cisstInteractive "Build cisstInteractive (requires CISST_HAS_SWIG_PYTHON)." OFF)
+# cisstInteractive requires Python wrappers; enabling it forces CISST_HAS_PYTHON
+option (CISST_cisstInteractive "Build cisstInteractive (requires CISST_HAS_PYTHON)." OFF)
 if (CISST_cisstInteractive)
-  set (CISST_HAS_SWIG_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with Swig." FORCE)
+  set (CISST_HAS_PYTHON ON CACHE BOOL "Build the Python wrappers for cisst with pybind11." FORCE)
 endif ()
 
 # Use a separate directory to find external dependencies, this allows
@@ -457,9 +457,9 @@ foreach (lib ${CISST_LIBRARIES_OPTIONAL})
   option (CISST_${lib} "Build ${lib}." OFF)
 endforeach (lib)
 
-if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
+if (CISST_HAS_PYTHON OR CISST_cisstInteractive)
   set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "Build cisst with shared libraries." FORCE)
-endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
+endif (CISST_HAS_PYTHON OR CISST_cisstInteractive)
 
 
 # List of libraries to be built
@@ -780,7 +780,7 @@ if (WIN32)
       endif ("${CURRENT_CISST_PATH}" STREQUAL "\\registry")
 
       # Do the same for PYTHONPATH if wrappers are compiled
-      if (CISST_HAS_SWIG_PYTHON)
+      if (CISST_HAS_PYTHON)
         # If there is no existing path, add it
         if ("${CURRENT_CISST_PYTHONPATH}" STREQUAL "\\registry")
           # not defined, add it to register using cmake -E
@@ -805,7 +805,7 @@ if (WIN32)
           endif ("${CISST_PYTHONPATH}" STREQUAL "${CURRENT_CISST_PYTHONPATH}")
 
         endif ("${CURRENT_CISST_PYTHONPATH}" STREQUAL "\\registry")
-      endif (CISST_HAS_SWIG_PYTHON)
+      endif (CISST_HAS_PYTHON)
 
 
       # If there is no CISST_ROOT

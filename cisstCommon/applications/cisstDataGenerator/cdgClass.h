@@ -69,6 +69,7 @@ public:
     bool Validate(std::string & errorMessage) override;
     void GenerateHeader(std::ostream & outputStream) const override;
     void GenerateCode(std::ostream & outputStream) const override;
+    void GeneratePython(std::ostream & outputStream) const override;
 
 protected:
 

@@ -231,144 +231,22 @@ macro (cisst_target_link_libraries TARGET ...)
 endmacro (cisst_target_link_libraries)
 
 
-# The function adds a SWIG module to a CISST-related project by processing the
-# following parameters
-#
-# - MODULE is the prefix of the main .i file.  The module name will be <MODULE>Python
-# - INTERFACE_FILENAME is the filename of the .i file (if not specified, defaults to <MODULE>.i)
-# - INTERFACE_DIRECTORY is the directory containing the .i file (use relative path from current source dir)
-# - FOLDER is used for IDE that support the CMake target property FOLDER
-# - MODULE_LINK_LIBRARIES cisst libraries needed to link the module (can be used for other libraries as long as CMake can find them)
-#
-function (cisst_add_swig_module ...)
-  # debug
-  cisst_cmake_debug ("cisst_add_swig_module called with: ${ARGV}")
-
-  # set all keywords and their values to ""
-  set (FUNCTION_KEYWORDS
-       MODULE
-       INTERFACE_FILENAME
-       INTERFACE_DIRECTORY
-       FOLDER
-       HEADER_FILES
-       MODULE_LINK_LIBRARIES
-       INSTALL_FILES)
-
-  # reset local variables
-  foreach (keyword ${FUNCTION_KEYWORDS})
-    set (${keyword} "")
-  endforeach (keyword)
-
-  # parse input
-  foreach (arg ${ARGV})
-    list (FIND FUNCTION_KEYWORDS ${arg} ARGUMENT_IS_A_KEYWORD)
-    if (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
-      set (CURRENT_PARAMETER ${arg})
-      set (${CURRENT_PARAMETER} "")
-    else (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
-      set (${CURRENT_PARAMETER} ${${CURRENT_PARAMETER}} ${arg})
-    endif (${ARGUMENT_IS_A_KEYWORD} GREATER -1)
-  endforeach (arg)
-
-  # set default interface file name
-  if (NOT INTERFACE_FILENAME)
-    set (INTERFACE_FILENAME "${MODULE}.i")
-  endif (NOT INTERFACE_FILENAME)
-
-  # debug
-  foreach (keyword ${FUNCTION_KEYWORDS})
-    cisst_cmake_debug ("cisst_add_swig_module: ${keyword}: ${${keyword}}")
-  endforeach (keyword)
-
-  # interface file
-  set (SWIG_INTERFACE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${INTERFACE_DIRECTORY}/${INTERFACE_FILENAME}")
-  cisst_cmake_debug ("cisst_add_swig_module: looking for interface file ${SWIG_INTERFACE_FILE}")
-
-  if (EXISTS ${SWIG_INTERFACE_FILE})
-    # SWIG is a build tool for this wrapper, not a dependency of consumers of
-    # the already-built cisst libraries.  Discover it only when actually used.
-    find_package (SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
-    include (UseSWIG)
-    # create a directory in build tree
-    file (MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${INTERFACE_DIRECTORY}")
-    # we are using C++ code
-    set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES CPLUSPLUS ON)
-    # make sure source file is not used before libraries are build
-    set_source_files_properties (${SWIG_INTERFACE_FILE} PROPERTIES DEPENDS "${MODULE_LINK_LIBRARIES}")
-    # finally create the swig project using CMake command
-    set (MODULE_NAME ${MODULE}Python)
-    cisst_cmake_debug ("cisst_add_swig_module: swig_add_library (${MODULE_NAME} LANGUAGE python SOURCES ${SWIG_INTERFACE_FILE})")
-    swig_add_library (${MODULE_NAME}
-      LANGUAGE python
-      SOURCES ${SWIG_INTERFACE_FILE})
-    set_target_properties (${MODULE_NAME} PROPERTIES
-                           SWIG_COMPILE_OPTIONS "-v;-fvirtual"
-                           SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
-
-    # SWIG generates function-pointer casts for some standard stream
-    # conversions.  These are part of the generated wrapper runtime rather
-    # than cisst code, so suppress this warning only for the SWIG target.
-    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-      target_compile_options (${MODULE_NAME} PRIVATE -Wno-cast-function-type)
-    endif ()
-
-    if (WIN32)
-      set_target_properties (${MODULE_NAME} PROPERTIES SUFFIX .pyd)
-      set_target_properties (${MODULE_NAME} PROPERTIES DEBUG_POSTFIX "_d")
-    endif (WIN32)
-    target_include_directories (${MODULE_NAME} PRIVATE ${PYTHON_ALL_INCLUDE_DIRS})
-    cisst_cmake_debug ("cisst_add_swig_module: swig_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${PYTHON_ALL_LIBRARIES})")
-    target_link_libraries (${MODULE_NAME} ${MODULE_LINK_LIBRARIES} ${PYTHON_ALL_LIBRARIES})
-
-    # copy the .py file generated to wherever the libraries are
-    add_custom_command (TARGET ${MODULE_NAME}
-                        POST_BUILD
-                        COMMAND ${CMAKE_COMMAND}
-                        ARGS -E copy_if_different
-                                ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
-                                ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/${MODULE_NAME}.py)
-    if (FOLDER)
-      set_property (TARGET ${MODULE_NAME} PROPERTY FOLDER "${FOLDER}")
-    endif (FOLDER)
-
-    # create a cisstCommon.py as CMake assumes one should be created
-    # this is a bug that should be fixed in future releases of CMake.
-    add_custom_command (TARGET ${MODULE_NAME}
-                        POST_BUILD
-                        COMMAND ${CMAKE_COMMAND}
-                        ARGS -E copy_if_different
-                                ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
-                                ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.py)
-
-    # install files if requested
-    if (${INSTALL_FILES})
-      # install the interface files so that one can %import them
-      install (FILES ${SWIG_INTERFACE_FILE}
-               DESTINATION include/${MODULE}
-               COMPONENT ${MODULE})
-
-      # install library and python file
-      install (TARGETS ${MODULE_NAME}
-               RUNTIME DESTINATION bin
-               LIBRARY DESTINATION lib
-               COMPONENT ${MODULE})
-      install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${MODULE_NAME}.py
-               DESTINATION lib
-               COMPONENT ${MODULE})
-
-      # install extra header files
-      foreach (header ${HEADER_FILES})
-        install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/${header}"
-                 DESTINATION include/${MODULE}
-                 COMPONENT ${MODULE})
-      endforeach (header)
-    endif  (${INSTALL_FILES})
-
-  else (EXISTS ${SWIG_INTERFACE_FILE})
-    message (SEND_ERROR "cisst_add_swig_module: can't file SWIG interface file for ${MODULE}: ${SWIG_INTERFACE_FILE}")
-  endif (EXISTS ${SWIG_INTERFACE_FILE})
-
-endfunction (cisst_add_swig_module)
+function (cisst_add_pybind11_module)
+  cmake_parse_arguments (ARG "INSTALL_FILES" "MODULE;FOLDER" "SOURCES;MODULE_LINK_LIBRARIES" ${ARGN})
+  find_package (pybind11 REQUIRED)
+  pybind11_add_module (${ARG_MODULE} ${ARG_SOURCES})
+  target_link_libraries (${ARG_MODULE} PRIVATE ${ARG_MODULE_LINK_LIBRARIES})
+  set_target_properties (${ARG_MODULE} PROPERTIES
+                         LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_OUTPUT_PATH}")
+  if (ARG_FOLDER)
+    set_property (TARGET ${ARG_MODULE} PROPERTY FOLDER "${ARG_FOLDER}")
+  endif ()
+  if (ARG_INSTALL_FILES)
+    install (TARGETS ${ARG_MODULE}
+             LIBRARY DESTINATION lib
+             COMPONENT ${ARG_MODULE})
+  endif ()
+endfunction (cisst_add_pybind11_module)
 
 
 # Function to use cisstComponentGenerator, this function assumes input
@@ -481,21 +359,25 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     cisst_cmake_debug ("cisst_data_generator: creating directory for generated header file ${FULL_GENERATED_INCLUDE_DIRECTORY}")
     set (header_absolute "${GENERATED_INCLUDE_DIRECTORY}/${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h")
     set (code_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}_cdg.cpp")
-    cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute}")
+    set (python_absolute "${CMAKE_CURRENT_BINARY_DIR}/${INPUT_WE}_cdg_pybind.cpp")
+    cisst_cmake_debug ("cisst_data_generator: adding output files: ${header_absolute} ${code_absolute} ${python_absolute}")
     set (GENERATED_FILES ${GENERATED_FILES} ${code_absolute} ${header_absolute})
+    set (GENERATED_FILES_PYTHON ${GENERATED_FILES_PYTHON} ${python_absolute})
     set (GENERATED_FILES_HDRS ${GENERATED_FILES_HDRS} "${INPUT_WE}.h")
     set (GENERATED_FILES_HDRS_FULLPATH ${GENERATED_FILES_HDRS_FULLPATH} ${header_absolute})
     # tell cmake the output is generated and how to generate it
     set_source_files_properties (${header_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
+    set_source_files_properties (${python_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties ("${INPUT_WE}.h" PROPERTIES GENERATED 1)
     add_custom_command (
-      OUTPUT ${header_absolute} ${code_absolute}
+      OUTPUT ${header_absolute} ${code_absolute} ${python_absolute}
       COMMAND "${CISST_DG_EXECUTABLE}"
       --verbose
       --input ${input_absolute}
       --header-directory ${GENERATED_INCLUDE_DIRECTORY} --header-file ${GENERATED_INCLUDE_SUB_DIRECTORY}${INPUT_WE}.h
       --code-directory   ${CMAKE_CURRENT_BINARY_DIR} --code-file ${INPUT_WE}_cdg.cpp
+      --python-file      ${python_absolute}
       MAIN_DEPENDENCY ${input}
       DEPENDS "${_cisst_dg_dependency}"
       VERBATIM
@@ -504,6 +386,7 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
 
   # create variables to store all generated files names
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_SRCS ${GENERATED_FILES} PARENT_SCOPE)
+  set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_PYTHON_SRCS ${GENERATED_FILES_PYTHON} CACHE INTERNAL "Generated pybind11 source files for ${GENERATED_FILES_VAR_PREFIX}")
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_HDRS ${GENERATED_FILES_HDRS} PARENT_SCOPE)
   set (${GENERATED_FILES_VAR_PREFIX}_CISST_DG_HDRS_FULLPATH ${GENERATED_FILES_HDRS_FULLPATH} PARENT_SCOPE)
 

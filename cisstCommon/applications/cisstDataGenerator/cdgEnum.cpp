@@ -283,3 +283,29 @@ void cdgEnum::GenerateDataFunctionsCode(std::ostream & outputStream) const
                  << "#endif // CISST_HAS_JSON" << std::endl;
 
 }
+
+
+void cdgEnum::GeneratePython(std::ostream & outputStream) const
+{
+    const std::string name = this->GetFieldValue("name");
+    const std::string prefix = this->GetFieldValue("prefix");
+    const std::string _namespace = this->GetFieldValue("namespace");
+    const std::string parent = (this->ClassName == "") ? "m" : "cls";
+
+    std::string fullEnum = name;
+    std::string valPrefix = prefix;
+    if (this->ClassName != "") {
+        fullEnum = this->ClassName + "::" + name;
+        valPrefix = this->ClassName + "::" + prefix;
+    } else if (_namespace != "") {
+        fullEnum = _namespace + "::" + name;
+        valPrefix = _namespace + "::" + prefix;
+    }
+
+    outputStream << "    pybind11::enum_<" << fullEnum << ">(" << parent << ", \"" << name << "\")" << std::endl;
+    for (size_t index = 0; index < Scopes.size(); index++) {
+        const std::string valName = Scopes[index]->GetFieldValue("name");
+        outputStream << "        .value(\"" << prefix << valName << "\", " << valPrefix << valName << ")" << std::endl;
+    }
+    outputStream << "        .export_values();" << std::endl;
+}

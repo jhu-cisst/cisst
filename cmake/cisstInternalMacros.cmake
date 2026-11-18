@@ -69,15 +69,15 @@ endmacro (cisst_offer_tests)
 # Default values are hard coded intentionally
 macro (cisst_offer_python library)
   set (cop_OPTION_NAME CISST_${library}Python)
-  if (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+  if (CISST_HAS_PYTHON)
     option (${cop_OPTION_NAME} "Build ${library} Python" ON)
     mark_as_advanced (${cop_OPTION_NAME})
     if (${cop_OPTION_NAME})
       add_subdirectory (codePython)
     endif (${cop_OPTION_NAME})
-  else (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+  else (CISST_HAS_PYTHON)
     unset (${cop_OPTION_NAME} CACHE)
-  endif (CISST_HAS_SWIG_PYTHON AND CISST_SWIG_FOUND)
+  endif (CISST_HAS_PYTHON)
 endmacro (cisst_offer_python)
 
 # Offer the option to compile all tests in relative directory "testsPython"

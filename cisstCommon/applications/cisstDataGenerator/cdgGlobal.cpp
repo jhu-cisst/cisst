@@ -128,3 +128,11 @@ void cdgGlobal::GenerateCode(std::ostream & outputStream) const
         outputStream << std::endl;
     }
 }
+
+
+void cdgGlobal::GeneratePython(std::ostream & outputStream) const
+{
+    for (size_t index = 0; index < Scopes.size(); index++) {
+        Scopes[index]->GeneratePython(outputStream);
+    }
+}

@@ -252,36 +252,16 @@ else ()
 endif ()
 
 
-# Wrapping with swig for Python
-option (CISST_HAS_SWIG_PYTHON "Build the Python wrappers for cisst with Swig." OFF)
-mark_as_advanced (CISST_HAS_SWIG_PYTHON)
+# Wrapping with pybind11 for Python
+option (CISST_HAS_PYTHON "Build the Python wrappers for cisst with pybind11." OFF)
+mark_as_advanced (CISST_HAS_PYTHON)
 
-if (CISST_HAS_SWIG_PYTHON)
-  # Find Swig
-  set (CISST_SWIG_REQUIRED_VERSION 1.3.36)
-  find_package (SWIG ${CISST_SWIG_REQUIRED_VERSION} REQUIRED)
-  # It looks like version is not yet supported by CMake for SWIG so we are checking manually
-  if (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-    message ("SWIG version ${SWIG_VERSION} is too low, cisst requires ${CISST_SWIG_REQUIRED_VERSION}")
-    # propagate the fact that SWIG was found
-    set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
-  else (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-    include (${SWIG_USE_FILE})
-    # save SWIG settings
-    set (CISST_SWIG_PACKAGE "SWIG")
-    set (SWIG_EXECUTABLE ${SWIG_EXECUTABLE} PARENT_SCOPE)
-    set (SWIG_USE_FILE ${SWIG_USE_FILE} PARENT_SCOPE)
-    # propagate the fact that SWIG was found
-    set (CISST_SWIG_FOUND 1 PARENT_SCOPE)
-  endif (${SWIG_VERSION} VERSION_LESS ${CISST_SWIG_REQUIRED_VERSION})
-endif (CISST_HAS_SWIG_PYTHON)
-
-if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
+if (CISST_HAS_PYTHON OR CISST_cisstInteractive)
   # Force to use exceptions
   set (CISST_CMN_THROW_DOES_ABORT OFF CACHE BOOL "cmnThrow uses abort() instead of throw" FORCE)
   set (CISST_CMN_ASSERT_THROWS_EXCEPTION ON CACHE BOOL "CMN_ASSERT throws an exception instead of abort" FORCE)
 
-  # Find Python and NumPy
+  # Find Python, NumPy, and pybind11
   set (CISST_PYTHON_VERSION_REQUIRED "" CACHE STRING "Required Python version (if not empty)")
   if (CISST_PYTHON_VERSION_REQUIRED)
     message (STATUS "Looking for Python ${CISST_PYTHON_VERSION_REQUIRED}")
@@ -289,17 +269,16 @@ if (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
   else ()
     find_package (Python REQUIRED COMPONENTS Interpreter Development NumPy)
   endif ()
+  if (CISST_HAS_PYTHON)
+    find_package (pybind11 REQUIRED)
+  endif ()
 
   set (Python_EXECUTABLE ${Python_EXECUTABLE} PARENT_SCOPE)
   set (PYTHON_ALL_INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
   set (PYTHON_ALL_LIBRARIES ${Python_LIBRARIES})
   set (PYTHON_ALL_INCLUDE_DIRS ${PYTHON_ALL_INCLUDE_DIRS} PARENT_SCOPE)
   set (PYTHON_ALL_LIBRARIES ${PYTHON_ALL_LIBRARIES} PARENT_SCOPE)
-
-else (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
-  # propagate the fact that SWIG was not found
-  set (CISST_SWIG_FOUND 0 PARENT_SCOPE)
-endif (CISST_HAS_SWIG_PYTHON OR CISST_cisstInteractive)
+endif (CISST_HAS_PYTHON OR CISST_cisstInteractive)
 
 
 # Support for cisstCommonXML, just to see what is available

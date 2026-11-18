@@ -79,6 +79,7 @@ public:
     virtual void GenerateIncludes(std::ostream & CMN_UNUSED(outputStream)) const {};
     virtual void GenerateHeader(std::ostream & outputStream) const = 0;
     virtual void GenerateCode(std::ostream & outputStream) const = 0;
+    virtual void GeneratePython(std::ostream & CMN_UNUSED(outputStream)) const {};
     void DisplaySyntax(std::ostream & outputStream, size_t offset, bool recursive, bool skipScopeName = false) const;
     void DisplayFieldsSyntax(std::ostream & outputStream, size_t offset) const;
 

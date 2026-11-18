@@ -14,18 +14,25 @@
 
 project (cisstMultiTaskPython)
 
-if (WIN32)
-  # For conditional compilation on Windows
-  set_property (SOURCE "../cisstMultiTask.i" PROPERTY COMPILE_DEFINITIONS SWIG_WINDOWS)
-endif ()
+# create wrappers using pybind11
+cisst_add_pybind11_module (MODULE _cisstMultiTaskPython
+                           FOLDER cisstMultiTask
+                           SOURCES cisstMultiTaskPybind.cpp ${cisstMultiTask_CISST_DG_PYTHON_SRCS}
+                           MODULE_LINK_LIBRARIES cisstMultiTask cisstOSAbstraction cisstCommon
+                           INSTALL_FILES)
 
-# create wrappers using swig
-cisst_add_swig_module (MODULE cisstMultiTask
-                       INTERFACE_DIRECTORY ..
-                       FOLDER cisstMultiTask
-                       HEADER_FILES ../mtsPython.h
-                       MODULE_LINK_LIBRARIES cisstMultiTask cisstOSAbstraction cisstCommon
-                       INSTALL_FILES 1)
+add_custom_command (OUTPUT "${LIBRARY_OUTPUT_PATH}/cisstMultiTaskPython.py"
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                            "${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskPython.py"
+                            "${LIBRARY_OUTPUT_PATH}/cisstMultiTaskPython.py"
+                    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskPython.py")
+
+add_custom_target (cisstMultiTaskPython ALL
+                   DEPENDS _cisstMultiTaskPython "${LIBRARY_OUTPUT_PATH}/cisstMultiTaskPython.py")
+
+install (FILES "${CMAKE_CURRENT_SOURCE_DIR}/cisstMultiTaskPython.py"
+         DESTINATION lib
+         COMPONENT cisstMultiTaskPython)
 
 if (WIN32 AND CMAKE_CL_64)
     message("cisstMultiTaskPython: added /bigobj flag")

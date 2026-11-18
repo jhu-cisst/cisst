@@ -81,9 +81,9 @@ if (CISST_cisstStereoVision)
 endif (CISST_cisstStereoVision)
 
 # Tells if Python was used
-if (CISST_HAS_SWIG_PYTHON)
+if (CISST_HAS_PYTHON)
   set (BUILDNAME_TMP ${BUILDNAME_TMP}-Py)
-endif (CISST_HAS_SWIG_PYTHON)
+endif (CISST_HAS_PYTHON)
 
 # Save to cache
 set (BUILDNAME ${BUILDNAME_TMP}
