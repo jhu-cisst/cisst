@@ -119,9 +119,7 @@ class mtsMessage;
 
 // interfaces and tasks
 class mtsInterfaceProvided;
-class mtsInterfaceOutput;
 class mtsInterfaceRequired;
-class mtsInterfaceInput;
 
 class mtsCommandState;
 class mtsComponent;

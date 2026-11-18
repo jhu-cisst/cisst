@@ -222,7 +222,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     //@}
 
     /* adeguet - seems deprecated or at least not used anywhere?
-    inline bool CouldConnectTo(mtsInterfaceProvided * CMN_UNUSED(interfaceProvidedOrOutput)) {
+    inline bool CouldConnectTo(mtsInterfaceProvided * CMN_UNUSED(interfaceProvided)) {
         return true;
         } */
 

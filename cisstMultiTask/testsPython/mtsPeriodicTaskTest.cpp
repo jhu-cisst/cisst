@@ -30,8 +30,7 @@ mtsPeriodicTaskTest::mtsPeriodicTaskTest(double periodInSeconds):
     mtsTaskPeriodic("mtsPeriodicTaskTest", periodInSeconds, false, 500)
 {
     this->Double = 0.0;
-    this->Vector.SetSize(5);
-    this->Vector.SetAll(0.0);
+    this->Vector = Eigen::VectorXd::Zero(5);
     StateTable.AddData(this->Double, "Double");
     StateTable.AddData(this->Vector, "Vector");
     // add one interface, this will create an mtsTaskInterface
@@ -53,14 +52,14 @@ mtsPeriodicTaskTest::mtsPeriodicTaskTest(double periodInSeconds):
 void mtsPeriodicTaskTest::AddDouble(const mtsDouble & addend)
 {
     this->Double = addend;
-    this->Vector += addend.Data;
+    this->Vector.array() += addend.Data;
 }
 
 
 void mtsPeriodicTaskTest::ZeroAll(void)
 {
     this->Double = 0.0;
-    this->Vector.SetAll(0.0);
+    this->Vector.setZero();
 }
 
 

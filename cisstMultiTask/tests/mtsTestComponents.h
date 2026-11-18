@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
@@ -91,16 +92,23 @@ bool TestClassConversion(const mtsTestClassGeneric<_elementType> &input, _elemen
 // For testing state table filtered read using a standard type
 // (not derived from mtsGenericObject)
 template <class _elementType>
-bool TestV3Conversion(const vctFixedSizeVector<_elementType, 3> &input, _elementType &output)
+bool TestV3Conversion(const Eigen::Matrix<_elementType, 3, 1> &input, _elementType &output)
 {
-    output = input.SumOfElements();
+    output = input.sum();
     return true;
 }
 
 // Not sure why following is needed
 CMN_DATA_SPECIALIZE_ALL_NO_BYTE_SWAP(mtsInt, mtsI);
 
-typedef vctFixedSizeVector<mtsInt, 3> vct3mtsInt;
+namespace Eigen {
+    template <typename T>
+    struct NumTraits<mtsGenericObjectProxy<T> > : NumTraits<T> {
+        enum { RequireInitialization = 1 };
+    };
+}
+
+typedef Eigen::Matrix<mtsInt, 3, 1> vct3mtsInt;
 typedef mtsGenericObjectProxy<vct3mtsInt> mtsVct3mtsInt;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct3mtsInt)
 
@@ -145,7 +153,7 @@ class mtsTestInterfaceProvided: public mtsTestInterfaceProvidedBase
 {
 public:
     typedef _elementType value_type; // STL convention
-    typedef vctFixedSizeVector<_elementType, 3> vector3_type;
+    typedef Eigen::Matrix<_elementType, 3, 1> vector3_type;
 
 private:
     value_type Value, StateValue;
@@ -167,7 +175,7 @@ public:
         Value = -1;   // initial value = -1;
         StateValue = 0;
         StateValueFilteredGeneric.Init();
-        StateValueFilteredV3.SetAll(0);
+        StateValueFilteredV3.setConstant(0);
         Argument1Prototype = Argument1PrototypeDefault;
         Argument2Prototype = Argument2PrototypeDefault;
     }
@@ -218,7 +226,7 @@ public:
         StateTable->Start();
         StateValue++;
         StateValueFilteredGeneric.Increment();
-        StateValueFilteredV3.SetAll(StateValue);
+        StateValueFilteredV3.setConstant(StateValue);
         StateTable->Advance();
     }
 

@@ -91,7 +91,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsExport.h>
 
 
-// EventReceivers must be added before Bind (should add check for InterfaceProvidedOrOutput==0)
+// EventReceivers must be added before Bind (should add check for InterfaceProvided==0)
 // EventHandlers can be added at any time.
 // When Bind called,
 //    if no EventReceiver, directly add EventHandler

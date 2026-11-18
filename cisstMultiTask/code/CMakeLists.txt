@@ -65,8 +65,6 @@ set (SOURCE_FILES
      mtsGenericObject.cpp
 
      mtsInterface.cpp
-     mtsInterfaceInput.cpp
-     mtsInterfaceOutput.cpp
      mtsInterfaceProvided.cpp
      mtsInterfaceRequired.cpp
      mtsIntervalStatistics.cpp
@@ -163,8 +161,6 @@ set (HEADER_FILES
 
      mtsIntervalStatistics.h
      mtsInterface.h
-     mtsInterfaceInput.h
-     mtsInterfaceOutput.h
      mtsInterfaceProvided.h
      mtsInterfaceRequired.h
 

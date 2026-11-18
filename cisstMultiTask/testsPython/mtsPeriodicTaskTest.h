@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsPeriodicTaskTest_h
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <Eigen/Core>
 
 // code required for the DLL generation
 #ifdef cisstMultiTaskPythonTest_EXPORTS
@@ -36,7 +37,7 @@ class CISST_EXPORT mtsPeriodicTaskTest: public mtsTaskPeriodic {
     // double
     mtsDouble Double;
     // vector
-    mtsDoubleVec Vector;
+    Eigen::VectorXd Vector;
 
     void AddDouble(const mtsDouble & addend); // method used for write command
     void ZeroAll(void); // method used for void command

@@ -24,7 +24,7 @@ set_property (TARGET cisstVectorQtTests PROPERTY FOLDER "cisstVector/tests")
 target_link_libraries (cisstVectorQtTests
   cisstTestsDriver
   cisstCommon
-  cisstVector)
+  cisstVectorQt)
 
 # To generate a CTest list of tests
 cisst_add_test (cisstVectorQtTests ITERATIONS 10 INSTANCES 2)
