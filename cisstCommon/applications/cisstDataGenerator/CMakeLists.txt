@@ -71,6 +71,7 @@ add_executable (cisstDataGenerator
                 cdgFile.cpp
                 ${SOURCE_FILES_FROM_cisstCommon}
                 )
+target_compile_features(cisstDataGenerator PUBLIC c_std_99 cxx_std_17)
 
 add_dependencies (cisstDataGenerator cisstRevision cisstBuildType)
 
