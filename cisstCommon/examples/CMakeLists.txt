@@ -14,6 +14,5 @@
 add_subdirectory (dataGenerator)
 add_subdirectory (getChar)
 add_subdirectory (portability)
-add_subdirectory (serialization)
 add_subdirectory (units)
 add_subdirectory (LoggerQt)

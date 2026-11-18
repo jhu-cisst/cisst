@@ -19,7 +19,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorEvent.h>
 
-#include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>

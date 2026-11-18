@@ -20,11 +20,11 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorState.h>
 
-#include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnThrow.h>
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
@@ -496,10 +496,10 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
             MarkHeaderEnd(*(this->OutputStream));
 
             // Remember the number of registered signals.
-            cmnULongLong cmnULongTotalSignalCount;
-            cmnULongTotalSignalCount.Data = RegisteredSignalElements.size();
+            mtsULong totalSignalCount;
+            totalSignalCount.Data = RegisteredSignalElements.size();
             StringStreamBufferForSerialization.str("");
-            Serializer->Serialize(cmnULongTotalSignalCount);
+            Serializer->Serialize(totalSignalCount);
             *(this->OutputStream) << StringStreamBufferForSerialization.str();
         }
     } else {
@@ -536,7 +536,7 @@ bool mtsCollectorState::FetchStateTableData(const mtsStateTable * table,
     if (this->OutputStream) {
         if (this->OutputStream->good()) {
             if (FileFormat == COLLECTOR_FILE_FORMAT_BINARY) {
-                cmnULongLong timeTick;
+                mtsULong timeTick;
                 size_t i, j;
                 for (i = startIndex; i <= endIndex; i += SamplingInterval) {
                     StringStreamBufferForSerialization.str("");
@@ -622,7 +622,7 @@ bool mtsCollectorState::ConvertBinaryToText(const std::string sourceBinaryFileNa
     // Deserialize to get the total number of recorded signals.
     cmnGenericObject * element = DeSerializer.DeSerialize();
     // Should we check that element is not 0?
-    cmnULong * totalSignalCountObject = dynamic_cast<cmnULong *>(element);
+    mtsULong * totalSignalCountObject = dynamic_cast<mtsULong *>(element);
     if (!totalSignalCountObject) {
         CMN_LOG_INIT_ERROR << "Class mtsCollectorState: ConvertBinaryToText: corrupted header (missing number of signals)." << std::endl;
         inFile.close();

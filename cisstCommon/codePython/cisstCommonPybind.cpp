@@ -25,7 +25,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassServicesBase.h>
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnObjectRegister.h>
-#include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnLogLoD.h>
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnPath.h>
@@ -34,16 +33,6 @@ http://www.cisst.org/cisst/license.txt.
 namespace py = pybind11;
 
 void cdgBind_cisstCommon_cmnJointType(py::module & m);
-
-template <typename _elementType>
-void bindGenericObjectProxy(py::module & m, const char * name)
-{
-    using ProxyType = cmnGenericObjectProxy<_elementType>;
-    py::class_<ProxyType, cmnGenericObject>(m, name)
-        .def(py::init<>())
-        .def(py::init<const _elementType &>())
-        .def_readwrite("Data", &ProxyType::Data);
-}
 
 PYBIND11_MODULE(cisstCommonPython, m)
 {
@@ -100,15 +89,6 @@ PYBIND11_MODULE(cisstCommonPython, m)
             reg.ToStream(oss);
             return oss.str();
         });
-
-    bindGenericObjectProxy<double>(m, "cmnDouble");
-    bindGenericObjectProxy<int>(m, "cmnInt");
-    bindGenericObjectProxy<unsigned int>(m, "cmnUInt");
-    bindGenericObjectProxy<short>(m, "cmnShort");
-    bindGenericObjectProxy<unsigned short>(m, "cmnUShort");
-    bindGenericObjectProxy<long>(m, "cmnLong");
-    bindGenericObjectProxy<unsigned long>(m, "cmnULong");
-    bindGenericObjectProxy<bool>(m, "cmnBool");
 
     m.attr("CMN_LOG_LEVEL_NONE") = CMN_LOG_LEVEL_NONE;
     m.attr("CMN_LOG_LEVEL_INIT_ERROR") = CMN_LOG_LEVEL_INIT_ERROR;

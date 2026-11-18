@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
-#include <cisstCommon/cmnGenericObjectProxy.h>
 #include <functional>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsGenericObject.h>

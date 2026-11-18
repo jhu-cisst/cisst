@@ -74,7 +74,6 @@ set (HEADER_FILES
      cmnExportMacros.h
      cmnForwardDeclarations.h
      cmnGenericObject.h
-     cmnGenericObjectProxy.h
      cmnGetChar.h
      cmnKbHit.h
      cmnLogLoD.h
