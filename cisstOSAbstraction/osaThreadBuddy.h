@@ -54,7 +54,7 @@ class CISST_EXPORT osaThreadBuddy {
 private:
     std::unique_ptr<osaThreadBuddyInternals> internals;
 
-    std::thread* thread;
+    std::thread& thread;
 
     /*! Thread period (if > 0) */
     double Period = 0;
@@ -70,10 +70,6 @@ public:
     \param period The period of the thread (in nanosecond)
     */
     void Create(double period);
-
-    /*! Return true if thread is periodic.  Currently, returns true if
-      the thread was created with a period > 0. */
-    bool IsPeriodic() const { return Period > 0; }
 
     /*! Suspend the execution of the real time thread for the
       remainder of the current period. */

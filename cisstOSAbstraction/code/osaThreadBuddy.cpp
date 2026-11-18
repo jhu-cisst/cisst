@@ -129,7 +129,7 @@ void osaThreadBuddyInternals::waitForTimer() {
 
 osaThreadBuddy::osaThreadBuddy(std::thread& thread)
     : internals(std::make_unique<osaThreadBuddyInternals>()),
-      thread(&thread)
+      thread(thread)
 {}
 
 // Need to define here, once osaThreadBuddyInternals source is available
@@ -144,7 +144,8 @@ void osaThreadBuddy::Create(double period)
 
 void osaThreadBuddy::WaitForRemainingPeriod(void)
 {
-    if (!IsPeriodic()) { return; }
+    // Check if period has been configured
+    if (Period <= 0) { return; }
 
     do {
         internals->waitForTimer();
@@ -154,7 +155,7 @@ void osaThreadBuddy::WaitForRemainingPeriod(void)
 void osaThreadBuddy::MakeHardRealTime(void) 
 {
 #if (CISST_OS == CISST_LINUX)
-    pthread_t native_handle = thread->native_handle();
+    pthread_t native_handle = thread.native_handle();
     struct sched_param param;
     param.sched_priority = 80;
 
@@ -171,9 +172,9 @@ void osaThreadBuddy::MakeHardRealTime(void)
 void osaThreadBuddy::MakeSoftRealTime(void) 
 {
 #if (CISST_OS == CISST_WINDOWS)
-    SetThreadPriority(thread->native_handle(), THREAD_PRIORITY_TIME_CRITICAL);
+    SetThreadPriority(thread.native_handle(), THREAD_PRIORITY_TIME_CRITICAL);
 #elif (CISST_OS == CISST_LINUX)
-    pthread_t native_handle = thread->native_handle();
+    pthread_t native_handle = thread.native_handle();
     struct sched_param param;
     param.sched_priority = 50;
 
