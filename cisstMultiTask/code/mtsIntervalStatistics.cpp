@@ -190,7 +190,7 @@ void mtsIntervalStatistics::Update(const double period, const double computeTime
 
         // timestamp this data
         this->Valid() = true;
-        this->Timestamp() = durationToSeconds(currentTime.time_since_epoch());
+        this->Timestamp() = getTimestamp(currentTime);
 
         // finally call user code to act on updated data
         if (mCallback) {

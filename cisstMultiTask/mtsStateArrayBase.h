@@ -20,8 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 /*!
-  \file
-  \brief Defines a base class the state data array.
+    \file
+    \brief Defines a base class the state data array.
 */
 
 #ifndef _mtsStateArrayBase_h
@@ -30,13 +30,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObject.h>
 
 /*!
-  \ingroup cisstMultiTask
+    \ingroup cisstMultiTask
 
-  Abstract base class for state data arrays.  This class is mostly
-  pure virtual and is used as a base class for mtsStateArray which is
-  templated.  Using a base class allows to keep all the state arrays
-  in an homogenous container of pointers on different types of state
-  arrays.
+    Abstract base class for state data arrays.  This class is mostly
+    pure virtual and is used as a base class for mtsStateArray which is
+    templated.  Using a base class allows to keep all the state arrays
+    in an homogenous container of pointers on different types of state
+    arrays.
 
   \sa mtsStateArray */
 class mtsStateArrayBase {
@@ -57,29 +57,27 @@ public:
     /*! Overloaded subscript operator. */
     virtual mtsGenericObject & operator[](index_type index) = 0;
 
-	/*! Overloaded subscript operator. */
-	virtual const mtsGenericObject & operator[](index_type index) const = 0;
+    /*! Overloaded subscript operator. */
+    virtual const mtsGenericObject & operator[](index_type index) const = 0;
 
-	/*! Create the array of data.  This is currently unused. */
-	virtual mtsStateArrayBase * Create(const mtsGenericObject * objectExample, size_type size) = 0;
+    /*! Create the array of data.  This is currently unused. */
+    virtual mtsStateArrayBase * Create(const mtsGenericObject * objectExample, size_type size) = 0;
 
-	/*! Copy data from one index to another. */
-	virtual void Copy(index_type indexTo, index_type indexFrom) = 0;
+    /*! Copy data from one index to another. */
+    virtual void Copy(index_type indexTo, index_type indexFrom) = 0;
 
-	/*! Get data from array. */
-	virtual bool Get(index_type index, mtsGenericObject & data) const = 0;
+    /*! Get data from array. */
+    virtual bool Get(index_type index, mtsGenericObject & data) const = 0;
 
-	/*! Set data in array. */
-	virtual bool Set(index_type index, const mtsGenericObject & data) = 0;
+    /*! Set data in array. */
+    virtual bool Set(index_type index, const mtsGenericObject & data) = 0;
 
     virtual bool SetDataSize(const size_t size) = 0;
 
     bool SetSize(const size_t size){
         return SetDataSize(size);
     }
-
 };
 
 
 #endif // _mtsStateArrayBase_h
-

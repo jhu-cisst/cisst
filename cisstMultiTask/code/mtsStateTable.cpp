@@ -52,6 +52,8 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     StateVector(0),
     StateVectorDataNames(0),
     Ticks(size, mtsStateIndex::TimeTicksType(0)),
+    Tic(Clock_t::time_point::min()),
+    Toc(Clock_t::time_point::min()),
     Period(Clock_t::duration::zero()),
     SumOfPeriods(0.0),
     AveragePeriod(0.0),
@@ -121,13 +123,13 @@ bool mtsStateTable::SetSize(const size_t size) {
 /* All the const methods that can be called from reader or writer */
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
     size_t tmp = IndexReader;
-    const double timestamp = durationToSeconds(Tic.Data.time_since_epoch());
+    const double timestamp = getTimestamp(Tic.Data);
     return mtsStateIndex(timestamp, static_cast<int>(tmp), Ticks[tmp], static_cast<int>(HistoryLength));
 }
 
 mtsStateIndex mtsStateTable::GetIndexDelayed(void) const {
     size_t tmp = IndexDelayed;
-    const double timestamp = durationToSeconds(Tic.Data.time_since_epoch());
+    const double timestamp = getTimestamp(Tic.Data);
     return mtsStateIndex(timestamp, static_cast<int>(tmp), Ticks[tmp], static_cast<int>(HistoryLength));
 }
 
@@ -162,7 +164,7 @@ mtsStateTable::AccessorBase * mtsStateTable::GetAccessorById(const size_t id) co
 
 /* All the non-const methods that can be called from writer only */
 mtsStateIndex mtsStateTable::GetIndexWriter(void) const {
-    const double timestamp = durationToSeconds(Tic.Data.time_since_epoch());
+    const double timestamp = getTimestamp(Tic.Data);
     return mtsStateIndex(timestamp, static_cast<int>(IndexWriter), Ticks[IndexWriter], static_cast<int>(HistoryLength));
 }
 
@@ -191,9 +193,13 @@ void mtsStateTable::Start(void) {
 
     // Since IndexReader and IndexWriter are initialized to 0,
     // the first period will be 0
-    mtsGenericObjectProxy<Clock_t::time_point> old_tic_count;
-    StateVector[TicId]->Get(IndexReader, old_tic_count);
-    Period = Tic.Data - old_tic_count.Data;
+    mtsGenericObjectProxy<Clock_t::time_point> previous_tic;
+    StateVector[TicId]->Get(IndexReader, previous_tic);
+    if (previous_tic.Data != Clock_t::time_point::min()) {
+        Period = Tic.Data - previous_tic.Data;
+    } else {
+        Period = Clock_t::duration::zero();
+    }
 
     // update "started" status
     mStarted = true;
@@ -241,7 +247,7 @@ void mtsStateTable::Advance(void) {
     // Write data in the state table from the different state data objects.
     // Note that we start at TicId, which should correspond to the second
     // element in the array (after Toc).
-    const double timestamp = durationToSeconds(Tic.Data.time_since_epoch());
+    const double timestamp = getTimestamp(Tic.Data);
     for (size_t i = TicId; i < StateVector.size(); i++) {
         if (StateVectorElements[i]) {
             StateVectorElements[i]->SetTimestampIfAutomatic(timestamp);
@@ -314,7 +320,7 @@ void mtsStateTable::Advance(void) {
     Toc = Clock_t::now(); // in seconds
 
     // Update Period Statistics (last time interval, current compute time)
-    PeriodStats.Update(durationToSeconds(Clock_t::duration{Period.Data}), durationToSeconds(Toc.Data - Tic.Data));
+    PeriodStats.Update(durationToSeconds(Period.Data), durationToSeconds(Toc.Data - Tic.Data));
 
     Write(TocId, Toc);
     // now increment the IndexWriter and set its Tick value
