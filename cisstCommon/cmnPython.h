@@ -27,7 +27,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _cmnPython_h
 
 #include <cisstCommon/cmnGenericObject.h>
-#include <cisstCommon/cmnGenericObjectProxy.h>
 #include <cisstCommon/cmnObjectRegister.h>
 #include <cisstCommon/cmnClassServicesBase.h>
 #include <cisstCommon/cmnClassRegister.h>
