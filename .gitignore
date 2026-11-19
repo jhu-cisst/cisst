@@ -48,3 +48,6 @@ build.log
 *.aux
 *.log
 *.toc
+
+# Editor config
+.vscode/

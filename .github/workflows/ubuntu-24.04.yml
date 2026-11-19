@@ -90,7 +90,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCISST_QT_VERSION=${{ matrix.qt_version }} \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -C ../.github/workflows/cmake-ubuntu-cache.cmake
 
     - name: Build
@@ -107,7 +107,7 @@ jobs:
           -DCISST_cisstCommon_EXAMPLES=ON \
           -DCISST_cisstOSAbstraction_EXAMPLES=ON \
           -DCISST_cisstMultiTask_EXAMPLES=ON \
-          -DCISST_cisstParameterTypes_EXAMPLES=ON \
+          -DCISST_cisstParameterTypes_EXAMPLES=ON
 
     - name: Build examples
       working-directory: build
