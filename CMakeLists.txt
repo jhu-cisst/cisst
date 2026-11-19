@@ -354,14 +354,19 @@ include_directories (${CISST_INCLUDE_DIR})
 
 # Build test driver if needed
 if (CISST_BUILD_TESTS)
+  message(INFO AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA)
   if (CISST_USE_EXTERNAL)
+    message(INFO BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBb)
     find_package (CppUnit MODULE QUIET)
   else ()
+    message(INFO CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC)
     find_package (CppUnit MODULE REQUIRED)
   endif ()
   if (NOT CPPUNIT_FOUND)
+    message(INFO DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDd)
     # Try to build as external project
     if (CISST_USE_EXTERNAL)
+    message(INFO EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE)
       include (ExternalProject)
       set (cisstCppUnit_PREFIX cisstCppUnitExternal)
       set (CISST_CPPUNIT_GIT_REPOSITORY https://github.com/jhu-cisst-external/cppunit.git)
@@ -386,6 +391,7 @@ if (CISST_BUILD_TESTS)
       set (CPPUNIT_LINK_DIR "${CMAKE_CURRENT_BINARY_DIR}/${cisstCppUnit_PREFIX}/src/cisstCppUnit-build")
       link_directories (${CPPUNIT_LINK_DIR})
       if (NOT TARGET CppUnit::CppUnit)
+        message(INFO FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFf)
         add_library (CppUnit::CppUnit INTERFACE IMPORTED)
         set_target_properties (CppUnit::CppUnit PROPERTIES
                                INTERFACE_INCLUDE_DIRECTORIES "${CPPUNIT_INCLUDE_DIR}"
