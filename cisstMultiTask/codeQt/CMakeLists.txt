@@ -106,7 +106,9 @@ if (CISST_HAS_QTNODES)
       target_include_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_INCLUDE_DIRS})
     endif ()
     if (GRAPHVIZ_LIBRARY_DIRS)
-      target_link_directories (cisstMultiTaskQt PRIVATE ${GRAPHVIZ_LIBRARY_DIRS})
+        target_link_directories (cisstMultiTaskQt PUBLIC
+          $<BUILD_INTERFACE:${GRAPHVIZ_LIBRARY_DIRS}>
+        )
     endif ()
     target_link_libraries (cisstMultiTaskQt $<BUILD_INTERFACE:${GRAPHVIZ_LIBRARIES}>)
   endif ()
