@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorEvent.h>
 #include <cisstMultiTask/mtsCollectorState.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include <components/sineTask.h>
 

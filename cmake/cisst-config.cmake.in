@@ -234,14 +234,16 @@ if (CISST_HAS_QT)
     endforeach ()
     unset (_cisst_qt_component)
 
-    find_file (_cisstQtTargets_file
-               cisst-qt-targets.cmake
-               PATHS ${CISST_CMAKE_DIRS} ${CISST_BINARY_DIR}
-               NO_DEFAULT_PATH)
-    if (EXISTS ${_cisstQtTargets_file})
-      include (${_cisstQtTargets_file})
+    if (NOT TARGET cisst::cisstCommonQt)
+      find_file (_cisstQtTargets_file
+                 cisst-qt-targets.cmake
+                 PATHS ${CISST_CMAKE_DIRS} ${CISST_BINARY_DIR}
+                 NO_DEFAULT_PATH)
+      if (EXISTS ${_cisstQtTargets_file})
+        include (${_cisstQtTargets_file})
+      endif ()
+      unset (_cisstQtTargets_file CACHE)
     endif ()
-    unset (_cisstQtTargets_file CACHE)
   endif ()
   unset (_cisst_needs_qt)
 endif ()

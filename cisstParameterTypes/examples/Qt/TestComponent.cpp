@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <thread>
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 using namespace std::chrono_literals;
 

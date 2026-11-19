@@ -22,6 +22,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // include what is needed from cisst
 #include <cisstOSAbstraction/osaSerialPort.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 // system includes
 #include <iostream>

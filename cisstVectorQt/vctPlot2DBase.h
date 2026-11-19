@@ -163,6 +163,10 @@ public:
 
         Scale(const std::string & name);
 
+        // Explicitly delete copy ctor so MSVC dllexport doesn't complain
+        Scale(const Scale &) = delete;
+        Scale & operator=(const Scale &) = delete;
+
         const std::string & GetName(void) const;
 
         vctPlot2DBase::Signal * AddSignal(const std::string & name);
@@ -283,6 +287,10 @@ public:
     }
 
     vctPlot2DBase();
+
+    // Explicitly delete copy ctor so MSVC dllexport doesn't complain
+    vctPlot2DBase(const vctPlot2DBase &) = delete;
+    vctPlot2DBase & operator=(const vctPlot2DBase &) = delete;
 
     /*! Set the number of points for all signals. */
     void SetNumberOfPoints(size_t numberOfPoints);

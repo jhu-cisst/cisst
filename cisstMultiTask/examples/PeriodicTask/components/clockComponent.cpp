@@ -48,5 +48,5 @@ void clockComponent::SetupInterfaces(void)
 
 void clockComponent::GetTime(mtsDouble & time) const
 {
-    time = Timer.GetElapsedTime(); // get the time since started
+    time = durationToSeconds(Timer.GetElapsedTime()); // get the time since started
 }

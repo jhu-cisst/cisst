@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnLogger.h>
 #include <cisstCommon/cmnUnits.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaSocketServer.h>
 
 using namespace std::chrono_literals;

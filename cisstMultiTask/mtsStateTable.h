@@ -378,7 +378,6 @@ public:
         return StateVectorElements[id]; // WEIRD??? TODO BB: why does it say weird?
     }
 
-
     mtsGenericObject * GetStateVectorElement(size_t id) const {
         return StateVectorElements[id];
     }
