@@ -100,7 +100,7 @@ jobs:
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
           -DVCPKG_MANIFEST_INSTALL=OFF ^
-          -Dcisst_DIR="${{github.workspace}}/build" ^
+          -Dcisst_DIR="${{github.workspace}}/build"
         cmake --build test_export_build_tree_build --config Release --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Install cisst
@@ -114,7 +114,7 @@ jobs:
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
           -DVCPKG_MANIFEST_INSTALL=OFF ^
-          -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.5/cmake" ^
+          -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.5/cmake"
         cmake --build test_export_install_tree_build --config Release --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Test downstream package discovery
