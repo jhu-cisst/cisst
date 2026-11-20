@@ -225,11 +225,6 @@ protected:
     */
     static bool SetLogMaskClass(const std::string & className, cmnLogMask mask);
 
-    static inline bool CISST_DEPRECATED SetLoD(const std::string & className, cmnLogMask mask) {
-        return SetLogMaskClass(className, mask);
-    }
-
-
     /*! The SetLogMaskClassAll method allows the user to specify the
       log mask for all registered classes.
 
@@ -241,11 +236,6 @@ protected:
     static inline bool SetLogMaskClassAll(cmnLogMask mask) {
         return Instance()->SetLogMaskClassAllInstance(mask);
     }
-
-    static inline bool CISST_DEPRECATED SetLoDForAllClasses(cmnLogMask mask) {
-        return SetLogMaskClassAll(mask);
-    }
-
 
     /*! The SetLogMaskClassMatching method allows the user to specify
       the log mask for all classes with a name matching a given
@@ -260,11 +250,6 @@ protected:
     static inline bool SetLogMaskClassMatching(const std::string & stringToMatch, cmnLogMask mask) {
         return Instance()->SetLogMaskClassMatchingInstance(stringToMatch, mask);
     }
-
-    static inline bool CISST_DEPRECATED SetLoDForMatchingClasses(const std::string & stringToMatch, cmnLogMask mask) {
-        return Instance()->SetLogMaskClassMatching(stringToMatch, mask);
-    }
-
 
     /*! Get the class services by name. Returns null if the class is
       not registered.

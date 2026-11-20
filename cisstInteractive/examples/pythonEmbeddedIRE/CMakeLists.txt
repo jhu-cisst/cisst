@@ -15,8 +15,6 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask ciss
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND AND CISST_HAS_PYTHON)
-  message (WARNING "pythonEmbeddedIRE example has not been migrated to pybind11 yet.")
-
   # Create SineGenerator as a shared library
   add_library (SineGenerator SHARED SineGenerator.cpp SineGenerator.h)
   set_property (TARGET SineGenerator PROPERTY FOLDER "cisstInteractive/examples")
@@ -28,17 +26,10 @@ if (cisst_FOUND AND CISST_HAS_PYTHON)
   #  mark_as_advanced (EXAMPLE_IRE_USE_OSATHREAD)
   #endif (CISST_cisstOSAbstraction)
 
-  # Allow generated c++ code to find header files
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR})
-
-  # To link with build libraries
-  link_directories (${CMAKE_CURRENT_BINARY_DIR})
-
-  # Run SWIG on the interface file
-  cisst_add_swig_module (MODULE SineGenerator
-                         INTERFACE_FILENAME SineGeneratorPython.i
-                         FOLDER "cisstMultiTask/examples"
-                         MODULE_LINK_LIBRARIES SineGenerator)
+  cisst_add_pybind11_module (MODULE SineGeneratorPython
+                             SOURCES SineGeneratorPybind.cpp
+                             FOLDER "cisstInteractive/examples"
+                             MODULE_LINK_LIBRARIES SineGenerator)
 
   add_executable (pythonEmbeddedIRE pythonEmbeddedIRE.cpp)
   set_property (TARGET pythonEmbeddedIRE PROPERTY FOLDER "cisstInteractive/examples")
@@ -78,5 +69,5 @@ if (cisst_FOUND AND CISST_HAS_PYTHON)
                       COMMENT "Copy of pythonEmbeddedIRE.py to the library directory")
 
 else ()
-  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES} and cisst Python/SWIG support")
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES} and cisst pybind11 support")
 endif ()

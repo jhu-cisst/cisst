@@ -98,11 +98,11 @@ void mtsQueueTest::TestQueue_mtsDouble(void)
 void mtsQueueTest::TestConstructorDestructorCalls(void)
 {
     // reset all counters
-    mtsMacrosTestClassB::ResetAllCounters();
-    mtsMacrosTestClassBProxy original;
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DefaultConstructorCalls, static_cast<size_t>(1));
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::CopyConstructorCalls, static_cast<size_t>(0));
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DestructorCalls, static_cast<size_t>(0));
+    mtsMacrosTestClass::ResetAllCounters();
+    mtsMacrosTestClass original;
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DefaultConstructorCalls, static_cast<size_t>(1));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::CopyConstructorCalls, static_cast<size_t>(0));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DestructorCalls, static_cast<size_t>(0));
 
     // test default constructor
     mtsQueueGeneric * queue = new mtsQueueGeneric;
@@ -110,14 +110,14 @@ void mtsQueueTest::TestConstructorDestructorCalls(void)
     // test constructor call when set size
     const size_t size = 100;
     size_t index;
-    mtsMacrosTestClassB::ResetAllCounters();
+    mtsMacrosTestClass::ResetAllCounters();
     queue->SetSize(size, original);
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DefaultConstructorCalls, static_cast<size_t>(0));
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::CopyConstructorCalls, size + 1);
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DestructorCalls, static_cast<size_t>(0));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DefaultConstructorCalls, static_cast<size_t>(0));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::CopyConstructorCalls, size + 1);
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DestructorCalls, static_cast<size_t>(0));
 
     // test a couple of Put and Get
-    mtsMacrosTestClassB::ResetAllCounters();
+    mtsMacrosTestClass::ResetAllCounters();
     for (index = 0; index < size; index++) {
         CPPUNIT_ASSERT(queue->Put(original));
     }
@@ -126,22 +126,22 @@ void mtsQueueTest::TestConstructorDestructorCalls(void)
         basePointer = queue->Get();
         CPPUNIT_ASSERT(basePointer);
     }
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DefaultConstructorCalls, static_cast<size_t>(0));
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::CopyConstructorCalls, size);
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DestructorCalls, static_cast<size_t>(100));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DefaultConstructorCalls, static_cast<size_t>(0));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::CopyConstructorCalls, size);
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DestructorCalls, static_cast<size_t>(100));
 
     // test resize
-    mtsMacrosTestClassB::ResetAllCounters();
+    mtsMacrosTestClass::ResetAllCounters();
     queue->SetSize(size * 2, original);
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DefaultConstructorCalls, static_cast<size_t>(0));
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::CopyConstructorCalls, 2 * size + 1);
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DestructorCalls, size + 1);
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DefaultConstructorCalls, static_cast<size_t>(0));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::CopyConstructorCalls, 2 * size + 1);
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DestructorCalls, size + 1);
 
 
     // test final delete
-    mtsMacrosTestClassB::ResetAllCounters();
+    mtsMacrosTestClass::ResetAllCounters();
     delete queue;
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DefaultConstructorCalls, static_cast<size_t>(0));
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::CopyConstructorCalls, static_cast<size_t>(0));
-    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClassB::DestructorCalls, 2 * size + 1);
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DefaultConstructorCalls, static_cast<size_t>(0));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::CopyConstructorCalls, static_cast<size_t>(0));
+    CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DestructorCalls, 2 * size + 1);
 }

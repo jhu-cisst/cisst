@@ -26,60 +26,53 @@ http://www.cisst.org/cisst/license.txt.
 // Always include last
 #include "mtsTestExport.h"
 
-class CISST_EXPORT mtsMacrosTestClassA: public mtsGenericObject
+
+class CISST_EXPORT mtsMacrosTestClass: public mtsGenericObject
 {
+protected:
     CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, 5);
     CMN_DECLARE_MEMBER_AND_ACCESSORS(double, Value);
-};
 
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsMacrosTestClassA);
-
-
-class CISST_EXPORT mtsMacrosTestClassB
-{
 public:
     static size_t DefaultConstructorCalls;
     static size_t DestructorCalls;
     static size_t CopyConstructorCalls;
 
-    mtsMacrosTestClassB(void);
+    mtsMacrosTestClass();
+    mtsMacrosTestClass(const mtsMacrosTestClass & other);
 
-    mtsMacrosTestClassB(const mtsMacrosTestClassB & other);
-
-    ~mtsMacrosTestClassB();
+    ~mtsMacrosTestClass();
 
     static void ResetAllCounters(void);
 
-    double Value;
-
     /*! To stream human readable output */
-    virtual void ToStream(std::ostream & outputStream) const {
-        outputStream << this->Value << std::endl;
+    virtual void ToStream(std::ostream & outputStream) const override {
+        outputStream << Value() << std::endl;
     }
 
     /*! Print in machine processable format */
     void ToStreamRaw(std::ostream & outputStream, const char CMN_UNUSED(delimiter) = ' ',
-                     bool headerOnly = false, const std::string & headerPrefix = "") const {
+                     bool headerOnly = false, const std::string & headerPrefix = "") const override
+    {
         if (headerOnly) {
             outputStream << headerPrefix << "value";
         } else {
-            outputStream << Value;
+            outputStream << Value();
         }
     }
 
-    void SerializeRaw(std::ostream & outputStream) const
+    void SerializeRaw(std::ostream & outputStream) const override
     {
-        cmnSerializeRaw(outputStream, this->Value);
+        cmnSerializeRaw(outputStream, Value());
     }
 
-    void DeSerializeRaw(std::istream & inputStream)
+    void DeSerializeRaw(std::istream & inputStream) override
     {
-        cmnDeSerializeRaw(inputStream, this->Value);
+        cmnDeSerializeRaw(inputStream, Value());
     }
 
 };
 
-MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(mtsMacrosTestClassB, mtsMacrosTestClassBProxy);
-
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsMacrosTestClass);
 
 #endif // _mtsMacrosTestClasses_h

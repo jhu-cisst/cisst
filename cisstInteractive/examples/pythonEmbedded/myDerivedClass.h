@@ -48,12 +48,12 @@ public:
 
     myDerivedClass(void);
 
-    virtual ~myDerivedClass() {}
+    virtual ~myDerivedClass() = default;
 
     inline virtual void CommonMethod(void) {
         std::cout << "CommonMethod from derived (+= 5.0)" << std::endl;
-        this->FixedSizeVectorMember += 5.0;
-        this->DynamicVectorMember += 5.0;
+        this->FixedSizeVectorMember.array() += 5.0;
+        this->DynamicVectorMember.array() += 5.0;
     }
 
     inline Eigen::Vector3d& FixedSizeVector(void) {

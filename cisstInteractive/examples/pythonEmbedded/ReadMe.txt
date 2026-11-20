@@ -12,11 +12,8 @@ user can get a handle on any registered object and modify them.  He
 can also create new objects and register them to share them with the
 C++ code.
 
-This example relies on the cisst object register (cmnObjectRegister)
-as well as the class register (cmnClassRegister) to find the class
-type to return.  The wrapping of the C++ code is performed by SWIG.
-An interesting feature of this example is the use of the method
-cmnObjectRegisterGet added in cisstCommon.i which cast the pointer on
-the base class (cmnGenericObject) to whatever is the actual class of
-the object (e.g. myDerivedClass).
+This example uses the cisst object register (cmnObjectRegister) to share
+C++ objects with Python. The C++ classes are exposed with pybind11, including
+their inheritance from cmnGenericObject, so FindObject can return the concrete
+dynamic type (e.g. myDerivedClass) to Python.
 

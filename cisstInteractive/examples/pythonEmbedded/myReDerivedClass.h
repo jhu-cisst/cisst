@@ -42,16 +42,16 @@ class CISST_EXPORT myReDerivedClass: public myDerivedClass {
     
     inline ~myReDerivedClass() {}
 
-    inline void CommonMethod(void) {
+    void CommonMethod(void) override {
         std::cout << "CommonMethod from derived (+= 10.0)" << std::endl;
-        this->FixedSizeVectorMember += 10.0;
-        this->DynamicVectorMember += 10.0;
+        this->FixedSizeVectorMember.array() += 10.0;
+        this->DynamicVectorMember.array() += 10.0;
     }
 
     inline void DerivedMethod(void) {
         std::cout << "DerivedMethod (+= 20.0)" << std::endl;
-        this->FixedSizeVectorMember += 20.0;
-        this->DynamicVectorMember += 20.0;
+        this->FixedSizeVectorMember.array() += 20.0;
+        this->DynamicVectorMember.array() += 20.0;
     }
 };
 

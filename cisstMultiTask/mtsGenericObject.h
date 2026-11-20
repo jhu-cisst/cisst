@@ -24,12 +24,11 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsGenericObject_h
 #define _mtsGenericObject_h
 
+#include <cisstCommon/cmnAccessorMacros.h>
 #include <cisstCommon/cmnGenericObject.h>
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnSerializer.h>
 #include <cisstCommon/cmnDeSerializer.h>
-
-#include <cisstMultiTask/mtsMacros.h>
 
 #if CISST_HAS_JSON
 #include <cisstCommon/cmnDataFunctionsJSON.h>

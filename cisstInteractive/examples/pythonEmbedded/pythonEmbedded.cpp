@@ -34,13 +34,12 @@ int main(void) {
     std::cout << "*** Start" << std::endl;
     std::cout << "*** List of registered classes: " << cmnClassRegister::ToString() << std::endl;
     myDerivedClass derived1;
-    derived1.FixedSizeVector().SetAll(10);
-    derived1.DynamicVector().SetSize(5);
-    derived1.DynamicVector().SetAll(-10);
+    derived1.FixedSizeVector().fill(10);
+    derived1.DynamicVector() = Eigen::VectorXd::Constant(5, -10);
     std::cout << "*** Fixed size vector of derived1 before python: " << derived1.FixedSizeVector() << std::endl;
     
     myReDerivedClass rederived1;
-    rederived1.FixedSizeVector().SetAll(1000);
+    rederived1.FixedSizeVector().fill(1000);
     
     cmnObjectRegister::Register("derived1", &derived1);
     cmnObjectRegister::Register("rederived1", &rederived1);
@@ -57,14 +56,14 @@ int main(void) {
               << ptr << std::endl;
     std::cout << "*** List from C: " << cmnObjectRegister::ToString() << std::endl;
 
-    std::string cisstRoot;
+    std::filesystem::path cisstRoot;
     if (!cmnSearchPath::GetCisstRoot(cisstRoot)) {
         std::cout << "Can't find environment variable CISST_ROOT" << std::endl;
         exit(0);
     }
     Py_Initialize();
     PyRun_SimpleString("import sys; sys.path.append(\".\");");
-    std::string command = std::string("sys.path.append(\"") +  cisstRoot + "/lib\");";
+    std::string command = std::string("sys.path.append(\"") + pathToUTF8(cisstRoot) + "/lib\");";
     std::cout << "*** Path for cisst libraries: " << cisstRoot << std::endl;
     PyRun_SimpleString(const_cast<char*>(command.c_str()));
 #if (CISST_OS == CISST_WINDOWS)
@@ -78,13 +77,9 @@ int main(void) {
     PyRun_SimpleString(const_cast<char*>(command.c_str()));
 #endif
 
-    std::cout << "*** Import cisstCommonPython and cisstVectorPython" << std::endl;
+    std::cout << "*** Import cisstCommonPython" << std::endl;
     if (PyRun_SimpleString("import cisstCommonPython as cisstCommon") != 0) {
         std::cout << "Failed importing cisstCommonPython!" << std::endl;
-        exit(0);
-    }
-    if (PyRun_SimpleString("import cisstVectorPython as cisstVector") != 0) {
-        std::cout << "Failed importing cisstVectorPython!" << std::endl;
         exit(0);
     }
 
@@ -107,8 +102,8 @@ int main(void) {
     bool FileFound = true;
     FILE * fp = NULL;
     cmnSearchPath path;
-    path.AddRelativeToCisstRoot("/bin");
-    std::string fullName = path.Find("pythonEmbedded.py");
+    path.AddRelativeToCisstRoot(std::string("bin"));
+    std::string fullName = path.Find(std::string("pythonEmbedded.py"));
     if (fullName == "") {
         std::cout << "*** Can't find file \"pythonEmbedded.py\" in path " << path << std::endl;
         FileFound = false;

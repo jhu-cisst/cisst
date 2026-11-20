@@ -701,16 +701,6 @@ bool mtsManagerLocal::AddComponent(mtsComponent * component)
     return GetManagerComponentServices()->ComponentAdd(component);
 }
 
-bool CISST_DEPRECATED mtsManagerLocal::AddTask(mtsTask * component)
-{
-    return AddComponent(component);
-}
-
-bool CISST_DEPRECATED mtsManagerLocal::AddDevice(mtsComponent * component)
-{
-    return AddComponent(component);
-}
-
 bool mtsManagerLocal::RemoveComponent(mtsComponent * component)
 {
     return GetManagerComponentServices()->ComponentRemove(component);
