@@ -1,9 +1,8 @@
 name: Windows Latest
 
 on:
-  # Build pushes to the main and development branches.
   push:
-    branches: [ main, devel ]
+    branches: [ main, devel, cisst2 ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
