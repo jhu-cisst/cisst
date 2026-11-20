@@ -73,7 +73,9 @@ find_file (CISST_USE_FILE
            PATHS ${CISST_CMAKE_DIRS}
            NO_DEFAULT_PATH)
 
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CISST_CMAKE_DIRS})
+foreach (_cisst_cmake_dir ${CISST_CMAKE_DIRS})
+  list (APPEND CMAKE_MODULE_PATH "${_cisst_cmake_dir}" "${_cisst_cmake_dir}/Modules")
+endforeach ()
 include (CMakeFindDependencyMacro)
 include (cisstMacros)
 include_directories (${CISST_INCLUDE_DIR})
