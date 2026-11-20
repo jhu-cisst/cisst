@@ -383,12 +383,12 @@ inline bool cmnTypeTraits<unsigned char>::HasInfinity(void) {
 /* Define IsFinite for some basic types */
 template<>
 inline bool cmnTypeTraits<float>::IsFinite(const float & value) {
-    return cmnIsFinite(value);
+    return std::isfinite(value);
 }
 
 template<>
 inline bool cmnTypeTraits<double>::IsFinite(const double & value) {
-    return cmnIsFinite(value);
+    return std::isfinite(value);
 }
 
 template<>
@@ -506,12 +506,12 @@ inline bool cmnTypeTraits<unsigned char>::HasNaN(void) {
 /* Define IsNaN for some basic types */
 template<>
 inline bool cmnTypeTraits<float>::IsNaN(const float & value) {
-    return CMN_ISNAN(value);
+    return std::isnan(value);
 }
 
 template<>
 inline bool cmnTypeTraits<double>::IsNaN(const double & value) {
-    return CMN_ISNAN(value);
+    return std::isnan(value);
 }
 
 template<>

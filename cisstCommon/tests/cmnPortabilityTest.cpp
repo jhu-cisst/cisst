@@ -120,34 +120,6 @@ void cmnPortabilityTest::TestWithCMake(void) {
 }
 
 
-void cmnPortabilityTest::TestCMN_ISNAN(void) {
-    // a normal number
-    double x = 20.0;
-    CPPUNIT_ASSERT(!CMN_ISNAN(x));
-
-    // inf/inf gives nan
-    x /= Zero;
-    double y = x;
-    CPPUNIT_ASSERT(CMN_ISNAN(x / y));
-}
-
-
-void cmnPortabilityTest::TestCMN_ISFINITE(void) {
-    // a normal number
-    double x = 20.0;
-    CPPUNIT_ASSERT(CMN_ISFINITE(x));
-
-    // +inf
-    x /= Zero;
-    CPPUNIT_ASSERT(!CMN_ISFINITE(x));
-
-    // -inf
-    x = -20.0;
-    x /= Zero;
-    CPPUNIT_ASSERT(!CMN_ISFINITE(x));
-}
-
-
 void cmnPortabilityTest::TestDataModel(void) {
 #if (CISST_DATA_MODEL == CISST_ILP32)
     cout << std::endl << "Cisst data model: ILP32" << std::endl;

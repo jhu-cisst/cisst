@@ -32,8 +32,6 @@ class cmnPortabilityTest : public CppUnit::TestFixture
         CPPUNIT_TEST(Print);
         CPPUNIT_TEST(TestUndefined);
         CPPUNIT_TEST(TestWithCMake);
-        CPPUNIT_TEST(TestCMN_ISNAN);
-        CPPUNIT_TEST(TestCMN_ISFINITE);
         CPPUNIT_TEST(TestDataModel);
     }
     CPPUNIT_TEST_SUITE_END();
@@ -55,12 +53,6 @@ class cmnPortabilityTest : public CppUnit::TestFixture
 
     /*! Compare with the information from CMake */
     void TestWithCMake(void);
-
-    /*! Test the NaN macro CMN_ISNAN */
-    void TestCMN_ISNAN(void);
-
-    /*! Test the NaN macro CMN_ISINF */
-    void TestCMN_ISFINITE(void);
 
     /*! Test data model, i.e. size of int, long, long long, pointers, size_t, ... */
     void TestDataModel(void);

@@ -68,7 +68,7 @@ int main (void) {
     std::cin >> zero;
     double infinite = 1.0 / zero;
     double nan = infinite / infinite;
-    if ((!CMN_ISFINITE(infinite)) && (CMN_ISNAN(nan))) {
+    if (!std::isfinite(infinite) && std::isnan(nan)) {
         std::cout << "Thank you, an infinite double looks like \""
                   << infinite << "\" and a NaN like \""
                   << nan << "\"" << std::endl;
