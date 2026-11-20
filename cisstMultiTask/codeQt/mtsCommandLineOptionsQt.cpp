@@ -34,8 +34,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <string>
 
 mtsCommandLineOptionsQt::mtsCommandLineOptionsQt(const std::string & options):
-    mtsCommandLineOptions(options)
+    mtsCommandLineOptions(options),
+    QtZoom(options.find('Z') != std::string::npos)
 {
+    if (options.find('Z') != std::string::npos) {
+        this->AddOptionOneValue("Z", "qt-zoom",
+                                "enable Ctrl++/Ctrl+-/Ctrl+0 and Ctrl+mouse-wheel font zoom (true/false, default true)",
+                                cmnCommandLineOptions::OPTIONAL_OPTION, &QtZoom);
+    }
     if (options.find('D') != std::string::npos) {
         this->AddOptionNoValue("D", "dark-mode",
                                "replaces the default Qt palette with darker colors");
@@ -61,6 +67,7 @@ void mtsCommandLineOptionsQt::Apply(void)
 {
     mtsCommandLineOptions::Apply();
     cmnQt::QApplicationExitsOnCtrlC();
+    cmnQt::EnableFontZoom(QtZoom);
     if (this->IsSet("dark-mode")) {
         cmnQt::SetDarkMode();
     }

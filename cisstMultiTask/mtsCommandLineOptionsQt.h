@@ -25,11 +25,14 @@ http://www.cisst.org/cisst/license.txt.
 
 class CISST_EXPORT mtsCommandLineOptionsQt: public mtsCommandLineOptions {
 public:
-    mtsCommandLineOptionsQt(const std::string & options = "mcDSMW");
+    /*! Include 'Z' to offer --qt-zoom true/false (enabled by default).
+        Omitting 'Z' from a custom option list disables font zoom in Apply. */
+    mtsCommandLineOptionsQt(const std::string & options = "mcDSMWZ");
     ~mtsCommandLineOptionsQt() override {}
     void Apply(void) override;
 
     std::string QtStyle;
+    bool QtZoom;
 #if CISST_HAS_QTNODES
     bool ComponentViewer;
 #endif

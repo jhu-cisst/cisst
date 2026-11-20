@@ -29,6 +29,11 @@ http://www.cisst.org/cisst/license.txt.
 namespace cmnQt {
     void CISST_EXPORT QApplicationExitsOnCtrlC(void);
 
+    /*! Enable Ctrl++/Ctrl+-/Ctrl+0 and Ctrl+wheel font zoom for all widget
+        windows. Each window has independent zoom state. Call on the GUI thread
+        after constructing QApplication. Disabling preserves the current zoom. */
+    void CISST_EXPORT EnableFontZoom(bool enable = true);
+
     void CISST_EXPORT SetDarkMode(void);
 
     std::string CISST_EXPORT SetStyle(const std::string & qtStyle);
