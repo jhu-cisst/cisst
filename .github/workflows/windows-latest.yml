@@ -20,6 +20,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Set up vcpkg at the manifest baseline
+      shell: pwsh
+      run: |
+        $manifestPath = Join-Path $env:GITHUB_WORKSPACE "vcpkg.json"
+        $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+        $baseline = $manifest.'builtin-baseline'
+        if (-not $baseline) { throw "builtin-baseline is missing from $manifestPath" }
+
+        git -C $env:VCPKG_INSTALLATION_ROOT fetch --no-tags https://github.com/microsoft/vcpkg.git $baseline
+        if ($LASTEXITCODE -ne 0) { throw "Failed to fetch vcpkg baseline commit $baseline" }
+
+        git -C $env:VCPKG_INSTALLATION_ROOT checkout --detach $baseline
+        if ($LASTEXITCODE -ne 0) { throw "Failed to check out vcpkg baseline commit $baseline" }
+
+        & (Join-Path $env:VCPKG_INSTALLATION_ROOT "bootstrap-vcpkg.bat") -disableMetrics
+        if ($LASTEXITCODE -ne 0) { throw "Failed to bootstrap vcpkg at commit $baseline" }
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -66,20 +83,6 @@ jobs:
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', '.github/workflows/vcpkg-triplets/**') }}-${{ steps.toolchain-versions.outputs.vcpkg }}-${{ steps.toolchain-versions.outputs.msvc }}
         restore-keys: |
           ${{ runner.os }}-vcpkg-
-
-    - name: Fetch vcpkg baseline commit
-      shell: pwsh
-      run: |
-        $manifestPath = Join-Path $env:GITHUB_WORKSPACE "vcpkg.json"
-        $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-        $baseline = $manifest.'builtin-baseline'
-        if (-not $baseline) { throw "builtin-baseline is missing from $manifestPath" }
-
-        git -C $env:VCPKG_INSTALLATION_ROOT fetch --no-tags https://github.com/microsoft/vcpkg.git $baseline
-        if ($LASTEXITCODE -ne 0) { throw "Failed to fetch vcpkg baseline commit $baseline" }
-
-        git -C $env:VCPKG_INSTALLATION_ROOT cat-file -e "${baseline}:versions/baseline.json"
-        if ($LASTEXITCODE -ne 0) { throw "Fetched vcpkg commit $baseline does not contain versions/baseline.json" }
 
     - name: Install dependencies via vcpkg
       shell: pwsh
