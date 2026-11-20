@@ -131,7 +131,7 @@ jobs:
               "-Dcisst_DIR=$($packages[$tree])", "-DMODE=$mode",
               "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake",
               "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed",
-              '-DVCPKG_MANIFEST_INSTALL=OFF', '-DCMAKE_DISABLE_FIND_PACKAGE_SWIG=ON',
+              '-DVCPKG_MANIFEST_INSTALL=OFF', '-DCMAKE_DISABLE_FIND_PACKAGE_SWIG=ON'
             )
             if ($mode -eq 'core') {
               $options += '-DCMAKE_DISABLE_FIND_PACKAGE_Qt5=ON', '-DCMAKE_DISABLE_FIND_PACKAGE_Qt6=ON'
