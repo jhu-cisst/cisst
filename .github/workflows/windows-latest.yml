@@ -31,8 +31,14 @@ jobs:
       id: toolchain-versions
       shell: pwsh
       run: |
-        $vcpkgVersion = (& C:\vcpkg\vcpkg.exe version | Select-Object -First 1) -replace '^vcpkg package management program version ', ''
-        if ($LASTEXITCODE -ne 0 -or -not $vcpkgVersion) { throw "Unable to determine vcpkg version" }
+        $vcpkgExe = Join-Path $env:VCPKG_INSTALLATION_ROOT "vcpkg.exe"
+        if (-not (Test-Path -LiteralPath $vcpkgExe)) { throw "vcpkg executable not found: $vcpkgExe" }
+        $vcpkgVersionOutput = & $vcpkgExe version 2>&1
+        $vcpkgExitCode = $LASTEXITCODE
+        if ($vcpkgExitCode -ne 0) { throw "vcpkg version command failed ($vcpkgExitCode): $($vcpkgVersionOutput -join ' ')" }
+        $versionMatch = [regex]::Match(($vcpkgVersionOutput -join ' '), '(?i)\bversion\s+([^\s]+)')
+        if (-not $versionMatch.Success) { throw "Unable to parse vcpkg version output: $($vcpkgVersionOutput -join ' ')" }
+        $vcpkgVersion = $versionMatch.Groups[1].Value
 
         $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
         $vsPath = & $vswhere -latest -products '*' -property installationPath
