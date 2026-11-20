@@ -36,6 +36,7 @@ class cmnCommandLineOptionsTest : public CppUnit::TestFixture
         CPPUNIT_TEST(TestRepeatedOptions);
         CPPUNIT_TEST(TestIsSet);
         CPPUNIT_TEST(TestMultipleValues);
+        CPPUNIT_TEST(TestBooleanValues);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -54,6 +55,7 @@ class cmnCommandLineOptionsTest : public CppUnit::TestFixture
     void TestRepeatedOptions(void);
     void TestIsSet(void);
     void TestMultipleValues(void);
+    void TestBooleanValues(void);
 };
 
 
