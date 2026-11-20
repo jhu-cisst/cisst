@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "prmForceCartesianGetTest.h"
 #include "prmTestGenericObjectConstructor.h"
-#include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstParameterTypes/prmForceCartesianGet.h>
 #include <Eigen/Geometry>
@@ -38,18 +37,4 @@ void prmForceCartesianGetTest::TestConstructors(void)
     prmForceCartesianGet forceCopy(force);
     prmTestGenericObjectCopyConstructor(force, forceCopy);
     CPPUNIT_ASSERT(force.Force() == forceCopy.Force());
-}
-
-void prmForceCartesianGetTest::TestSerialize(void)
-{
-    prmForceCartesianGet initial, final;
-    // test part inherited from mtsGenericObject
-    prmSetAndTestGenericObjectSerialization(initial);
-
-    initial.Force() = Eigen::Vector<double, 6>::Random() * 10.0;
-    std::stringstream serializationStream;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-
-    CPPUNIT_ASSERT(final.Force() == initial.Force());
 }

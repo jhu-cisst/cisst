@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstCommon/cmnUnits.h>
+#include <thread>
 
 
 void * mtsTaskContinuous::RunInternal(void *data)
@@ -60,7 +61,7 @@ void * mtsTaskContinuous::RunInternal(void *data)
 
 void mtsTaskContinuous::StartInternal(void)
 {
-    Thread.Wakeup();
+    Wakeup();
 }
 
 /********************* Task constructor and destructor *****************/
@@ -90,13 +91,7 @@ mtsTaskContinuous::~mtsTaskContinuous() {
     if (!this->IsTerminated()) {
         Kill();
         WaitToTerminate(1.0 * cmn_s);   // Wait 1 second for it to terminate
-        if (!IsTerminated()) {
-            // If thread not dead, delete it.
-            if (NewThread) {
-                Thread.Delete();
-                CMN_LOG_CLASS_INIT_VERBOSE << "mtsTaskContinuous destructor: Deleting thread for " << this->GetName() << std::endl;
-            }
-        }
+        CMN_LOG_CLASS_RUN_WARNING << "mtsTaskContinuous destructor: thread failed to terminate after 1 second: " << this->GetName() << std::endl;
     }
 }
 
@@ -120,7 +115,7 @@ void mtsTaskContinuous::Create(void *data)
         if (srcTask && srcTask->CheckForOwnThread()) {
             CMN_LOG_CLASS_INIT_VERBOSE << "Create: special case initialization from "
                                        << srcTask->GetName() << std::endl;
-            Thread.CreateFromCurrentThread();
+            ThreadId = std::this_thread::get_id();
             StartupInternal();
         }
     }
@@ -134,11 +129,12 @@ void mtsTaskContinuous::Create(void *data)
         if (NewThread) {
             CMN_LOG_CLASS_INIT_VERBOSE << "Create: creating thread for task " << this->GetName() << std::endl;
             ChangeState(mtsComponentState::INITIALIZING);
-            Thread.Create<mtsTaskContinuous, void*>(this, &mtsTaskContinuous::RunInternal, data);
+            Thread = std::thread([this, data]() { RunInternal(data); });
+            ThreadId = Thread.get_id();
         }
         else {
             CMN_LOG_CLASS_INIT_VERBOSE << "Create: using current thread for task " << this->GetName() << std::endl;
-            Thread.CreateFromCurrentThread();
+            ThreadId = std::this_thread::get_id();
             CaptureThread = true;
             ChangeState(mtsComponentState::INITIALIZING);
             RunInternal(data);
@@ -157,7 +153,7 @@ void mtsTaskContinuous::Start(void)
         CMN_LOG_CLASS_INIT_VERBOSE << "Start: starting task " << this->GetName() << std::endl;
         ChangeState(mtsComponentState::ACTIVE);
         if (CaptureThread) {
-            if (Thread.GetId() != osaGetCurrentThreadId()) {
+            if (Thread.get_id() != std::this_thread::get_id()) {
                 CMN_LOG_CLASS_INIT_ERROR << "Start: cannot start task " << this->GetName() << " (wrong thread)" << std::endl;
                 return;
             }

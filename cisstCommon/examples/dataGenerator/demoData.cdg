@@ -6,11 +6,11 @@
 
 // Inline code that will be placed in the generated header file
 inline-header {
+#include <Eigen/Core>
+#include <cisstCommon/cmnSerializer.h>
+#include <cisstCommon/cmnDeSerializer.h>
 #include <cisstCommon/cmnDataFunctionsArray.h>
-#include <cisstVectorQt/vctFixedSizeVectorTypes.h>
-#include <cisstVectorQt/vctDataFunctionsFixedSizeVector.h>
-#include <cisstVectorQt/vctDynamicVectorTypes.h>
-#include <cisstVectorQt/vctDataFunctionsDynamicVector.h>
+#include <cisstCommon/cmnDataFunctionsEigen.h>
 #include <vector>
 
 // You can place external typedef at the global scope but
@@ -47,11 +47,11 @@ class {
     // The equivalent typedef will be defined in the class scope
     typedef {
         name FixedVectorType;
-        type vctFixedSizeVector<double, 2>;
+        type Eigen::Vector2d;
     }
     typedef {
         name DynamicVectorType;
-        type vctDynamicVector<double>;
+        type Eigen::VectorXd;
     }
 
     // 'member' allows to define a data type
@@ -82,7 +82,7 @@ class {
         description dynamic vector;
         accessors all;
         // 'default' allows to set a default value in the generated constructor!
-        default DynamicVectorType(2, 5); // size 2, all elements initialized to 5
+        default DynamicVectorType::Constant(2, 5); // size 2, all elements initialized to 5
     }
 
     member {

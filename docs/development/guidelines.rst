@@ -10,7 +10,6 @@ Naming conventions
       -  ``cisstInteractive`` uses ``ire``
       -  ``cisstMultiTask`` uses ``mts``
       -  ``cisstParameterTypes`` uses ``prm``
-      -  ``cisstStereoVision`` uses ``svl``
 
    -  Global classes and functions use the lower case library prefix (e.g. ``vctFixedSizeVector``) while constants, enums and macros use the upper case prefix (e.g. ``VCT_ROW_MAJOR``).
 

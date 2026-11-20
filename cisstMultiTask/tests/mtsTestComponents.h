@@ -19,13 +19,14 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsTestComponents_h
 #define _mtsTestComponents_h
 
+#include <Eigen/Core>
+
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <cisstCommon/cmnUnits.h>
 #include <cisstCommon/cmnClassRegisterMacros.h>
 #include <cisstCommon/cmnDataFunctionsEigen.h>
-#include <cisstOSAbstraction/osaSleep.h>
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsTaskFromCallback.h>
@@ -33,6 +34,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
+
+#include <cisstOSAbstraction/osaSleep.h>
 
 // Always include last
 #include "mtsTestExport.h"
@@ -92,7 +95,7 @@ bool TestClassConversion(const mtsTestClassGeneric<_elementType> &input, _elemen
 // For testing state table filtered read using a standard type
 // (not derived from mtsGenericObject)
 template <class _elementType>
-bool TestV3Conversion(const Eigen::Matrix<_elementType, 3, 1> &input, _elementType &output)
+bool TestV3Conversion(const Eigen::Vector<_elementType, 3> &input, _elementType &output)
 {
     output = input.sum();
     return true;
@@ -100,17 +103,6 @@ bool TestV3Conversion(const Eigen::Matrix<_elementType, 3, 1> &input, _elementTy
 
 // Not sure why following is needed
 CMN_DATA_SPECIALIZE_ALL_NO_BYTE_SWAP(mtsInt, mtsI);
-
-namespace Eigen {
-    template <typename T>
-    struct NumTraits<mtsGenericObjectProxy<T> > : NumTraits<T> {
-        enum { RequireInitialization = 1 };
-    };
-}
-
-typedef Eigen::Matrix<mtsInt, 3, 1> vct3mtsInt;
-typedef mtsGenericObjectProxy<vct3mtsInt> mtsVct3mtsInt;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsVct3mtsInt)
 
 //-----------------------------------------------------------------------------
 //  Base class for all test components
@@ -153,7 +145,7 @@ class mtsTestInterfaceProvided: public mtsTestInterfaceProvidedBase
 {
 public:
     typedef _elementType value_type; // STL convention
-    typedef Eigen::Matrix<_elementType, 3, 1> vector3_type;
+    typedef Eigen::Vector<_elementType, 3> vector3_type;
 
 private:
     value_type Value, StateValue;
@@ -175,7 +167,7 @@ public:
         Value = -1;   // initial value = -1;
         StateValue = 0;
         StateValueFilteredGeneric.Init();
-        StateValueFilteredV3.setConstant(0);
+        StateValueFilteredV3.setZero();
         Argument1Prototype = Argument1PrototypeDefault;
         Argument2Prototype = Argument2PrototypeDefault;
     }
@@ -226,7 +218,7 @@ public:
         StateTable->Start();
         StateValue++;
         StateValueFilteredGeneric.Increment();
-        StateValueFilteredV3.setConstant(StateValue);
+        StateValueFilteredV3.fill(StateValue);
         StateTable->Advance();
     }
 
@@ -262,11 +254,6 @@ public:
                                               "StateTableFilteredReadGenericVR");
         provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredGeneric, &TestClassConversion<value_type>,
                                               "StateTableFilteredReadGenericCF");
-#if 0
-        // Compiler fails to deduce template argument
-        provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredV3, &vector3_type::SumOfElements,
-                                              "StateTableFilteredReadV3VR");
-#endif
         provided->AddCommandFilteredReadState(*StateTable, StateValueFilteredV3, &TestV3Conversion<value_type>,
                                               "StateTableFilteredReadV3CF");
         provided->AddCommandVoid(&mtsTestInterfaceProvided::StateTableAdvance,
@@ -374,7 +361,7 @@ public:
 template <class _elementType>
 class CISST_EXPORT mtsTestDevice1: public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
 
     typedef _elementType value_type;
@@ -411,9 +398,6 @@ public:
 
 typedef mtsTestDevice1<int> mtsTestDevice1_int;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_int);
-
-typedef mtsTestDevice1<mtsInt> mtsTestDevice1_mtsInt;
-CMN_DECLARE_SERVICES_INSTANTIATION(mtsTestDevice1_mtsInt);
 
 //-----------------------------------------------------------------------------
 //  Continuous1: (P1:Continuous1:r1 - P2:Continuous1:p2)
@@ -458,7 +442,8 @@ public:
     }
 
     void Run(void) {
-        osaSleep(1.0 * cmn_ms);
+        using namespace std::chrono_literals;
+        osaSleep(1ms);
         ProcessQueuedCommands();
         ProcessQueuedEvents();
     }
@@ -552,34 +537,32 @@ public:
 
 class mtsTestCallbackTrigger
 {
-    osaThread Thread;
     mtsTaskFromCallback * Task;
-    bool Running;
+    std::atomic<bool> Running;
+    std::thread Thread;
+
 public:
     mtsTestCallbackTrigger(mtsTaskFromCallback * task):
         Task(task),
-        Running(true)
-    {
-        Thread.Create<mtsTestCallbackTrigger, int>(this, &mtsTestCallbackTrigger::Run,
-                                                   0, "TstCb");
-    }
+        Running(true),
+        Thread([&](){ return Run(); })
+    { }
 
     ~mtsTestCallbackTrigger() {
-        Thread.Wait();
+        Thread.join();
     }
 
     void Stop(void) {
-        this->Running = false;
+        Running = false;
     }
 
-    void * Run(int CMN_UNUSED(data)) {
-        while (this->Running) {
+    void Run() {
+        while (Running) {
             Task->DoCallback(0);
-            osaSleep(1.0 * cmn_ms);
+
+            using namespace std::chrono_literals;
+            osaSleep(1ms);
         }
-        // stop the thread
-        osaCurrentThreadYield();
-        return 0;
     }
 };
 

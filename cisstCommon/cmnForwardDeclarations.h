@@ -43,7 +43,7 @@ class cmnLODOutputMultiplexer;
 
 class cmnObjectRegister;
 
-class cmnPath;
+class cmnSearchPath;
 
 class cmnSerializer;
 

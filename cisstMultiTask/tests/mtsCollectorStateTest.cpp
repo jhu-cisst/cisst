@@ -21,6 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsCollectorState.h>
+#include <cisstOSAbstraction/osaSleep.h>
 
 #include "mtsTestComponents.h"
 
@@ -111,7 +112,7 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     // now try to stop
     executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking(0.0);
     CPPUNIT_ASSERT(executionResult.IsOK());
-    // see previous comment re. osaSleep
+    // see previous comment re. sleep
     osaSleep(serverExecutionDelay);
     // collection will not send the stop event until the next state table advance
     executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
@@ -120,66 +121,6 @@ void mtsCollectorStateTest::TestExecution(_serverType * server,
     // since we had to do one advance, the collector should send a range event
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->BatchReadyEventCounter);
     CPPUNIT_ASSERT_EQUAL(1u, stateCollectorTestDevice->SamplesCollected);
-
-#if 0
-
-    // now collect 300 elements so we can test replay
-    executionResult = stateCollectorTestDevice->CollectorState.StartCollection.ExecuteBlocking(0.0);
-    CPPUNIT_ASSERT(executionResult.IsOK());
-    // see previous comment re. osaSleep
-    osaSleep(serverExecutionDelay);
-    for (size_t index = 0;
-         index < 300;
-         index++) {
-        executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
-        CPPUNIT_ASSERT(executionResult.IsOK());
-        CPPUNIT_ASSERT(stateCollectorTestDevice->CollectionRunning);
-    }
-    // stop collection
-    executionResult = stateCollectorTestDevice->CollectorState.StopCollection.ExecuteBlocking(0.0);
-    CPPUNIT_ASSERT(executionResult.IsOK());
-    // see previous comment re. osaSleep
-    osaSleep(serverExecutionDelay);
-    // collection will not send the stop event until the next state table advance
-    executionResult = stateCollectorTestDevice->TestComponent.StateTableAdvance.ExecuteBlocking();
-    CPPUNIT_ASSERT(executionResult.IsOK());
-    // since we had to do one advance, the collector should send a range event
-    CPPUNIT_ASSERT_EQUAL(11u, stateCollectorTestDevice->BatchReadyEventCounter);
-    CPPUNIT_ASSERT_EQUAL(300u, stateCollectorTestDevice->SamplesCollected);
-
-    // create a new component of the same type for replay
-    _serverType * replayComponent = new _serverType("replay-component");
-    CPPUNIT_ASSERT(manager->AddComponent(replayComponent));
-    // should fail since we are not in replay mode
-    CPPUNIT_ASSERT(!replayComponent->SetReplayData(stateTableName, filename));
-    CPPUNIT_ASSERT(replayComponent->SetReplayMode());
-    // shouldn't find that "dummy" state table
-    CPPUNIT_ASSERT(!replayComponent->SetReplayData("dummy", filename));
-    std::string dataReplayFile = filename + ".csv";
-    CPPUNIT_ASSERT(replayComponent->SetReplayData(stateTableName, dataReplayFile));
-
-    // create and connect component to read from replay state table
-    typedef typename _serverType::value_type value_type;
-    mtsTestDevice1<value_type> * replayReader = new mtsTestDevice1<value_type>("replay-reader");
-    CPPUNIT_ASSERT(manager->AddComponent(replayReader));
-    CPPUNIT_ASSERT(manager->Connect(replayReader->GetName(), "r1",
-                                    replayComponent->GetName(), "p1"));
-
-    replayComponent->Start();
-    replayReader->Start();
-    replayComponent->Create();
-    replayReader->Create();
-
-    value_type data;
-    for (size_t index = 0;
-         index < 300;
-         index++) {
-        CPPUNIT_ASSERT(replayComponent->InterfaceProvided1.StateTable->ReplayAdvance());
-        replayReader->InterfaceRequired1.FunctionStateTableRead(data);
-        std::cerr << index << " -> " << data << std::endl;
-    }
-
-#endif
 
     // stop all and cleanup
     manager->KillAll();
@@ -207,9 +148,6 @@ void mtsCollectorStateTest::TestDevice(void)
     TestExecution(server, 0.0 /* no execution delay for a device */);
     delete server;
 }
-void mtsCollectorStateTest::TestDevice_mtsInt(void) {
-    mtsCollectorStateTest::TestDevice<mtsInt>();
-}
 void mtsCollectorStateTest::TestDevice_int(void) {
     mtsCollectorStateTest::TestDevice<int>();
 }
@@ -223,9 +161,6 @@ void mtsCollectorStateTest::TestPeriodic(void)
     TestExecution(server, serverExecutionDelay);
     delete server;
 }
-void mtsCollectorStateTest::TestPeriodic_mtsInt(void) {
-    mtsCollectorStateTest::TestPeriodic<mtsInt>();
-}
 void mtsCollectorStateTest::TestPeriodic_int(void) {
     mtsCollectorStateTest::TestPeriodic<int>();
 }
@@ -238,9 +173,6 @@ void mtsCollectorStateTest::TestContinuous(void)
     const double serverExecutionDelay = 0.1 * cmn_s;
     TestExecution(server, serverExecutionDelay);
     delete server;
-}
-void mtsCollectorStateTest::TestContinuous_mtsInt(void) {
-    mtsCollectorStateTest::TestContinuous<mtsInt>();
 }
 void mtsCollectorStateTest::TestContinuous_int(void) {
     mtsCollectorStateTest::TestContinuous<int>();
@@ -258,9 +190,6 @@ void mtsCollectorStateTest::TestFromCallback(void)
     delete serverTrigger;
     delete server;
 }
-void mtsCollectorStateTest::TestFromCallback_mtsInt(void) {
-    mtsCollectorStateTest::TestFromCallback<mtsInt>();
-}
 void mtsCollectorStateTest::TestFromCallback_int(void) {
     mtsCollectorStateTest::TestFromCallback<int>();
 }
@@ -273,9 +202,6 @@ void mtsCollectorStateTest::TestFromSignal(void)
     const double serverExecutionDelay = 0.1 * cmn_s;
     TestExecution(server, serverExecutionDelay);
     delete server;
-}
-void mtsCollectorStateTest::TestFromSignal_mtsInt(void) {
-    mtsCollectorStateTest::TestFromSignal<mtsInt>();
 }
 void mtsCollectorStateTest::TestFromSignal_int(void) {
     mtsCollectorStateTest::TestFromSignal<int>();

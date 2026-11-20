@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstCommon/cmnUnits.h>
-#include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstOSAbstraction/osaSleep.h>
 
 
@@ -48,7 +47,7 @@ void * mtsTaskPeriodic::RunInternal(void *data)
     while ((currentState == mtsComponentState::ACTIVE) || (currentState == mtsComponentState::READY)) {
         if (currentState == mtsComponentState::ACTIVE) {
             DoRunInternal();
-            if (StateTable.GetToc() - StateTable.GetTic() > Period) {
+            if (StateTable.GetToc() - StateTable.GetTic() > Period_d) {
                 OverranPeriod = true;
             }
         }
@@ -65,16 +64,12 @@ void * mtsTaskPeriodic::RunInternal(void *data)
 void mtsTaskPeriodic::StartupInternal(void) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Starting StartupInternal (periodic) for " << Name << std::endl;
     // user defined initialization, find commands from associated resource interfaces
-    ThreadBuddy.Create(GetName().c_str(), AbsoluteTimePeriod); // convert to nano seconds
+    ThreadBuddy.Create(Period); // convert to nano seconds
 
     // Call base class StartupInternal, which also calls user-supplied Startup.
     // If all goes well, this changes the state to READY.
     BaseType::StartupInternal();
 
-    // allow no more stack allocation. allowing this will
-    // break realtime performance.
-    // lock all pages too
-    //ThreadBuddy.LockStack();
     if (IsHardRealTime) {
         // Might as well wait for loop to start before going hard-real-time
         while ((this->State == mtsComponentState::READY) && !CaptureThread) {
@@ -90,12 +85,9 @@ void mtsTaskPeriodic::CleanupInternal() {
     if (IsHardRealTime) {
         ThreadBuddy.MakeSoftRealTime();
     }
-    ThreadBuddy.UnlockStack();
 
-    //If the task was waiting on a queue, i.e. semaphore, mailbox,
-    //etc, it is removed from such a queue and messaging tasks
-    //pending on its message queue are unblocked with an error return.
-    ThreadBuddy.Delete();
+    // Just in case thread was suspended
+    ThreadBuddy.Resume();
 
     BaseType::CleanupInternal();
 }
@@ -111,23 +103,9 @@ mtsTaskPeriodic::mtsTaskPeriodic(const std::string & name, double periodicityInS
                                  bool isHardRealTime, unsigned int sizeStateTable,
                                  bool newThread):
     mtsTaskContinuous(name, sizeStateTable, newThread),
-    ThreadBuddy(),
+    ThreadBuddy(Thread),
     Period(periodicityInSeconds),
-    IsHardRealTime(isHardRealTime)
-{
-    AbsoluteTimePeriod.FromSeconds(periodicityInSeconds);
-    CMN_ASSERT(GetPeriodicity() > 0);
-}
-
-mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name,
-                                  const osaAbsoluteTime & period,
-                                  bool isHardRealTime,
-                                  unsigned int sizeStateTable,
-                                  bool newThread ):
-    mtsTaskContinuous(name, sizeStateTable, newThread),
-    ThreadBuddy(),
-    Period(period.ToSeconds()),
-    AbsoluteTimePeriod(period),
+    Period_d(durationFromSeconds<std::chrono::steady_clock>(periodicityInSeconds)),
     IsHardRealTime(isHardRealTime)
 {
     CMN_ASSERT(GetPeriodicity() > 0);
@@ -135,11 +113,11 @@ mtsTaskPeriodic::mtsTaskPeriodic( const std::string & name,
 
 mtsTaskPeriodic::mtsTaskPeriodic(const mtsTaskPeriodicConstructorArg &arg):
     mtsTaskContinuous(arg.Name, arg.StateTableSize, true),
-    ThreadBuddy(),
+    ThreadBuddy(Thread),
     Period(arg.Period),
+    Period_d(durationFromSeconds<std::chrono::steady_clock>(arg.Period)),
     IsHardRealTime(arg.IsHardRealTime)
 {
-    AbsoluteTimePeriod.FromSeconds(arg.Period);
     CMN_ASSERT(GetPeriodicity() > 0);
 }
 
@@ -170,7 +148,7 @@ void mtsTaskPeriodic::Suspend(void)
 
 double mtsTaskPeriodic::GetPeriodicity(void) const
 {
-    return AbsoluteTimePeriod.ToSeconds();
+    return Period;
 }
 
 /*! Return true if thread is periodic.  Currently, returns true if

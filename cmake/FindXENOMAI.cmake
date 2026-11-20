@@ -47,4 +47,3 @@ if( UNIX )
   endif( XENOMAI_DIR )
 
 endif( UNIX )
-

@@ -113,17 +113,6 @@ protected:
     mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
     mtsFunctionWrite InterfaceComponentEvents_ChangeState;
 
-    //********************************* Logger (provided interface) ***************************************
-
-    // Following structure is for the provided interface that supports system-wide logging.
-    //   - mtsManagerLocal connects and uses PrintLog to forward log messages
-    //   - a user-provided logger component connects and observes EventPrintLog
-    struct LogInterface {
-        void PrintLog(const mtsLogMessage & log);     // Write command
-        mtsFunctionWrite EventPrintLog;               // Log event
-    };
-    LogInterface Logger;
-
     //********************************* Connect/Disconnect Internal **************************************
 
     bool ConnectInternal(const std::string & clientComponentName, const std::string & clientInterfaceName,

@@ -16,47 +16,31 @@ project (cisstOSAbstraction)
 # all source files
 set (SOURCE_FILES
      osaClassServices.cpp
-     osaCPUAffinity.cpp
-     osaCriticalSection.cpp
      osaDynamicLoader.cpp
-     osaDynamicLoaderAndFactory.cpp
-     osaGetTime.cpp
-     osaMutex.cpp
      osaPipeExec.cpp
      osaSerialPort.cpp
      osaSleep.cpp
      osaSocket.cpp
      osaSocketServer.cpp
-     osaStopwatch.cpp
-     osaThread.cpp
      osaThreadBuddy.cpp
      osaThreadSignal.cpp
-     osaTimeServer.cpp
+     osaTime.cpp
      )
 
 # all header files
 set (HEADER_FILES
-     osaForwardDeclarations.h
-     osaCPUAffinity.h
-     osaCriticalSection.h
      osaDynamicLoader.h
-     osaDynamicLoaderAndFactory.h
      osaExport.h
-     osaGetTime.h
-     osaMutex.h
      osaPipeExec.h
      osaSerialPort.h
      osaSleep.h
      osaSocket.h
      osaSocketServer.h
      osaStopwatch.h
-     osaThread.h
-     osaThreadAdapter.h
      osaThreadBuddy.h
-     osaThreadedLogFile.h
      osaThreadSignal.h
-     osaTimeServer.h
-     osaTripleBuffer.h
+     osaThreadedLogFile.h
+     osaTime.h
      )
 
 # Create the config file

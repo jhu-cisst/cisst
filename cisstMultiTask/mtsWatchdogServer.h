@@ -15,6 +15,9 @@ http://www.cisst.org/cisst/license.txt.
 
 --- end cisst license ---
 */
+
+// TODO BB: Do we still use this anywhere?
+
 #ifndef _mtsWatchdogServer_h
 #define _mtsWatchdogServer_h
 
@@ -29,7 +32,7 @@ class mtsWatchdogServer: public cmnGenericObject {
     // used to control the log level, "Run Error" by default
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LOD_RUN_ERROR);
 protected:
-    osaStopwatch StopWatch;
+    osaStopwatch<std::chrono::steady_clock> StopWatch;
     double Timeout;
 
     mtsFunctionWrite * WatchdogReadBool;

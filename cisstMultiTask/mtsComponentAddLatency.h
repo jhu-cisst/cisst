@@ -20,6 +20,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsComponentAddLatency_h
 #define _mtsComponentAddLatency_h
 
+#include <chrono>
+
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
@@ -136,7 +138,7 @@ class CISST_EXPORT mtsComponentAddLatency: public mtsTaskPeriodic
                               mtsInterfaceProvided * interfaceProvided,
                               const std::string & eventProvidedName = "");
 
-    double Latency;
+    std::chrono::steady_clock::duration Latency;
     mtsStateTable LatencyStateTable;
 
  private:

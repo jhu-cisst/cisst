@@ -37,10 +37,10 @@ set (SOURCE_FILES
      cmnOutputMultiplexer.cpp
      cmnPortability.cpp
      cmnRandomSequence.cpp
+     cmnSearchPath.cpp
      cmnSerializer.cpp
      cmnStreamRawParser.cpp
      cmnStrings.cpp
-     cmnPath.cpp
      cmnPrintf.cpp
      cmnTokenizer.cpp
      cmnTypeTraits.cpp
@@ -64,6 +64,7 @@ set (HEADER_FILES
      cmnDataFunctionsVector.h
      cmnDataFunctionsArray.h
      cmnDataFunctionsList.h
+     cmnDataFunctionsPath.h
      cmnDataFunctionsSet.h
      cmnDataFunctionsVectorHelpers.h
      cmnDataFunctionsMatrixHelpers.h
@@ -89,10 +90,10 @@ set (HEADER_FILES
      cmnPrintf.h
      cmnRandomSequence.h
      cmnRequiresDeepCopy.h
+     cmnSearchPath.h
      cmnSerializer.h
      cmnStreamRawParser.h
      cmnStrings.h
-     cmnPath.h
      cmnThrow.h
      cmnTokenizer.h
      cmnTypeTraits.h
@@ -140,11 +141,6 @@ if (CISST_HAS_JSON)
 endif ()
 
 target_link_libraries(cisstCommon PUBLIC Eigen3::Eigen)
-
-if (CISST_HAS_LINUX_RTAI)
-  target_include_directories (cisstCommon PUBLIC ${RTAI_INCLUDE_DIR})
-  target_link_libraries (cisstCommon PUBLIC ${RTAI_LIBRARIES})
-endif ()
 
 if (CISST_HAS_LINUX_XENOMAI)
   target_include_directories (cisstCommon PUBLIC ${CISST_XENOMAI_INCLUDE_DIRECTORIES})

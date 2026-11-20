@@ -70,12 +70,12 @@ class CISST_EXPORT mtsStateIndex : public mtsGenericObject {
 
 public:
     /*! Default constructor. Does nothing. */
-    inline mtsStateIndex():
+    mtsStateIndex():
         BaseType(), TimeIndex(0), TimeTicks(0), BufferLength(0)
     {}
 
     /*! Default constructor. Does nothing. */
-    inline mtsStateIndex(double timestamp, int index, TimeTicksType ticks, int Length):
+    mtsStateIndex(double timestamp, int index, TimeTicksType ticks, int Length):
         BaseType(timestamp, false /* automatic timestamp */, true /* valid */),
         TimeIndex(index), TimeTicks(ticks), BufferLength(Length)
     {}

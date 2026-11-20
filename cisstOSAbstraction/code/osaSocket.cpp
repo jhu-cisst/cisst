@@ -41,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <sys/socket.h>
@@ -144,7 +144,7 @@ osaSocket::~osaSocket(void)
 
 std::string osaSocket::GetLocalhostIP(void)
 {
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
     
     struct ifaddrs *ifaddr;
     
@@ -212,7 +212,7 @@ std::string osaSocket::GetLocalhostIP(void)
 
 int osaSocket::GetLocalhostIP(std::vector<std::string> & IPaddress)
 {    
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_DARWIN)
     
     struct ifaddrs *ifaddr, *ifa;
     char host[255];

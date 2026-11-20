@@ -19,6 +19,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include "clientTask.h"
+#include "configuration.h"
 
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
@@ -44,22 +45,13 @@ clientTask::clientTask(const std::string & taskName, double period):
         required->AddEventHandlerWrite(&clientTask::EventWriteHandler, this, "EventWrite");
     }
     
-    // Get a pointer to the time server
-    this->TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
-    
     // Allocates space for samples
-    this->Samples.SetSize(confNumberOfSamples);
+    this->Samples = Eigen::VectorXd::Zero(confNumberOfSamples);
 }
 
+void clientTask::Configure(const std::string & CMN_UNUSED(filename)) {}
 
-void clientTask::Configure(const std::string & CMN_UNUSED(filename))
-{}
-
-
-void clientTask::Startup(void) 
-{
-}
-
+void clientTask::Startup(void) {}
 
 void clientTask::EventWriteHandler(const value_type & data)
 {
@@ -68,17 +60,16 @@ void clientTask::EventWriteHandler(const value_type & data)
             this->NumberOfskippedElement++;
         } else {
             double originalTime = data.Timestamp();
-            double currentTime = TimeServer->GetRelativeTime();
-            this->Samples.Element(this->SamplesCollected) = (currentTime - originalTime);
+            double currentTime = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
+            this->Samples(this->SamplesCollected) = (currentTime - originalTime);
             this->SamplesCollected++;
         }
     }
     if (this->SamplesCollected == confNumberOfSamples) {
         this->BenchmarkDoneMember = true;
-        double average = Samples.SumOfElements() / Samples.size();
-        double min = 0.0;
-        double max = 0.0;
-        Samples.MinAndMaxElement(min, max);
+        double average = Samples.sum() / Samples.size();
+        double min = Samples.minCoeff();
+        double max = Samples.maxCoeff();
         std::cout << "csc: client->server->client: client write data (queued), server triggers event (queued)" << std::endl
                   << "csc: Client period (ms): " << cmnInternalTo_ms(confClientPeriod) << std::endl
                   << "csc: Server period (ms): " << cmnInternalTo_ms(confServerPeriod) << std::endl
@@ -92,7 +83,6 @@ void clientTask::EventWriteHandler(const value_type & data)
     }
 }
 
-
 void clientTask::Run(void)
 {
     ProcessQueuedEvents();
@@ -102,12 +92,10 @@ void clientTask::Run(void)
     this->WriteServer(parameter);
 
     // create an event to measure the loop client->server->client
-    double time;
-    time = this->TimeServer->GetRelativeTime();
+    double time = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
     parameter.SetTimestamp(time);
     this->TriggerEvent(parameter);
 }
-
 
 bool clientTask::BenchmarkDone(void) const
 {

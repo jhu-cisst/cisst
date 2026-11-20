@@ -17,15 +17,22 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+
 #include <cisstOSAbstraction/osaSocketServer.h>
 
 #if (CISST_OS == CISST_WINDOWS)
-#include <cisstOSAbstraction/osaSleep.h>
+
+#include <chrono>
+#include <thread>
+using namespace std::chrono_literals;
+
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #define WINSOCKVERSION MAKEWORD(2,2)
+
 #else
+
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -38,6 +45,7 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 #endif
 
+#include <cisstOSAbstraction/osaSleep.h>
 
 osaSocketServer::osaSocketServer(void)
 {
@@ -126,7 +134,7 @@ osaSocket * osaSocketServer::Accept(void)
             int err = WSAGetLastError();
             if (err == WSAEWOULDBLOCK) {
                 // Resource temporarily unavailable. Try again.
-                osaSleep(10.0 * cmn_ms);
+                osaSleep(10ms);
             }
             else {
                 CMN_LOG_CLASS_RUN_ERROR << "osaSocketServer::Accept failed, error = "

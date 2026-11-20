@@ -16,7 +16,7 @@ Key classes
    :project: cisst
    :members:
 
-.. doxygenclass:: cmnPath
+.. doxygenclass:: cmnSearchPath
    :project: cisst
    :members:
 

@@ -18,7 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 
-#include <string.h>
 #include <fstream>
 
 #include <cisstRevision.h>
@@ -27,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnClassRegister.h>
 
 // to provide some information regarding this build
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnUnits.h>
 
 // Whether cmnLogger instance has been created. Since this is a built-in type,
@@ -54,11 +53,11 @@ cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     cmnLogger::InstanceCreated = true;
     LoDMultiplexerStreambuf.AddChannel(*(DefaultLogFile(defaultLogFileName)), CMN_LOG_ALLOW_DEFAULT);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " " << CISST_FULL_REVISION << std::endl;
-    std::string result = "undefined";
-    cmnPath::GetCisstRoot(result);
+    std::filesystem::path result = "undefined";
+    cmnSearchPath::GetCisstRoot(result);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " CISST_ROOT: " << result << std::endl;
     result = "undefined";
-    cmnPath::GetCisstShare(result);
+    cmnSearchPath::GetCisstShare(result);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cisst share: " << result << std::endl;
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cmn_m: " << cmn_m << ", cmn_kg: " << cmn_kg << ", CISST_USE_SI_UNITS is set to " << CISST_USE_SI_UNITS << std::endl;
 }
@@ -150,21 +149,6 @@ bool cmnLogger::SetMaskClassAll(cmnLogMask mask)
 bool cmnLogger::SetMaskClassMatching(const std::string & stringToMatch, cmnLogMask mask)
 {
     return cmnClassRegister::SetLogMaskClassMatching(stringToMatch, mask);
-}
-
-const char * cmnLogger::ExtractFileName(const char * file)
-{
-    const char * p1 = strrchr(file, '/');
-#if (CISST_OS == CISST_WINDOWS)
-    const char * p2 = strrchr(file, '\\');
-    if (p2 > p1) {
-        return p2 + 1;
-    }
-#endif
-    if (p1) {
-        return p1 + 1;
-    }
-    return file;
 }
 
 

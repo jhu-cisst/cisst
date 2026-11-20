@@ -30,8 +30,6 @@ const std::string mtsManagerComponentBase::InterfaceNames::InterfaceInternalProv
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceInternalRequired  = "InterfaceInternalRequired";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceComponentProvided = "InterfaceComponentProvided";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceComponentRequired = "InterfaceComponentRequired";
-const std::string mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerProvided = "InterfaceSystemLoggerProvided";
-const std::string mtsManagerComponentBase::InterfaceNames::InterfaceSystemLoggerRequired = "InterfaceSystemLoggerRequired";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceExecIn = "ExecIn";
 const std::string mtsManagerComponentBase::InterfaceNames::InterfaceExecOut = "ExecOut";
 // Names of commands
@@ -60,7 +58,6 @@ const std::string mtsManagerComponentBase::CommandNames::AddObserverList = "AddO
 const std::string mtsManagerComponentBase::CommandNames::RemoveEndUserInterface = "RemoveEndUserInterface";
 const std::string mtsManagerComponentBase::CommandNames::RemoveObserverList = "RemoveObserverList";
 const std::string mtsManagerComponentBase::CommandNames::LoadLibrary = "LoadLibrary";
-const std::string mtsManagerComponentBase::CommandNames::PrintLog = "PrintLog";
 const std::string mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSeconds = "GetAbsoluteTimeInSeconds";
 
 // Names of events
@@ -68,7 +65,6 @@ const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddCompo
 const std::string mtsManagerComponentBase::EventNames::AddConnection = "AddConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::RemoveConnection = "RemoveConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::ChangeState   = "ChangeState";
-const std::string mtsManagerComponentBase::EventNames::PrintLog      = "PrintLog";
 
 CMN_IMPLEMENT_SERVICES_DERIVED(mtsManagerComponentBase, mtsTaskFromSignal);
 

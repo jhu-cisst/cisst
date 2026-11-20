@@ -174,8 +174,8 @@ public:
       methods are mainly pass through, i.e. they call the
       corresponding commands from the state table component. */
     //@{
-    void StartCollection(const double & delayInSeconds) override;
-    void StopCollection(const double & delayInSeconds) override;
+    void StartCollection(double delayInSeconds) override;
+    void StopCollection(double delayInSeconds) override;
     //@}
 };
 

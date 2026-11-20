@@ -19,14 +19,15 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorEvent.h>
 
+#include <chrono>
+#include <iostream>
+
 #include <cisstCommon/cmnThrow.h>
-#include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include <iostream>
-#include <fstream>
+#include <cisstOSAbstraction/osaTime.h>
 
 
 mtsCollectorEvent::CollectorEventVoid::CollectorEventVoid(const std::string & componentName,
@@ -97,26 +98,20 @@ mtsCollectorEvent::mtsCollectorEvent(const std::string & collectorName,
     mtsCollectorBase(collectorName, fileFormat),
     ObservedComponents("ObservedComponents"),
     EventCounter(1),
-    Collecting(false),
-    ScheduledStartTime(0.0),
-    ScheduledStopTime(0.0),
-    TimeServer(0)
+    Collecting(false)
 {
     this->SetOutputToDefault(fileFormat);
     this->ObservedComponents.SetOwner(*this);
-    this->TimeServer = &(mtsManagerLocal::GetInstance()->GetTimeServer());
 }
 
 
-mtsCollectorEvent::~mtsCollectorEvent()
-{
-}
+mtsCollectorEvent::~mtsCollectorEvent() { }
 
 
 bool mtsCollectorEvent::CheckCollectingStatus(void)
 {
     // get the current time and check agains scheduled start/stop time
-    const double currentTime = this->TimeServer->GetRelativeTime();
+    const auto currentTime = std::chrono::steady_clock::now();
     if (this->Collecting) {
         // check if we have been collecting long enough to send a progress info (number of samples)
         if ((currentTime - this->TimeOfLastProgressEvent) >= this->TimeIntervalForProgressEvent) {
@@ -125,17 +120,17 @@ bool mtsCollectorEvent::CheckCollectingStatus(void)
             this->TimeOfLastProgressEvent = currentTime;
         }
         // now check if we are supposed to stop
-        if ((this->ScheduledStopTime != 0.0) // stop time is set
+        if ((this->ScheduledStopTime.has_value()) // stop time is set
             && (currentTime >= this->ScheduledStopTime)) {
             this->SetCollecting(false, currentTime);
-            CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: stopping collection at: " << currentTime << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: stopping collection at: " << durationToSeconds(currentTime.time_since_epoch()) << std::endl;
         }
     } else {
         // we are not collecting yet, check if we should start
-        if ((this->ScheduledStartTime != 0.0)
+        if ((this->ScheduledStartTime.has_value())
             && (currentTime >= this->ScheduledStartTime)) {
             this->SetCollecting(true, currentTime);
-            CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: starting collection at: " << currentTime << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "CheckCollectingStatus: starting collection at: " << durationToSeconds(currentTime.time_since_epoch()) << std::endl;
         }
     }
     return this->Collecting;
@@ -500,7 +495,7 @@ void mtsCollectorEvent::SaveEventVoid(const CollectorEventVoid * event)
             this->OpenFileIfNeeded();
             this->PrintHeader(this->FileFormat);
         }
-        *(this->OutputStream) << mtsManagerLocal::GetInstance()->GetTimeServer().GetRelativeTime()
+        *(this->OutputStream) << durationToSeconds(std::chrono::steady_clock::now().time_since_epoch())
                               << this->Delimiter << event->EventId << std::endl;
         this->SampleCounter++;
         this->SampleCounterForEvent++;
@@ -517,7 +512,7 @@ void mtsCollectorEvent::SaveEventWrite(const CollectorEventWrite * event, const 
             this->OpenFileIfNeeded();
             this->PrintHeader(this->FileFormat);
         }
-        *(this->OutputStream) << mtsManagerLocal::GetInstance()->GetTimeServer().GetRelativeTime()
+        *(this->OutputStream) << durationToSeconds(std::chrono::steady_clock::now().time_since_epoch())
                               << this->Delimiter << event->EventId << this->Delimiter;
         payload.ToStreamRaw(*(this->OutputStream), this->Delimiter);
         *(this->OutputStream) << std::endl;
@@ -570,45 +565,53 @@ void mtsCollectorEvent::PrintHeader(const CollectorFileFormat & fileFormat)
 }
 
 
-void mtsCollectorEvent::StartCollection(const double & delay)
+void mtsCollectorEvent::StartCollection(double delay)
 {
-    const double currentTime = this->TimeServer->GetRelativeTime();
+    const auto currentTime = std::chrono::steady_clock::now();
     if (delay == 0.0) {
         this->SetCollecting(true, currentTime);
-        CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: starting collection now (" << currentTime << ")" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: starting collection now (" << durationToSeconds(currentTime.time_since_epoch()) << ")" << std::endl;
     } else {
-        this->ScheduledStartTime = currentTime + delay;
-        CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: collection scheduled to start at " << this->ScheduledStartTime << std::endl;
+        const std::chrono::duration<double> delay_d(delay);
+        const auto delay_t = std::chrono::duration_cast<std::chrono::steady_clock::duration>(delay_d);
+        this->ScheduledStartTime = currentTime + delay_t;
+
+        const auto relative_start = ScheduledStartTime->time_since_epoch();
+        CMN_LOG_CLASS_RUN_DEBUG << "StartCollection: collection scheduled to start at " << durationToSeconds(relative_start) << std::endl;
     }
 }
 
 
-void mtsCollectorEvent::StopCollection(const double & delay)
+void mtsCollectorEvent::StopCollection(double delay)
 {
-    const double currentTime = this->TimeServer->GetRelativeTime();
+    const auto currentTime = std::chrono::steady_clock::now();
     if (delay == 0.0) {
         this->SetCollecting(false, currentTime);
-        CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: stopping collection now (" << currentTime << ")" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: stopping collection now (" << durationToSeconds(currentTime.time_since_epoch()) << ")" << std::endl;
     } else {
-        this->ScheduledStopTime = currentTime + delay;
-        CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: collection scheduled to stop at " << this->ScheduledStopTime << std::endl;
+        const std::chrono::duration<double> delay_d(delay);
+        const auto delay_t = std::chrono::duration_cast<std::chrono::steady_clock::duration>(delay_d);
+        this->ScheduledStopTime = currentTime + delay_t;
+
+        const auto relative_stop = ScheduledStopTime->time_since_epoch();
+        CMN_LOG_CLASS_RUN_DEBUG << "StopCollection: collection scheduled to stop at " << durationToSeconds(relative_stop) << std::endl;
     }
 }
 
 
-void mtsCollectorEvent::SetCollecting(bool collecting, double currentTime)
+void mtsCollectorEvent::SetCollecting(bool collecting, std::chrono::steady_clock::time_point currentTime)
 {
     this->Collecting = collecting;
     if (this->Collecting) {
         // start collecting
         this->CollectionStartedEventTrigger(true);
-        this->ScheduledStartTime = 0.0;
+        this->ScheduledStartTime = std::nullopt;
         this->TimeOfLastProgressEvent = currentTime;
     } else {
         // stop collecting
         this->ProgressEventTrigger(size_t(this->SampleCounterForEvent));
         this->CollectionStartedEventTrigger(false);
-        this->ScheduledStopTime = 0.0;
+        this->ScheduledStopTime = std::nullopt;
         this->SampleCounterForEvent = 0;
     }
 }

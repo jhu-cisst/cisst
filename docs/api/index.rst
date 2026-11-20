@@ -8,10 +8,6 @@ cisst libraries, extracted from source code comments using Doxygen.
    :maxdepth: 1
 
    cisstCommon
-   cisstVector
-   cisstNumerical
    cisstOSAbstraction
    cisstMultiTask
-   cisstRobot
    cisstParameterTypes
-   cisstStereoVision

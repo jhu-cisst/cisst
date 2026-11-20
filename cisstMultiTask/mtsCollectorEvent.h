@@ -24,6 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCommandVoid.h>
 #include <cisstMultiTask/mtsStateTable.h>
 
+#include <chrono>
+#include <optional>
 #include <string>
 
 // Always include last
@@ -116,20 +118,15 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
     /*! Flag indicating if the collector is started */
     bool Collecting;
 
-    /*! Scheduled start.  If time is set to zero, there is no
-      scheduled start */
-    double ScheduledStartTime;
+    /*! Scheduled start */
+    std::optional<std::chrono::steady_clock::time_point> ScheduledStartTime;
 
-    /*! Scheduled start.  If time is set to zero, there is no
-      scheduled start */
-    double ScheduledStopTime;
+    /*! Scheduled stop */
+    std::optional<std::chrono::steady_clock::time_point> ScheduledStopTime;
 
     /*! Update and return the collecting status based on the scheduled
       start/stop time and current time. */
     bool CheckCollectingStatus(void);
-
-    /*! Pointer on manager's time server */
-    const osaTimeServer * TimeServer;
 
  public:
     /*! Thread-related methods */
@@ -205,12 +202,12 @@ class CISST_EXPORT mtsCollectorEvent : public mtsCollectorBase
       collection with delay.  For the event collector, these methods
       will enable/disable all event observers. */
     //@{
-    void StartCollection(const double & delayInSeconds) override;
-    void StopCollection(const double & delayInSeconds) override;
+    void StartCollection(double delayInSeconds) override;
+    void StopCollection(double delayInSeconds) override;
     //@}
 
  protected:
-    void SetCollecting(bool collecting, double currentTime);
+    void SetCollecting(bool collecting, std::chrono::steady_clock::time_point currentTime);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorEvent)

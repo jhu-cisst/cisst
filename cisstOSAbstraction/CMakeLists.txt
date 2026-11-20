@@ -12,22 +12,6 @@
 # All cisstOSAbstraction libraries
 project (cisstOSAbstractionLibs)
 
-
-# RTAI
-if (CISST_HAS_LINUX_RTAI)
-  # Check for existence of query_module, which was removed in kernel
-  # versions 2.6+ (and possibly some earlier ones).
-  include (CheckIncludeFiles)
-  check_include_files ("linux/module.h" CMAKE_HAVE_MODULE_H)
-  set (CISST_OSA_HAS_MODULE_H ${CMAKE_HAVE_MODULE_H})
-  if (CMAKE_HAVE_MODULE_H)
-    add_definitions (-DCMAKE_HAVE_MODULE_H)
-  endif (CMAKE_HAVE_MODULE_H)
-else (CISST_HAS_LINUX_RTAI)
-  set (CISST_OSA_HAS_MODULE_H 0)
-endif (CISST_HAS_LINUX_RTAI)
-
-
 # QNX does not require rt library for clock_gettime (contained in libc)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
   # QNX requires socket library

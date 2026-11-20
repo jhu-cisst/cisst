@@ -36,25 +36,25 @@ class ClassRegisterTest(unittest.TestCase):
     def TestIterator(self):
         """Test iterator"""
         gotStopIteration = False
-        found_cmnPath = False
+        found_cmnSearchPath = False
         try:
             try:
                 it = self.classRegister.__iter__()
                 while True:
                     key, classInfo = next(it)
-                    if classInfo.GetName() == "cmnPath":
-                        found_cmnPath = True
+                    if classInfo.GetName() == "cmnSearchPath":
+                        found_cmnSearchPath = True
             except StopIteration:
                 gotStopIteration = True
         except:
             self.fail("Unexpected exception")
         self.assertTrue(gotStopIteration)
-        self.assertTrue(found_cmnPath)
+        self.assertTrue(found_cmnSearchPath)
 
     def TestForLoop(self):
         """Test for loop"""
-        found_cmnPath = False
+        found_cmnSearchPath = False
         for key, classInfo in self.classRegister:
-            if classInfo.GetName() == "cmnPath":
-                found_cmnPath = True
-        self.assertTrue(found_cmnPath)
+            if classInfo.GetName() == "cmnSearchPath":
+                found_cmnSearchPath = True
+        self.assertTrue(found_cmnSearchPath)
