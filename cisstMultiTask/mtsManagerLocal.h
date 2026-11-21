@@ -213,8 +213,6 @@ public:
     /*! \brief Add a component to the component manager.
         \param component Component instance to be added */
     bool AddComponent(mtsComponent * component);
-    bool CISST_DEPRECATED AddTask(mtsTask * component); // For backward compatibility
-    bool CISST_DEPRECATED AddDevice(mtsComponent * component); // For backward compatibility
 
     /*! \brief Remove component from component manager. */
     bool RemoveComponent(mtsComponent * component);
@@ -227,9 +225,6 @@ public:
     /*! \brief Retrieve a component by name. */
     mtsComponent * GetComponent(const std::string & componentName) const;
     mtsTask * GetComponentAsTask(const std::string & componentName) const;
-
-    mtsComponent CISST_DEPRECATED * GetDevice(const std::string & deviceName); // For backward compatibility
-    mtsTask CISST_DEPRECATED * GetTask(const std::string & taskName); // For backward compatibility
 
     /*! \brief Check if a component exists by its name */
     bool FindComponent(const std::string & componentName) const;

@@ -751,16 +751,6 @@ mtsTask * mtsManagerLocal::GetComponentAsTask(const std::string & componentName)
     return componentTask;
 }
 
-mtsComponent CISST_DEPRECATED * mtsManagerLocal::GetDevice(const std::string & deviceName)
-{
-    return GetComponent(deviceName);
-}
-
-mtsTask CISST_DEPRECATED * mtsManagerLocal::GetTask(const std::string & taskName)
-{
-    return GetComponentAsTask(taskName);
-}
-
 bool mtsManagerLocal::FindComponent(const std::string & componentName) const
 {
     return (GetComponent(componentName) != 0);

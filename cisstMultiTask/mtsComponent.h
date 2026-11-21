@@ -309,11 +309,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
         AddInterfaceProvidedWithoutSystemEvents(const std::string & interfaceProvidedName,
                                                 mtsInterfaceQueueingPolicy queueingPolicy = MTS_COMPONENT_POLICY);
 
-    // provided for backward compatibility
-    inline CISST_DEPRECATED mtsInterfaceProvided * AddProvidedInterface(const std::string & interfaceProvidedName) {
-        return this->AddInterfaceProvided(interfaceProvidedName);
-    }
-
     /*! Return the list of provided interfaces.  This returns a list
       of names.  To retrieve the actual interface, use
       GetInterfaceProvided with the provided interface name. */
@@ -341,11 +336,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
     virtual mtsInterfaceRequired *
         AddInterfaceRequiredWithoutSystemEventHandlers(const std::string & interfaceRequiredName,
                                                        mtsRequiredType isRequired = MTS_REQUIRED);
-
-    // provided for backward compatibility
-    inline CISST_DEPRECATED mtsInterfaceRequired * AddRequiredInterface(const std::string & requiredInterfaceName) {
-        return this->AddInterfaceRequired(requiredInterfaceName);
-    }
 
     /*! Provide a list of existing required interfaces (by names) */
     std::vector<std::string> GetNamesOfInterfacesRequired(void) const;
@@ -412,9 +402,6 @@ class CISST_EXPORT mtsComponent: public cmnGenericObject
 
     /*! Return true if task is active. */
     bool IsRunning(void) const;
-    inline bool CISST_DEPRECATED Running(void) const {
-        return this->IsRunning();
-    }
 
     /*! Return true if task was started. */
     bool IsStarted(void) const;
