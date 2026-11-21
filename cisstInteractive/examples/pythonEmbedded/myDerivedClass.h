@@ -21,9 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _myDerivedClass_h
 
 
-#include <vector>
 #include <iostream>
-#include <string>
 #include <Eigen/Core>
 
 #include <cisstCommon/cmnGenericObject.h>
@@ -45,33 +43,30 @@ protected:
     Eigen::VectorXd DynamicVectorMember;
     
 public:
-
-    myDerivedClass(void);
-
+    myDerivedClass();
     virtual ~myDerivedClass() = default;
 
-    inline virtual void CommonMethod(void) {
+    virtual void CommonMethod(void) {
         std::cout << "CommonMethod from derived (+= 5.0)" << std::endl;
         this->FixedSizeVectorMember.array() += 5.0;
         this->DynamicVectorMember.array() += 5.0;
     }
 
-    inline Eigen::Vector3d& FixedSizeVector(void) {
+    Eigen::Vector3d& FixedSizeVector(void) {
         return this->FixedSizeVectorMember;
     }
 
-    inline const Eigen::Vector3d& FixedSizeVector(void) const {
+    const Eigen::Vector3d& FixedSizeVector(void) const {
         return this->FixedSizeVectorMember;
     }
 
-    inline Eigen::VectorXd& DynamicVector(void) {
+    Eigen::VectorXd& DynamicVector(void) {
         return this->DynamicVectorMember;
     }
 
-    inline const Eigen::VectorXd& DynamicVector(void) const {
+    const Eigen::VectorXd& DynamicVector(void) const {
         return this->DynamicVectorMember;
     }
-
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(myDerivedClass);

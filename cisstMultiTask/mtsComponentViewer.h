@@ -63,8 +63,6 @@ protected:
     bool ReaderThreadFinished; // TODO BB: should be atomic
     bool WaitingForResponse;
     static void ParseArgs(const std::string &input, std::string &arg1, std::string &arg2);
-    static bool ParseProcessAndComponent(const std::string &input, std::string &processName,
-                                         std::string &componentName);
     virtual void ProcessResponse(void);
 
     bool ConnectToUDrawGraph(void);
@@ -72,13 +70,13 @@ protected:
     virtual void SendAllInfo(void);
     void ActivateMenuItems(void);
 
-    std::string GetComponentInUDrawGraphFormat(const std::string & processName, const std::string & componentName,
+    std::string GetComponentInUDrawGraphFormat(const std::string & componentName,
                                                const mtsComponentState & componentState) const;
     std::string GetStateInUDrawGraphFormat(const mtsComponentState &componentState) const;
     std::string GetConnectionInUDrawGraphFormat(const mtsDescriptionConnection &connection) const;
 
     enum BorderType { BORDER_NONE, BORDER_SINGLE, BORDER_DOUBLE };
-    void ChangeComponentBorder(const std::string &processName, const std::string &componentName, BorderType border);
+    void ChangeComponentBorder(const std::string &componentName, BorderType border);
 
     // Event Handlers
     virtual void AddComponentHandler(const mtsDescriptionComponent &componentInfo);

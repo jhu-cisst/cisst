@@ -20,16 +20,12 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
 mtsDescriptionConnection::mtsDescriptionConnection(
-    const std::string & clientProcessName,
     const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
-    const std::string & serverProcessName,
     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName,
     const ConnectionIDType connectionId)
 {
-    Client.ProcessName   = clientProcessName;
     Client.ComponentName = clientComponentName;
     Client.InterfaceName = clientInterfaceRequiredName;
-    Server.ProcessName   = serverProcessName;
     Server.ComponentName = serverComponentName;
     Server.InterfaceName = serverInterfaceProvidedName;
     ConnectionID         = connectionId;
@@ -37,10 +33,8 @@ mtsDescriptionConnection::mtsDescriptionConnection(
 
 void mtsDescriptionConnection::Init(void)
 {
-    Client.ProcessName.clear();
     Client.ComponentName.clear();
     Client.InterfaceName.clear();
-    Server.ProcessName.clear();
     Server.ComponentName.clear();
     Server.InterfaceName.clear();
     ConnectionID = InvalidConnectionID;

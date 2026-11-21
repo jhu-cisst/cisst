@@ -264,8 +264,8 @@ public:
     bool ExecuteLine(const std::string &curLine) const;
     bool Quit(void) const;
     bool Help(const std::vector<std::string> &args) const;
-    bool List(const std::vector<std::string> &args) const;
-    bool Classes(const std::vector<std::string> &args) const;
+    bool List() const;
+    bool Classes() const;
     bool Connections(const std::vector<std::string> &args) const;
     bool System(const std::string &cmdString) const;
     bool ExecuteFile(const std::string &fileName) const;
@@ -284,12 +284,10 @@ void shellTask::Configure(const std::string &)
 {
     CommandList.insert(new CommandEntryMethodVoid<shellTask>("quit", "", &shellTask::Quit, this));
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("help", "[<command_name>]", &shellTask::Help, this));
-    CommandList.insert(new CommandEntryMethodArgv<shellTask>("list", "[<process_name>]",
-                                                             &shellTask::List, this));
-    CommandList.insert(new CommandEntryMethodArgv<shellTask>("classes", "[<process_name>]",
-                                                             &shellTask::Classes, this));
+    CommandList.insert(new CommandEntryMethodVoid<shellTask>("list", "",  &shellTask::List, this));
+    CommandList.insert(new CommandEntryMethodVoid<shellTask>("classes", "", &shellTask::Classes, this));
     CommandList.insert(new CommandEntryMethodArgv<shellTask>("connections",
-                                                             "[<process_name>] [<component_name>]",
+                                                             "[<component_name>]",
                                                              &shellTask::Connections, this));
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("system", "<\"string_to_execute\">",
                                                              &shellTask::System, this));
@@ -297,10 +295,9 @@ void shellTask::Configure(const std::string &)
                                                              &shellTask::ExecuteFile, this));
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("sleep", "<file_name>",
                                                              &shellTask::Sleep, this));
-    CommandList.insert(new CommandEntryMethodVoid<shellTask>("viewer", "",
-                                                             &shellTask::Viewer, this));
+    CommandList.insert(new CommandEntryMethodVoid<shellTask>("viewer", "", &shellTask::Viewer, this));
     CommandList.insert(new CommandEntryMethodArgvNonConst<shellTask>("waitfor",
-                                                             "<process_name> [<component_name> [component_state]]",
+                                                             "<component_name> [component_state]",
                                                              &shellTask::WaitFor, this));
     CommandList.insert(new CommandEntryMethodStr1<shellTask>("echo", "<\"message_string\">",
                                                              &shellTask::Echo, this));
@@ -308,50 +305,25 @@ void shellTask::Configure(const std::string &)
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "create", "<class_name> <component_name>",
                                &mtsManagerComponentServices::ComponentCreate, ManagerComponentServices));
-        CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
-                               "create", "<process_name> <class_name> <component_name>",
-                               &mtsManagerComponentServices::ComponentCreate, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
                                "configure", "<component_name> <config_string>",
                                &mtsManagerComponentServices::ComponentConfigure, ManagerComponentServices));
-        CommandList.insert(new CommandEntryMethodStr3<mtsManagerComponentServices>(
-                               "configure", "<process_name> <component_name> <config_string>",
-                               &mtsManagerComponentServices::ComponentConfigure, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr4<mtsManagerComponentServices>(
                                "connect",
                                "<component1> <component1_interface> <component2> <component2_interface>",
                                &mtsManagerComponentServices::Connect, ManagerComponentServices));
-        CommandList.insert(new CommandEntryMethodStr6<mtsManagerComponentServices>(
-                               "connect",
-                               "<process1> <component1> <component1_interface> "
-                               "<process2> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Connect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr4<mtsManagerComponentServices>(
                                "disconnect",
                                "<component1> <component1_interface> <component2> <component2_interface>",
-                               &mtsManagerComponentServices::Disconnect, ManagerComponentServices));
-        CommandList.insert(new CommandEntryMethodStr6<mtsManagerComponentServices>(
-                               "disconnect",
-                               "<process1> <component1> <component1_interface> "
-                               "<process2> <component2> <component2_interface>",
                                &mtsManagerComponentServices::Disconnect, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "start", "<component_name>",
                                &mtsManagerComponentServices::ComponentStart, ManagerComponentServices));
-        CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
-                               "start", "<process_name> <component_name>",
-                               &mtsManagerComponentServices::ComponentStart, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "stop", "<component_name>",
                                 &mtsManagerComponentServices::ComponentStop, ManagerComponentServices));
-        CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
-                               "stop", "<process_name> <component_name>",
-                                &mtsManagerComponentServices::ComponentStop, ManagerComponentServices));
         CommandList.insert(new CommandEntryMethodStr1<mtsManagerComponentServices>(
                                "load", "<file_name>",
-                                &mtsManagerComponentServices::Load, ManagerComponentServices));
-        CommandList.insert(new CommandEntryMethodStr2<mtsManagerComponentServices>(
-                               "load", "<process_name> <file_name>",
                                 &mtsManagerComponentServices::Load, ManagerComponentServices));
     }
 }
@@ -450,7 +422,7 @@ void shellTask::Run(void)
         firstTime = false;
     }
     // Display prompt
-    std::cout << mtsManagerLocal::GetInstance()->GetProcessName() << "> ";
+    std::cout << "> ";
     getline(std::cin, curLine);
     if (std::cin.good()) {
         if (!ExecuteLine(curLine)) {
@@ -489,38 +461,23 @@ bool shellTask::Help(const std::vector<std::string> &args) const
     return true;
 }
 
-bool shellTask::List(const std::vector<std::string> &args) const
+bool shellTask::List() const
 {
-    std::vector<std::string> procList;
-    if (args.size() > 0) {
-        procList.push_back(args[0]);
-        std::cout << "List of all process components:" << std::endl;
-    }
-    else {
-        std::cout << "List of all processes/components:" << std::endl;
-        procList = ManagerComponentServices->GetNamesOfProcesses();
-    }
-    for (size_t i = 0; i < procList.size(); i++) {
-        std::cout << "  " << procList[i] << std::endl;
-        std::vector<std::string> compList;
-        compList = ManagerComponentServices->GetNamesOfComponents(procList[i]);
-        for (size_t j = 0; j < compList.size(); j++) {
-            std::cout << "    " << compList[j] << " ("
-                      << ManagerComponentServices->ComponentGetState(procList[i], compList[j])
-                      << ")" << std::endl;
-        }
+    std::vector<std::string> compList;
+    compList = ManagerComponentServices->GetNamesOfComponents();
+    for (size_t j = 0; j < compList.size(); j++) {
+        std::cout << "    " << compList[j] << " ("
+                    << ManagerComponentServices->ComponentGetState(compList[j])
+                    << ")" << std::endl;
     }
     return true;
 }
 
 // List of components that can be dynamically created
-bool shellTask::Classes(const std::vector<std::string> &args) const
+bool shellTask::Classes() const
 {
     std::vector<mtsDescriptionComponentClass> classList;
-    if (args.size() > 0)
-        classList = ManagerComponentServices->GetListOfComponentClasses(args[0]);
-    else
-        classList = ManagerComponentServices->GetListOfComponentClasses();
+    classList = ManagerComponentServices->GetListOfComponentClasses();
 
     std::cout << "Component classes available for dynamic creation: " << std::endl;
     for (size_t i = 0; i < classList.size(); i++) {
@@ -537,43 +494,31 @@ bool shellTask::Classes(const std::vector<std::string> &args) const
 
 bool shellTask::Connections(const std::vector<std::string> &args) const
 {
-    std::string filterProcess;
     std::string filterComponent;
     if (args.size() == 0)
         std::cout << "Connections:" << std::endl;
     else if (args.size() == 1) {
-        filterProcess = args[0];
-        std::cout << "Connections to/from process " << filterProcess << ":" << std::endl;
-    }
-    else if (args.size() == 2) {
-        filterProcess = args[0];
-        filterComponent = args[1];
-        std::cout << "Connections to/from process " << filterProcess << ", component "
+        filterComponent = args[0];
+        std::cout << "Connections to/from component "
                   << filterComponent << ":" << std::endl;
-    }
-    else {
+    } else {
         std::cout << "Invalid number of parameters: " << args.size() << std::endl;
         return false;
     }
+
     std::vector<mtsDescriptionConnection> connections = ManagerComponentServices->GetListOfConnections();
     for (size_t i = 0; i < connections.size(); i++) {
         mtsDescriptionConnection &connection = connections[i];
-        if ((filterProcess == "") ||
-            (filterProcess == connection.Client.ProcessName) ||
-            (filterProcess == connection.Server.ProcessName)) {
-            if ((filterComponent == "") ||
-                (filterComponent == connection.Client.ComponentName) ||
-                (filterComponent == connection.Server.ComponentName)) {
-                // Following is same as mtsDescriptionConnection::ToStream, except that is does not
-                // stream out the mtsGenericObject base.
-                std::cout << "  (" << connection.ConnectionID << ") "
-                          << mtsManagerComponent::GetInterfaceUID(connection.Client.ProcessName,
-                                               connection.Client.ComponentName, connection.Client.InterfaceName)
-                          << " - "
-                          << mtsManagerComponent::GetInterfaceUID(connection.Server.ProcessName,
-                                               connection.Server.ComponentName, connection.Server.InterfaceName)
-                          << std::endl;
-            }
+        if ((filterComponent == "") ||
+            (filterComponent == connection.Client.ComponentName) ||
+            (filterComponent == connection.Server.ComponentName)) {
+            // Following is same as mtsDescriptionConnection::ToStream, except that is does not
+            // stream out the mtsGenericObject base.
+            std::cout << "  (" << connection.ConnectionID << ") "
+                        << mtsManagerComponent::GetInterfaceUID(connection.Client.ComponentName, connection.Client.InterfaceName)
+                        << " - "
+                        << mtsManagerComponent::GetInterfaceUID(connection.Server.ComponentName, connection.Server.InterfaceName)
+                        << std::endl;
         }
     }
     return true;
@@ -671,8 +616,6 @@ bool shellTask::WaitFor(const std::vector<std::string> &args)
             ManagerComponentServices->WaitFor(args[0]);
         else if (args.size() == 2)
             ManagerComponentServices->WaitFor(args[0], args[1]);
-        else if (args.size() == 3)
-            ManagerComponentServices->WaitFor(args[0], args[1], args[2]);
         else {
             std::cout << "Syntax: waitfor processName [<componentName> [<componentState>]]" << std::endl;
             return false;

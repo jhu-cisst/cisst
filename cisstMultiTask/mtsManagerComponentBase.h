@@ -107,7 +107,6 @@ public:
         // Logging
         const static std::string PrintLog;
         // Getters
-        const static std::string GetNamesOfProcesses;
         const static std::string GetNamesOfComponents;
         const static std::string GetDescriptionsOfComponents;
         const static std::string GetNamesOfInterfaces;

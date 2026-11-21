@@ -61,7 +61,7 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
 
     /* Generate random test string between 10 and 100 characters, of random alphabetic characters */
     std::uniform_int_distribution<int> length_dist(10, 100);
-    constexpr std::string_view chars = 
+    constexpr std::string_view chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
     std::uniform_int_distribution<std::size_t> char_dist(0, chars.size() - 1);

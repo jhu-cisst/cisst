@@ -70,8 +70,7 @@ void prmPositionCartesianGetQtWidgetFactory::timerEvent(QTimerEvent * CMN_UNUSED
 void prmPositionCartesianGetQtWidgetFactory::AddFactorySource(const std::string & componentName,
                                                               const std::string & interfaceName)
 {
-    mtsDescriptionInterfaceFullName source(mtsManagerLocal::GetInstance()->GetProcessName(),
-                                           componentName, interfaceName);
+    mtsDescriptionInterfaceFullName source(componentName, interfaceName);
 
     // first, make sure this doesn't already exist
     FactoriesType::const_iterator found = mFactories.find(source);
@@ -131,8 +130,7 @@ void prmPositionCartesianGetQtWidgetFactory::SlotCRTKInterfacesProvidedUpdated(v
                 if (mtsDescriptionHasName(interfaceDescription.CommandsRead,
                                           std::string("measured_cp"))) {
                     // new, create the interface and add to list of existing sources
-                    std::string interfaceName = source->ProcessName
-                        + "::" + source->ComponentName + "::" + source->InterfaceName;
+                    std::string interfaceName = source->ComponentName + "::" + source->InterfaceName;
                     mtsInterfaceRequired * newInterface = AddInterfaceRequired(interfaceName);
                     if (newInterface) {
                         // create interface

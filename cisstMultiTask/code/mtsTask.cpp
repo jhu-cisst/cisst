@@ -208,7 +208,7 @@ void mtsTask::ChangeState(mtsComponentState::Enum newState)
     // Inform the manager component client of the state change
     if (InterfaceProvidedToManager) {
         std::scoped_lock lock(StateChangeEventMutex);
-        EventGeneratorChangeState(mtsComponentStateChange("", this->GetName(), this->State));
+        EventGeneratorChangeState(mtsComponentStateChange(GetName(), State));
     }
 }
 
