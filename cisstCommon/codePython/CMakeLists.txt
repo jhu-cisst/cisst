@@ -14,9 +14,6 @@
 project (cisstCommonPython)
 
 # create wrappers using pybind11
-# Generated in the sibling code directory by cisstDataGenerator.
-set_source_files_properties (${cisstCommon_CISST_DG_PYTHON_SRCS} PROPERTIES GENERATED TRUE)
-
 cisst_add_pybind11_module (MODULE cisstCommonPython
                             FOLDER cisstCommon
                             SOURCES cisstCommonPybind.cpp ${cisstCommon_CISST_DG_PYTHON_SRCS}

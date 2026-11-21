@@ -234,6 +234,14 @@ endmacro (cisst_target_link_libraries)
 
 function (cisst_add_pybind11_module)
   cmake_parse_arguments (ARG "INSTALL_FILES" "MODULE;FOLDER" "SOURCES;MODULE_LINK_LIBRARIES" ${ARGN})
+  # With CMake 3.16's directory-scoped GENERATED property, outputs declared
+  # by cisst_data_generator must also be marked in this consumer directory.
+  get_property (_cisst_dg_outputs GLOBAL PROPERTY _CISST_DATA_GENERATOR_OUTPUTS)
+  foreach (_source IN LISTS ARG_SOURCES)
+    if (_source IN_LIST _cisst_dg_outputs)
+      set_source_files_properties ("${_source}" PROPERTIES GENERATED TRUE)
+    endif ()
+  endforeach ()
   find_package (pybind11 REQUIRED)
   pybind11_add_module (${ARG_MODULE} ${ARG_SOURCES})
   target_link_libraries (${ARG_MODULE} PRIVATE ${ARG_MODULE_LINK_LIBRARIES})
@@ -371,6 +379,9 @@ function (cisst_data_generator GENERATED_FILES_VAR_PREFIX GENERATED_INCLUDE_DIRE
     set_source_files_properties (${code_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties (${python_absolute} PROPERTIES GENERATED 1)
     set_source_files_properties ("${INPUT_WE}.h" PROPERTIES GENERATED 1)
+    # Record the outputs for helpers that consume them from another directory.
+    set_property (GLOBAL APPEND PROPERTY _CISST_DATA_GENERATOR_OUTPUTS
+                  "${header_absolute}" "${code_absolute}" "${python_absolute}")
     add_custom_command (
       OUTPUT ${header_absolute} ${code_absolute} ${python_absolute}
       COMMAND "${CISST_DG_EXECUTABLE}"
