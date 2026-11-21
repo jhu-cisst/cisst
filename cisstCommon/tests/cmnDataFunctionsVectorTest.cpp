@@ -50,6 +50,12 @@ void cmnDataFunctionsVectorTest::TestStandardContainers(void)
 
         std::stringstream raw;
         cmnSerializeRaw(raw, source);
+        std::stringstream expectedRaw;
+        cmnSerializeSizeRaw(expectedRaw, source.size());
+        for (const bool value : source) {
+            cmnSerializeRaw(expectedRaw, value);
+        }
+        CPPUNIT_ASSERT_EQUAL(expectedRaw.str(), raw.str());
         data.clear();
         cmnDeSerializeRaw(raw, data);
         CPPUNIT_ASSERT(data == source);

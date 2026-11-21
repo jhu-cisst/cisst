@@ -224,7 +224,7 @@ void cmnDataFunctionsTest::TestByteSwapMacros(void)
     int i1 = std::numeric_limits<int>::max() - 1234;
     cmnDataFunctionsTestTestByteSwap(i1);
 
-    unsigned int ui1;
+    unsigned int ui1 = std::numeric_limits<unsigned int>::max() - 1234;
     cmnDataFunctionsTestTestByteSwap(ui1);
 
     long long int lli1 = std::numeric_limits<long long int>::max() - 1234;
@@ -243,9 +243,9 @@ void cmnDataFunctionsTest::TestByteSwapMacros(void)
 
 void cmnDataFunctionsTest::TestDescriptions(void)
 {
-    double d1;
+    double d1 = 0.0;
     CPPUNIT_ASSERT_EQUAL(std::string("{d}"), cmnData<double>::ScalarDescription(d1, 0));
 
-    unsigned long long int ulli1;
+    unsigned long long int ulli1 = 0;
     CPPUNIT_ASSERT_EQUAL(std::string("{ulli}"), cmnData<unsigned long long int>::ScalarDescription(ulli1, 0));
 }

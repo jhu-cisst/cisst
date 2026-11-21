@@ -135,7 +135,9 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::vector<_elem
     const typename std::vector<_elementType>::size_type size = data.size();
     cmnSerializeSizeRaw(outputStream, size);
     for (size_t i = 0; i < size; i++) {
-        cmnSerializeRaw(outputStream, data[i]);
+        // libc++ can return a proxy even for const vector<bool> elements.
+        const _elementType & value = data[i];
+        cmnSerializeRaw(outputStream, value);
         if (outputStream.fail()) {
             cmnThrow("cmnSerializeRaw(std::vector<_elementType>): Error occured with std::ostream::write");
         }
