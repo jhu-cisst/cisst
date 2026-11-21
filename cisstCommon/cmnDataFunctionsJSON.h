@@ -25,6 +25,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <type_traits>
 #include <cisstConfig.h> // for CISST_HAS_JSON
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnThrow.h>
@@ -160,7 +161,13 @@ public:
         for (iterator iter = data.begin();
              iter != end;
              ++iter, ++jsonIndex) {
-            cmnDataJSON<_elementType>::DeSerializeText(*iter, jsonValue[jsonIndex]);
+            if constexpr (std::is_same_v<_elementType, bool>) {
+                bool value;
+                cmnDataJSON<bool>::DeSerializeText(value, jsonValue[jsonIndex]);
+                *iter = value;
+            } else {
+                cmnDataJSON<_elementType>::DeSerializeText(*iter, jsonValue[jsonIndex]);
+            }
         }
     }
 };

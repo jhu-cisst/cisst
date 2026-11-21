@@ -3,7 +3,7 @@
 
 inline-header {
 
-#include <Eigen/Dense>
+#include <vector>
 
 // Always include last
 #include <cisstParameterTypes/prmExport.h>
@@ -21,13 +21,13 @@ class {
 
     member {
         name AnalogInputs;
-        type Eigen::ArrayXd;
+        type std::vector<double>;
         description Analog inputs;
     }
 
     member {
         name DigitalInputs;
-        type Eigen::ArrayX<bool>;
+        type std::vector<bool>;
         description Digital inputs;
     }
 

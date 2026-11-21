@@ -29,3 +29,9 @@ target_link_libraries (cisstVectorQtTests
 
 # To generate a CTest list of tests
 cisst_add_test (cisstVectorQtTests ITERATIONS 10 INSTANCES 2)
+
+add_executable (cisstVectorQtStdContainersTest vctQtWidgetStdContainersTest.cpp)
+target_link_libraries (cisstVectorQtStdContainersTest cisstVectorQt)
+add_test (NAME cisstVectorQtStdContainers COMMAND cisstVectorQtStdContainersTest)
+set_tests_properties (cisstVectorQtStdContainers PROPERTIES
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

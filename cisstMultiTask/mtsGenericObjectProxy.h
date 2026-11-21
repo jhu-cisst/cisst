@@ -50,6 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 typedef std::vector<std::string> stdStringVec;
 typedef std::vector<double> stdDoubleVec;
 typedef std::vector<char> stdCharVec;
+typedef std::array<double, 3> stdDouble3;
 
 typedef std::list<std::string> stdStringList;
 
@@ -819,6 +820,9 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringVecProxy);
 
 typedef mtsGenericObjectProxy<stdDoubleVec> mtsStdDoubleVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDoubleVecProxy);
+
+typedef mtsGenericObjectProxy<stdDouble3> mtsStdDouble3Proxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDouble3Proxy);
 
 typedef mtsGenericObjectProxy<stdCharVec> mtsStdCharVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdCharVecProxy);

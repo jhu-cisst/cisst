@@ -21,6 +21,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _cmnDataFunctionsVectorHelpers_h
 #define _cmnDataFunctionsVectorHelpers_h
 
+#include <type_traits>
+
 template <class _vectorType>
 void cmnDataVectorCopy(_vectorType & data,
                        const _vectorType & source)
@@ -36,7 +38,11 @@ void cmnDataVectorCopy(_vectorType & data,
     for (;
          iterSource != endSource;
          ++iterSource, ++iterData) {
-        cmnData<typename _vectorType::value_type>::Copy(*iterData, *iterSource);
+        if constexpr (std::is_same_v<typename _vectorType::value_type, bool>) {
+            *iterData = *iterSource;
+        } else {
+            cmnData<typename _vectorType::value_type>::Copy(*iterData, *iterSource);
+        }
     }
 }
 
@@ -89,7 +95,14 @@ void cmnDataVectorDeSerializeText(_vectorType & data,
         if (iter != begin) {
             cmnDataDeSerializeTextDelimiter(inputStream, delimiter, "std::vector");
         }
-        cmnData<typename _vectorType::value_type>::DeSerializeText(*iter, inputStream, delimiter);
+        if constexpr (std::is_same_v<typename _vectorType::value_type, bool>) {
+            // std::vector<bool> stores proxy references rather than bool references.
+            bool value;
+            cmnData<bool>::DeSerializeText(value, inputStream, delimiter);
+            *iter = value;
+        } else {
+            cmnData<typename _vectorType::value_type>::DeSerializeText(*iter, inputStream, delimiter);
+        }
     }
 }
 
@@ -179,7 +192,14 @@ void cmnDataVectorDeSerializeBinary(_vectorType & data,
     const iterator end = data.end();
     iterator iter = data.begin();
     for (; iter != end; ++iter) {
-        cmnData<typename _vectorType::value_type>::DeSerializeBinary(*iter, inputStream, localFormat, remoteFormat);
+        if constexpr (std::is_same_v<typename _vectorType::value_type, bool>) {
+            // std::vector<bool> stores proxy references rather than bool references.
+            bool value;
+            cmnData<bool>::DeSerializeBinary(value, inputStream, localFormat, remoteFormat);
+            *iter = value;
+        } else {
+            cmnData<typename _vectorType::value_type>::DeSerializeBinary(*iter, inputStream, localFormat, remoteFormat);
+        }
     }
 }
 

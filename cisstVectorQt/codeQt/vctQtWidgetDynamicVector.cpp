@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnPortability.h>
 #include <cisstVectorQt/vctQtWidgetDynamicVector.h>
 
+#include <algorithm>
 #include <QHeaderView>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
@@ -61,6 +62,19 @@ void vctQtWidgetDynamicVectorReadFloating<_elementType>::SetFormat(const char fo
 template <class _elementType>
 bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValue(const Eigen::VectorX<_elementType> & vector)
 {
+    return SetValueInternal(vector);
+}
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValue(const std::vector<value_type> & vector)
+{
+    return SetValueInternal(vector);
+}
+
+template <class _elementType>
+template <class _containerType>
+bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValueInternal(const _containerType & vector)
+{
     // Qt uses int, not size_t
     const int size = static_cast<int>(vector.size());
     if (this->columnCount() != size) {
@@ -75,7 +89,7 @@ bool vctQtWidgetDynamicVectorReadFloating<_elementType>::SetValue(const Eigen::V
             tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
             this->setItem(0, index, tableItem);
         }
-        tableItem->setText(QString::number(vector(index), Format, Precision));
+        tableItem->setText(QString::number(static_cast<value_type>(vector[index]), Format, Precision));
     }
     return true;
 }
@@ -97,6 +111,19 @@ void vctQtWidgetDynamicVectorReadInteger<_elementType>::SetBase(const int base)
 template <class _elementType>
 bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValue(const Eigen::VectorX<_elementType> & vector)
 {
+    return SetValueInternal(vector);
+}
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValue(const std::vector<value_type> & vector)
+{
+    return SetValueInternal(vector);
+}
+
+template <class _elementType>
+template <class _containerType>
+bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValueInternal(const _containerType & vector)
+{
     // Qt uses int, not size_t
     const int size = static_cast<int>(vector.size());
     if (this->columnCount() != size) {
@@ -111,7 +138,7 @@ bool vctQtWidgetDynamicVectorReadInteger<_elementType>::SetValue(const Eigen::Ve
             tableItem->setFlags(tableItem->flags() ^ Qt::ItemIsEditable);
             this->setItem(0, index, tableItem);
         }
-        tableItem->setText(QString::number(vector(index), Base));
+        tableItem->setText(QString::number(static_cast<value_type>(vector[index]), Base));
     }
     return true;
 }
@@ -210,8 +237,8 @@ void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetFormat(const char f
 template <class _elementType>
 typename vctQtWidgetDynamicVectorWriteFloating<_elementType>::value_type
 vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMinimum(const size_t index) const {
-    if ((Eigen::Index)index < Minimums.size()) {
-        return Minimums(index);
+    if (index < Minimums.size()) {
+        return Minimums[index];
     }
     return Minimum;
 }
@@ -219,8 +246,8 @@ vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMinimum(const size_t ind
 template <class _elementType>
 typename vctQtWidgetDynamicVectorWriteFloating<_elementType>::value_type
 vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetMaximum(const size_t index) const {
-    if ((Eigen::Index)index < Maximums.size()) {
-        return Maximums(index);
+    if (index < Maximums.size()) {
+        return Maximums[index];
     }
     return Maximum;
 }
@@ -232,8 +259,8 @@ void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetRange(const value_t
     // set internal data members
     Minimum = minimum;
     Maximum = maximum;
-    Minimums.fill(minimum);
-    Maximums.fill(maximum);
+    std::fill(Minimums.begin(), Minimums.end(), minimum);
+    std::fill(Maximums.begin(), Maximums.end(), maximum);
     // update widgets
     UpdateWidgetRange();
 }
@@ -243,9 +270,18 @@ void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetRange(const Eigen::
                                                                    const Eigen::VectorX<value_type>& maximums)
 {
     // set internal data members
+    Minimums.assign(minimums.begin(), minimums.end());
+    Maximums.assign(maximums.begin(), maximums.end());
+    // update widgets
+    UpdateWidgetRange();
+}
+
+template <class _elementType>
+void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetRange(const std::vector<value_type> & minimums,
+                                                                   const std::vector<value_type> & maximums)
+{
     Minimums = minimums;
     Maximums = maximums;
-    // update widgets
     UpdateWidgetRange();
 }
 
@@ -283,6 +319,19 @@ void vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetStep(const value_ty
 template <class _elementType>
 bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const Eigen::VectorX<value_type>& vector, bool blockSignals)
 {
+    return SetValueInternal(vector, blockSignals);
+}
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const std::vector<value_type> & vector, bool blockSignals)
+{
+    return SetValueInternal(vector, blockSignals);
+}
+
+template <class _elementType>
+template <class _containerType>
+bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValueInternal(const _containerType & vector, bool blockSignals)
+{
     const bool previousBlockSignals = this->blockSignals(blockSignals);
 
     // Qt uses int, not size_t
@@ -300,7 +349,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const Eigen::
                 tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
                 this->setItem(0, index, tableItem);
             }
-            tableItem->setText(QString::number(vector(index), Format, Precision));
+            tableItem->setText(QString::number(static_cast<value_type>(vector[index]), Format, Precision));
         }
         break;
     case SPINBOX_WIDGET:
@@ -318,7 +367,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const Eigen::
                 connect(spinBox, SIGNAL(editingFinished()), this, SLOT(DoubleSpinBoxEditingFinishedSlot()));
                 this->setCellWidget(0, index, spinBox);
             }
-            spinBox->setValue(vector(index));
+            spinBox->setValue(static_cast<value_type>(vector[index]));
         }
         break;
     case SLIDER_WIDGET:
@@ -335,7 +384,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const Eigen::
                 connect(slider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChangedSlot(int)));
                 this->setCellWidget(0, index, slider);
             }
-            slider->setValue((vector(index) - GetMinimum(index)) / (GetMaximum(index) - GetMinimum(index)) * SLIDER_RESOLUTION);
+            slider->setValue((static_cast<value_type>(vector[index]) - GetMinimum(index)) / (GetMaximum(index) - GetMinimum(index)) * SLIDER_RESOLUTION);
         }
         break;
     default:
@@ -348,6 +397,19 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::SetValue(const Eigen::
 template <class _elementType>
 bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(Eigen::VectorX<value_type>& placeHolder) const
 {
+    return GetValueInternal(placeHolder);
+}
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(std::vector<value_type> & placeHolder) const
+{
+    return GetValueInternal(placeHolder);
+}
+
+template <class _elementType>
+template <class _containerType>
+bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValueInternal(_containerType & placeHolder) const
+{
     size_t index;
     const int columns = this->columnCount();
     if (columns != static_cast<int>(placeHolder.size())) {
@@ -358,7 +420,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(Eigen::Vector
         QTableWidgetItem * item;
         for (int column = 0; column < columns; ++column) {
             item = dynamic_cast<QTableWidgetItem*>(this->item(0, column));
-            placeHolder(column) = item->text().toDouble();
+            placeHolder[column] = item->text().toDouble();
         }
         break;
         break;
@@ -366,7 +428,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(Eigen::Vector
         QDoubleSpinBox * spinBox;
         for (int column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QDoubleSpinBox*>(this->cellWidget(0, column));
-            placeHolder(column) = spinBox->value();
+            placeHolder[column] = spinBox->value();
         }
         break;
     case SLIDER_WIDGET:
@@ -374,7 +436,7 @@ bool vctQtWidgetDynamicVectorWriteFloating<_elementType>::GetValue(Eigen::Vector
         for (int column = 0; column < columns; ++column) {
             index = static_cast<size_t>(column);
             slider = dynamic_cast<QSlider*>(this->cellWidget(0, column));
-            placeHolder(column) = static_cast<double>(slider->value()) / SLIDER_RESOLUTION * (GetMaximum(index) - GetMinimum(index)) + GetMinimum(index);
+            placeHolder[column] = static_cast<double>(slider->value()) / SLIDER_RESOLUTION * (GetMaximum(index) - GetMinimum(index)) + GetMinimum(index);
         }
         break;
     default:
@@ -421,6 +483,19 @@ void vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetStep(const value_typ
 template <class _elementType>
 bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const Eigen::VectorX<value_type>& vector, bool blockSignals)
 {
+    return SetValueInternal(vector, blockSignals);
+}
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const std::vector<value_type> & vector, bool blockSignals)
+{
+    return SetValueInternal(vector, blockSignals);
+}
+
+template <class _elementType>
+template <class _containerType>
+bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValueInternal(const _containerType & vector, bool blockSignals)
+{
     const bool previousBlockSignals = this->blockSignals(blockSignals);
 
     // Qt uses int, not size_t
@@ -438,7 +513,7 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const Eigen::V
                 tableItem->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
                 this->setItem(0, index, tableItem);
             }
-            tableItem->setText(QString::number(vector(index), Base));
+            tableItem->setText(QString::number(static_cast<value_type>(vector[index]), Base));
         }
         break;
     case SPINBOX_WIDGET:
@@ -455,7 +530,7 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const Eigen::V
                 connect(spinBox, SIGNAL(editingFinished()), this, SLOT(SpinBoxEditingFinishedSlot()));
                 this->setCellWidget(0, index, spinBox);
             }
-            spinBox->setValue(vector(index));
+            spinBox->setValue(static_cast<value_type>(vector[index]));
         }
         break;
     case SLIDER_WIDGET:
@@ -472,7 +547,7 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const Eigen::V
                 connect(slider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChangedSlot(int)));
                 this->setCellWidget(0, index, slider);
             }
-            slider->setValue(vector(index));
+            slider->setValue(static_cast<value_type>(vector[index]));
         }
         break;
     default:
@@ -485,6 +560,19 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::SetValue(const Eigen::V
 template <class _elementType>
 bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::GetValue(Eigen::VectorX<value_type>& placeHolder) const
 {
+    return GetValueInternal(placeHolder);
+}
+
+template <class _elementType>
+bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::GetValue(std::vector<value_type> & placeHolder) const
+{
+    return GetValueInternal(placeHolder);
+}
+
+template <class _elementType>
+template <class _containerType>
+bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::GetValueInternal(_containerType & placeHolder) const
+{
     const int columns = this->columnCount();
     if (columns != static_cast<int>(placeHolder.size())) {
         return false;
@@ -494,7 +582,7 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::GetValue(Eigen::VectorX
         QTableWidgetItem * item;
         for (int column = 0; column < columns; ++column) {
             item = dynamic_cast<QTableWidgetItem*>(this->item(0, column));
-            placeHolder(column) = item->text().toDouble();
+            placeHolder[column] = item->text().toDouble();
         }
         break;
         break;
@@ -502,14 +590,14 @@ bool vctQtWidgetDynamicVectorWriteInteger<_elementType>::GetValue(Eigen::VectorX
         QSpinBox * spinBox;
         for (int column = 0; column < columns; ++column) {
             spinBox = dynamic_cast<QSpinBox*>(this->cellWidget(0, column));
-            placeHolder(column) = spinBox->value();
+            placeHolder[column] = spinBox->value();
         }
         break;
     case SLIDER_WIDGET:
         QSlider * slider;
         for (int column = 0; column < columns; ++column) {
             slider = dynamic_cast<QSlider*>(this->cellWidget(0, column));
-            placeHolder(column) = slider->value();
+            placeHolder[column] = slider->value();
         }
         break;
     default:
@@ -541,6 +629,17 @@ void vctQtWidgetDynamicVectorBoolWrite::ValueChangedSlot(bool CMN_UNUSED(value))
 
 bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const Eigen::Ref<const Eigen::VectorX<bool>>& vector, bool blockSignals)
 {
+    return SetValueInternal(vector, blockSignals);
+}
+
+bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const std::vector<bool> & vector, bool blockSignals)
+{
+    return SetValueInternal(vector, blockSignals);
+}
+
+template <class _containerType>
+bool vctQtWidgetDynamicVectorBoolWrite::SetValueInternal(const _containerType & vector, bool blockSignals)
+{
     const bool previousBlockSignals = this->blockSignals(blockSignals);
 
     // Qt uses int, not size_t
@@ -556,7 +655,7 @@ bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const Eigen::Ref<const Eigen::V
             this->setCellWidget(0, index, checkBox);
             connect(checkBox, SIGNAL(toggled(bool)), this, SLOT(ValueChangedSlot(bool)));
         }
-        checkBox->setChecked(vector(index));
+        checkBox->setChecked(static_cast<bool>(vector[index]));
     }
     this->blockSignals(previousBlockSignals);
     return true;
@@ -564,11 +663,25 @@ bool vctQtWidgetDynamicVectorBoolWrite::SetValue(const Eigen::Ref<const Eigen::V
 
 bool vctQtWidgetDynamicVectorBoolWrite::GetValue(Eigen::Ref<Eigen::VectorX<bool>> placeHolder) const
 {
-    int columns = this->columnCount();
+    return GetValueInternal(placeHolder);
+}
+
+bool vctQtWidgetDynamicVectorBoolWrite::GetValue(std::vector<bool> & placeHolder) const
+{
+    return GetValueInternal(placeHolder);
+}
+
+template <class _containerType>
+bool vctQtWidgetDynamicVectorBoolWrite::GetValueInternal(_containerType & placeHolder) const
+{
+    const int columns = this->columnCount();
+    if (columns != static_cast<int>(placeHolder.size())) {
+        return false;
+    }
     QCheckBox * checkBox;
     for (int column = 0; column < columns; ++column) {
         checkBox = dynamic_cast<QCheckBox*>(this->cellWidget(0, column));
-        placeHolder(column) = checkBox->isChecked();
+        placeHolder[column] = checkBox->isChecked();
     }
     return true;
 }

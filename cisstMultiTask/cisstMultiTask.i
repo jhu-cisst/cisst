@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 %include "std_string.i"
 %include "std_vector.i"
+%include "std_array.i"
 %include "std_map.i"
 %include "std_pair.i"
 %include "std_streambuf.i"
@@ -56,6 +57,8 @@ http://www.cisst.org/cisst/license.txt.
 
 %template(mtsStringVector) std::vector<std::string>;
 %template(mtsDoubleVector) std::vector<double>;
+%template(mtsBoolVector) std::vector<bool>;
+%template(mtsDouble3) std::array<double, 3>;
 
 // Generate parameter documentation for IRE
 %feature("autodoc", "1");
@@ -674,6 +677,7 @@ MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsSizeT, size_t);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdString, std::string);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdStringVecProxy, stdStringVec);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdDoubleVecProxy, stdDoubleVec);
+MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdDouble3Proxy, stdDouble3);
 MTS_GENERIC_OBJECT_PROXY_INSTANTIATE(mtsStdCharVecProxy, stdCharVec);
 
 %include "cisstMultiTask/mtsParameterTypes.h"
