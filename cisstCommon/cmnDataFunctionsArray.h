@@ -23,6 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnDataFunctionsVectorHelpers.h>
+#include <array>
 
 // always include last
 #include <cisstCommon/cmnExport.h>
@@ -172,6 +173,83 @@ public:
             cmnThrow(std::out_of_range("cmnDataScalar: C array index out of range"));
         }
         return 0.123456789; // unreachable, just to avoid compiler warnings
+    }
+};
+
+template <class _elementType, size_t _size>
+class cmnData<std::array<_elementType, _size>>
+{
+public:
+    enum {IS_SPECIALIZED = 1};
+    typedef std::array<_elementType, _size> DataType;
+
+    static void Copy(DataType & data, const DataType & source)
+    {
+        for (size_t index = 0; index < _size; ++index) {
+            cmnData<_elementType>::Copy(data[index], source[index]);
+        }
+    }
+
+    static std::string HumanReadable(const DataType & data)
+    {
+        return cmnDataVectorHumanReadable(data);
+    }
+
+    static void SerializeText(const DataType & data, std::ostream & outputStream,
+                              const char delimiter)
+    {
+        cmnDataVectorSerializeText(data, outputStream, delimiter);
+    }
+
+    static void DeSerializeText(DataType & data, std::istream & inputStream,
+                                const char delimiter)
+    {
+        cmnDataVectorDeSerializeText(data, inputStream, delimiter);
+    }
+
+    static std::string SerializeDescription(const DataType & data, const char delimiter,
+                                            const std::string & userDescription = "v")
+    {
+        return cmnDataVectorSerializeDescription(data, delimiter, userDescription, false);
+    }
+
+    static void SerializeBinary(const DataType & data, std::ostream & outputStream)
+    {
+        cmnDataVectorSerializeBinary(data, outputStream);
+    }
+
+    static void DeSerializeBinary(DataType & data, std::istream & inputStream,
+                                  const cmnDataFormat & localFormat,
+                                  const cmnDataFormat & remoteFormat)
+    {
+        cmnDataVectorDeSerializeBinary(data, inputStream, localFormat, remoteFormat);
+    }
+
+    static bool ScalarNumberIsFixed(const DataType & data)
+    {
+        return data.empty() || cmnData<_elementType>::ScalarNumberIsFixed(data[0]);
+    }
+
+    static size_t ScalarNumber(const DataType & data)
+    {
+        return cmnDataVectorScalarNumber(data);
+    }
+
+    static std::string ScalarDescription(const DataType & data, const size_t index,
+                                         const std::string & userDescription = "v")
+    {
+        if (index >= ScalarNumber(data)) {
+            cmnThrow(std::out_of_range("cmnDataScalarDescription: std::array index out of range"));
+        }
+        return cmnDataVectorScalarDescription(data, index, userDescription);
+    }
+
+    static double Scalar(const DataType & data, const size_t index)
+    {
+        if (index >= ScalarNumber(data)) {
+            cmnThrow(std::out_of_range("cmnDataScalar: std::array index out of range"));
+        }
+        return cmnDataVectorScalar(data, index);
     }
 };
 

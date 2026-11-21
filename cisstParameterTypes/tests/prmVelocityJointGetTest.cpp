@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "prmVelocityJointGetTest.h"
 #include "prmTestGenericObjectConstructor.h"
-#include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstParameterTypes/prmVelocityJointGet.h>
 
@@ -37,20 +36,4 @@ void prmVelocityJointGetTest::TestConstructors(void)
     prmVelocityJointGet velocityCopy(velocity);
     prmTestGenericObjectCopyConstructor(velocity, velocityCopy);
     CPPUNIT_ASSERT(velocity.Velocity() == velocityCopy.Velocity());
-}
-
-
-void prmVelocityJointGetTest::TestSerialize(void)
-{
-    prmVelocityJointGet initial, final;
-    initial.SetSize(8);
-    // test part inherited from mtsGenericObject
-    prmSetAndTestGenericObjectSerialization(initial);
-    initial.Velocity() = Eigen::VectorXd::Random(initial.Velocity().size()) * 10.0;;
-
-    std::stringstream serializationStream;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    
-    CPPUNIT_ASSERT(final.Velocity() == initial.Velocity());
 }

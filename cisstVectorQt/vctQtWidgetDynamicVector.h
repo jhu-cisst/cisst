@@ -24,10 +24,13 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstVectorQt/vctForwardDeclarationsQt.h>
 #include <Eigen/Dense>
+#include <vector>
 
 // Always include last
 #include <cisstVectorQt/vctExportQt.h>
 
+// These widgets accept both Eigen vectors and std::vector, including packed
+// std::vector<bool>. GetValue requires an output container of matching size.
 class CISST_EXPORT vctQtWidgetDynamicVectorReadBase: public QTableWidget
 {
     Q_OBJECT;
@@ -45,8 +48,12 @@ class CISST_EXPORT vctQtWidgetDynamicVectorReadFloating: public vctQtWidgetDynam
 public:
     vctQtWidgetDynamicVectorReadFloating(void);
     virtual bool SetValue(const Eigen::VectorX<_elementType>& value);
+    virtual bool SetValue(const std::vector<value_type> & value);
     void SetPrecision(const int precision);
     void SetFormat(const char format);
+protected:
+    template <class _containerType>
+    bool SetValueInternal(const _containerType & value);
 };
 
 template <class _elementType>
@@ -58,7 +65,11 @@ class CISST_EXPORT vctQtWidgetDynamicVectorReadInteger: public vctQtWidgetDynami
 public:
     vctQtWidgetDynamicVectorReadInteger(void);
     virtual bool SetValue(const Eigen::VectorX<_elementType>& value);
+    virtual bool SetValue(const std::vector<value_type> & value);
     void SetBase(const int base);
+protected:
+    template <class _containerType>
+    bool SetValueInternal(const _containerType & value);
 };
 
 #if (CISST_OS == CISST_WINDOWS) && defined(CISST_COMPILER_IS_MSVC)
@@ -99,21 +110,28 @@ class CISST_EXPORT vctQtWidgetDynamicVectorWriteFloating: public vctQtWidgetDyna
     int Precision;
     char Format;
     value_type Minimum, Maximum, Step;
-    Eigen::VectorX<value_type> Minimums, Maximums;
+    std::vector<value_type> Minimums, Maximums;
 public:
     vctQtWidgetDynamicVectorWriteFloating(const DisplayModeType displayMode = TEXT_WIDGET);
     virtual bool SetValue(const Eigen::VectorX<value_type>& value, bool blockSignals = true);
     virtual bool GetValue(Eigen::VectorX<value_type>& placeHolder) const;
+    virtual bool SetValue(const std::vector<value_type> & value, bool blockSignals = true);
+    virtual bool GetValue(std::vector<value_type> & placeHolder) const;
     void SetPrecision(const int precision);
     void SetFormat(const char format);
     void SetRange(const value_type minimum, const value_type maximum);
     void SetRange(const Eigen::VectorX<value_type>& minimums, const Eigen::VectorX<value_type>& maximums);
+    void SetRange(const std::vector<value_type> & minimums, const std::vector<value_type> & maximums);
     void SetStep(const value_type step);
 protected:
     void UpdateWidgetPrecision(void);
     void UpdateWidgetRange(void);
     value_type GetMinimum(const size_t index) const;
     value_type GetMaximum(const size_t index) const;
+    template <class _containerType>
+    bool SetValueInternal(const _containerType & value, bool blockSignals);
+    template <class _containerType>
+    bool GetValueInternal(_containerType & placeHolder) const;
 };
 
 template <class _elementType>
@@ -126,9 +144,16 @@ public:
     vctQtWidgetDynamicVectorWriteInteger(const DisplayModeType displayMode = TEXT_WIDGET);
     virtual bool SetValue(const Eigen::VectorX<value_type>& value, bool blockSignals = true);
     virtual bool GetValue(Eigen::VectorX<value_type>& placeHolder) const;
+    virtual bool SetValue(const std::vector<value_type> & value, bool blockSignals = true);
+    virtual bool GetValue(std::vector<value_type> & placeHolder) const;
     void SetBase(const int base);
     void SetRange(const value_type minimum, const value_type maximum);
     void SetStep(const value_type step);
+protected:
+    template <class _containerType>
+    bool SetValueInternal(const _containerType & value, bool blockSignals);
+    template <class _containerType>
+    bool GetValueInternal(_containerType & placeHolder) const;
 };
 
 #if (CISST_OS == CISST_WINDOWS) && defined(CISST_COMPILER_IS_MSVC)
@@ -148,6 +173,13 @@ class CISST_EXPORT vctQtWidgetDynamicVectorBoolWrite: public QTableWidget
     vctQtWidgetDynamicVectorBoolWrite(void);
     virtual bool SetValue(const Eigen::Ref<const Eigen::VectorX<bool>>& value, bool blockSignals = true);
     virtual bool GetValue(Eigen::Ref<Eigen::VectorX<bool>> placeHolder) const;
+    virtual bool SetValue(const std::vector<bool> & value, bool blockSignals = true);
+    virtual bool GetValue(std::vector<bool> & placeHolder) const;
+protected:
+    template <class _containerType>
+    bool SetValueInternal(const _containerType & value, bool blockSignals);
+    template <class _containerType>
+    bool GetValueInternal(_containerType & placeHolder) const;
 signals:
     bool valueChanged(void);
 protected slots:

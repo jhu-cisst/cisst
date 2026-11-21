@@ -22,10 +22,9 @@ cisst_add_library (LIBRARY cisstTestsDriver
 set_property (TARGET cisstTestsDriver PROPERTY FOLDER "cisstCommon/tests")
 
 if (TARGET CppUnit::CppUnit)
-  target_link_libraries (cisstTestsDriver
-    CppUnit::CppUnit)
+  target_link_libraries (cisstTestsDriver CppUnit::CppUnit)
 else ()
-  target_include_directories (cisstTestsDriver PUBLIC "$<BUILD_INTERFACE:${CPPUNIT_INCLUDE_DIR}>")
+  target_include_directories (cisstTestsDriver PUBLIC "$<BUILD_INTERFACE:${CppUnit_INCLUDE_DIR}>")
 endif ()
 
 # add dependency to external project if needed

@@ -26,7 +26,6 @@ class prmVelocityCartesianGetTest: public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE(prmVelocityCartesianGetTest);
 
     CPPUNIT_TEST(TestConstructors);
-    CPPUNIT_TEST(TestSerialize);
 
     CPPUNIT_TEST_SUITE_END();
     
@@ -36,7 +35,6 @@ public:
     void tearDown(void) {}
     
     void TestConstructors(void);
-    void TestSerialize(void);
 };
 
 

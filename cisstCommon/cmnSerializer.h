@@ -34,6 +34,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <string>
 #include <vector>
+#include <array>
 #include <fstream>
 #include <cstddef>
 
@@ -113,12 +114,20 @@ inline void cmnSerializeRaw(std::ostream & outputStream, const std::string & dat
 }
 
 
-/*! Serialization helper function for an STL vector.  This function
-  first serializes the vector size and then calls cmnSerializeRaw
-  for each element of the vector (thus, it will only work if cmnSerializeRaw
-  is defined for the element type.  If the write
-  operation fails, an exception is thrown
-  (<code>std::runtime_error</code>). */
+template <class _elementType>
+inline void cmnSerializeRaw(std::ostream & outputStream, const std::vector<_elementType> & data)
+    CISST_THROW(std::runtime_error);
+
+/*! Serialize a fixed-size STL array element by element, without a size prefix. */
+template <class _elementType, size_t _size>
+inline void cmnSerializeRaw(std::ostream & outputStream, const std::array<_elementType, _size> & data)
+{
+    for (const auto & value : data) {
+        cmnSerializeRaw(outputStream, value);
+    }
+}
+
+/*! Serialize an STL vector's size followed by each element. */
 template <class _elementType>
 inline void cmnSerializeRaw(std::ostream & outputStream, const std::vector<_elementType> & data)
     CISST_THROW(std::runtime_error)

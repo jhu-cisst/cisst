@@ -162,6 +162,7 @@ macro (cisst_add_library ...)
                ${HEADERS}
                ${ADDITIONAL_HEADER_FILES}
                )
+  target_compile_features(${LIBRARY} PUBLIC c_std_99 cxx_std_17)
 
   # set version number
   set_target_properties (${LIBRARY} PROPERTIES

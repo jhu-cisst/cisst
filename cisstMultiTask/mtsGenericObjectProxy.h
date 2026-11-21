@@ -19,8 +19,13 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsGenericObjectProxy_h
 #define _mtsGenericObjectProxy_h
 
-#include "cisstCommon/cmnClassRegisterMacros.h"
-#include "cisstCommon/cmnClassServicesBase.h"
+#include <filesystem>
+#include <list>
+#include <string>
+#include <vector>
+
+#include <cisstCommon/cmnClassRegisterMacros.h>
+#include <cisstCommon/cmnClassServicesBase.h>
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnClassRegister.h>
 #include <cisstCommon/cmnSerializer.h>
@@ -32,9 +37,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDataFunctionsEigen.h>
 #include <cisstCommon/cmnDataFunctionsList.h>
 #include <cisstCommon/cmnDataFunctionsString.h>
+#include <cisstCommon/cmnDataFunctionsPath.h>
 #include <cisstCommon/cmnDataFunctionsVector.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsDataFunctionsChrono.h>
 #include <cisstMultiTask/mtsGenericObject.h>
 
 // Always include last!
@@ -43,6 +50,7 @@ http://www.cisst.org/cisst/license.txt.
 typedef std::vector<std::string> stdStringVec;
 typedef std::vector<double> stdDoubleVec;
 typedef std::vector<char> stdCharVec;
+typedef std::array<double, 3> stdDouble3;
 
 typedef std::list<std::string> stdStringList;
 
@@ -51,7 +59,7 @@ template <class _elementType> class mtsGenericObjectProxyBase;
 /*
   Note: the extra default-void template parameter is not normally used but
   added to support SFINAE-based template deduction, e.g. for Eigen types.
-  TODO: would we ever need it on the ProxyBase/ProxyRef types?
+  TODO BB: would we ever need it on the ProxyBase/ProxyRef types?
 */
 template <class _elementType, typename=void> class mtsGenericObjectProxy;
 template <class _elementType> class mtsGenericObjectProxyRef;
@@ -803,12 +811,18 @@ CMN_DECLARE_SERVICES_INSTANTIATION(mtsSizeT);
 typedef mtsGenericObjectProxy<std::string> mtsStdString;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdString);
 
+typedef mtsGenericObjectProxy<std::filesystem::path> mtsStdPath;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdPath);
+
 // Add Proxy to name to distinguish this from mtsVector<std::string>
 typedef mtsGenericObjectProxy<stdStringVec> mtsStdStringVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdStringVecProxy);
 
 typedef mtsGenericObjectProxy<stdDoubleVec> mtsStdDoubleVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDoubleVecProxy);
+
+typedef mtsGenericObjectProxy<stdDouble3> mtsStdDouble3Proxy;
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdDouble3Proxy);
 
 typedef mtsGenericObjectProxy<stdCharVec> mtsStdCharVecProxy;
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsStdCharVecProxy);
@@ -858,6 +872,10 @@ typedef mtsGenericObjectProxy<Eigen::Array<bool, 5, 1>> eigenarray5b;
 CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray5b);
 typedef mtsGenericObjectProxy<Eigen::Array<bool, 6, 1>> eigenarray6b;
 CMN_DECLARE_SERVICES_INSTANTIATION(eigenarray6b);
+
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<std::chrono::steady_clock::time_point>);
+CMN_DECLARE_SERVICES_INSTANTIATION(mtsGenericObjectProxy<std::chrono::steady_clock::duration>);
+
 
 // Default implementation if not explicitly provided
 

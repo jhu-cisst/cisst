@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _configuration_h
 #define _configuration_h
 
+#include <Eigen/Core>
 #include <cisstCommon/cmnUnits.h>
-#include <cisstVectorQt/vctDynamicVector.h>
 
 const double confClientPeriod = 1.0 * cmn_ms;
 const double confServerPeriod = 1.0 * cmn_ms;
@@ -31,12 +31,10 @@ const double confServerPeriod = 1.0 * cmn_ms;
 const unsigned int confNumberOfSamples = 10000;
 const unsigned int confNumberOfSamplesToSkip = 1000;
 
-inline double StandardDeviation(vctDynamicConstVectorRef<double> vector) {
-    vctDynamicVector<double> copy(vector);
-    double average = copy.SumOfElements() / copy.size();
-    copy.Subtract(average);
-    double normSquare = copy.NormSquare();
-    return sqrt(normSquare / copy.size());
+inline double StandardDeviation(const Eigen::VectorXd& vector) {
+    double average = vector.sum() / vector.size();
+    double normSquare = (vector.array() - average).matrix().squaredNorm();
+    return sqrt(normSquare / vector.size());
 }
 
 

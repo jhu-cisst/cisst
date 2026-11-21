@@ -27,9 +27,8 @@ http://www.cisst.org/cisst/license.txt.
 #define _cmnStreamRawParser_h
 
 #include <iostream>
-#include <string>
 #include <set>
-#include <functional>
+#include <string>
 
 #include <cisstCommon/cmnDataFunctions.h>
 #include <cisstCommon/cmnLogger.h>
@@ -180,9 +179,9 @@ class CISST_EXPORT cmnStreamRawParser
    };
 
    // Comparison operator for std::set
-   struct KeyListLess: public std::binary_function<const cmnStreamRawParser::EntryBase*, const cmnStreamRawParser::EntryBase*, bool>
+   struct KeyListLess
    {
-       result_type operator()(first_argument_type p1, second_argument_type p2) const
+       bool operator()(const cmnStreamRawParser::EntryBase* p1, const cmnStreamRawParser::EntryBase* p2) const
       {
           return p1->GetKey() < p2->GetKey();
       }

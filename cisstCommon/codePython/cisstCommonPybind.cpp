@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl/filesystem.h>
 
 #include <sstream>
 
@@ -27,7 +28,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnObjectRegister.h>
 #include <cisstCommon/cmnLogLoD.h>
 #include <cisstCommon/cmnLogger.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 #include <cisstCommon/cmnJointType.h>
 
 namespace py = pybind11;
@@ -112,20 +113,25 @@ PYBIND11_MODULE(cisstCommonPython, m)
                     py::arg("mask") = CMN_LOG_ALLOW_ALL);
 
     {
-        py::class_<cmnPath, cmnGenericObject> pathCls(m, "cmnPath");
-        py::enum_<decltype(cmnPath::HEAD)>(pathCls, "Position")
-            .value("HEAD", cmnPath::HEAD)
-            .value("TAIL", cmnPath::TAIL)
+        py::class_<cmnSearchPath, cmnGenericObject> pathCls(m, "cmnSearchPath");
+        py::enum_<cmnSearchPath::Position>(pathCls, "Position")
+            .value("HEAD", cmnSearchPath::Position::HEAD)
+            .value("TAIL", cmnSearchPath::Position::TAIL)
             .export_values();
         pathCls
             .def(py::init<>())
-            .def(py::init<const std::string &>())
-            .def("Add", &cmnPath::Add, py::arg("path"), py::arg("position") = cmnPath::TAIL)
-            .def("Find", [](const cmnPath & self, const std::string & filename) {
-                return self.Find(filename);
-            }, py::arg("filename"))
-            .def_static("Exists", &cmnPath::Exists)
-            .def_static("GetWorkingDirectory", &cmnPath::GetWorkingDirectory);
+            .def(py::init<const std::filesystem::path &>())
+            .def("Set", py::overload_cast<const std::filesystem::path &>(&cmnSearchPath::Set))
+            .def("Add", py::overload_cast<const std::filesystem::path &, cmnSearchPath::Position>(&cmnSearchPath::Add),
+                 py::arg("path"), py::arg("position") = cmnSearchPath::Position::HEAD)
+            .def("Find", py::overload_cast<const std::filesystem::path &>(&cmnSearchPath::Find, py::const_),
+                 py::arg("filename"))
+            .def("AddFromEnvironment", &cmnSearchPath::AddFromEnvironment,
+                 py::arg("variableName"), py::arg("position") = cmnSearchPath::Position::HEAD)
+            .def("Remove", py::overload_cast<const std::filesystem::path &>(&cmnSearchPath::Remove))
+            .def("Has", py::overload_cast<const std::filesystem::path &>(&cmnSearchPath::Has, py::const_))
+            .def_static("SharedLibrary", &cmnSearchPath::SharedLibrary)
+            .def_static("Executable", &cmnSearchPath::Executable);
     }
 
     cdgBind_cisstCommon_cmnJointType(m);

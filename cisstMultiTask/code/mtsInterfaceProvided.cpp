@@ -18,8 +18,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnPortability.h>
 #include <cisstCommon/cmnStrings.h>
-#include <cisstOSAbstraction/osaThread.h>
-#include <cisstOSAbstraction/osaThreadBuddy.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
 #include <cisstMultiTask/mtsCommandQueuedVoidReturn.h>

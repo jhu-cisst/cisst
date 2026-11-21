@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstConfig.h>
 #include <cisstCommon/cmnObjectRegister.h>
-#include <cisstCommon/cmnPath.h>
+#include <cisstCommon/cmnSearchPath.h>
 
 
 #include <Python.h>
@@ -58,7 +58,7 @@ int main(void) {
     std::cout << "*** List from C: " << cmnObjectRegister::ToString() << std::endl;
 
     std::string cisstRoot;
-    if (!cmnPath::GetCisstRoot(cisstRoot)) {
+    if (!cmnSearchPath::GetCisstRoot(cisstRoot)) {
         std::cout << "Can't find environment variable CISST_ROOT" << std::endl;
         exit(0);
     }
@@ -106,7 +106,7 @@ int main(void) {
     std::cout << "*** Load a Python script and execute it" << std::endl;
     bool FileFound = true;
     FILE * fp = NULL;
-    cmnPath path;
+    cmnSearchPath path;
     path.AddRelativeToCisstRoot("/bin");
     std::string fullName = path.Find("pythonEmbedded.py");
     if (fullName == "") {

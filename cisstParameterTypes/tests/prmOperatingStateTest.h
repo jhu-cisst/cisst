@@ -24,7 +24,6 @@ class prmOperatingStateTest: public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE(prmOperatingStateTest);
 
     CPPUNIT_TEST(TestConstructors);
-    CPPUNIT_TEST(TestSerialize);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -34,7 +33,6 @@ public:
     void tearDown(void) {}
 
     void TestConstructors(void);
-    void TestSerialize(void);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(prmOperatingStateTest);

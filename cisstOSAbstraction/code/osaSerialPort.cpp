@@ -29,7 +29,6 @@ http://www.cisst.org/cisst/license.txt.
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <string.h>
 #endif
 
 /* MJUNG: For detailed information about serial/parallel devices on QNX, please refer
@@ -43,7 +42,7 @@ http://www.cisst.org/cisst/license.txt.
 
 std::string osaSerialPort::SetPortNumber(unsigned int portNumber) {
     std::stringstream portName;
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI)
     portName << "/dev/ttyS" << (portNumber - 1);
 #elif (CISST_OS == CISST_WINDOWS)
     if (portNumber < 10)
@@ -111,7 +110,7 @@ bool osaSerialPort::Open(bool blocking) {
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 bool osaSerialPort::Open(bool) {
     CMN_LOG_CLASS_INIT_VERBOSE << "Start Open for port " << this->PortName << std::endl;
     // check that the port is not already opened
@@ -166,7 +165,7 @@ bool osaSerialPort::Close(void)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 bool osaSerialPort::Close(void)
 {
     if (this->IsOpenedFlag) {
@@ -281,7 +280,7 @@ bool osaSerialPort::Configure(void) {
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 bool osaSerialPort::Configure(void) {
 
     CMN_LOG_CLASS_INIT_VERBOSE << "Start Configure for port " << this->PortName << std::endl;
@@ -297,7 +296,7 @@ bool osaSerialPort::Configure(void) {
     tcgetattr(this->FileDescriptor, &portOptions);
 
     // set input and output speed
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI)
     cfsetspeed(&portOptions, this->BaudRate); // might be BSD only, if doesn't compile/work on Linux use CISST_DARWIN
 #endif
     cfsetispeed(&portOptions, this->BaudRate);
@@ -462,7 +461,7 @@ int osaSerialPort::Write(const char * data, int nBytes)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 int osaSerialPort::Write(const char * data, int nBytes)
 {
     // check that the port is opened
@@ -523,7 +522,7 @@ int osaSerialPort::Write(const unsigned char * data, int nBytes)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 int osaSerialPort::Write(const unsigned char * data, int nBytes)
 {
     // check that the port is opened
@@ -603,7 +602,7 @@ int osaSerialPort::Read(char * data, int nBytes)
 #endif
 
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 int osaSerialPort::Read(char * data, int nBytes)
 {
     // check that the port is opened
@@ -676,7 +675,7 @@ int osaSerialPort::Read(unsigned char * data, int nBytes)
 #endif
 
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 int osaSerialPort::Read(unsigned char * data, int nBytes)
 {
     // check that the port is opened
@@ -713,12 +712,12 @@ bool osaSerialPort::WriteBreak(double breakLengthInSeconds)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_LINUX_XENOMAI) || (CISST_OS == CISST_QNX)
 bool osaSerialPort::WriteBreak(double breakLengthInSeconds)
 {
-#if (CISST_OS == LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_QNX)
+#if (CISST_OS == LINUX) || (CISST_OS == CISST_QNX)
     breakLengthInSeconds *= 1000.0; // tcsendbreak on Linux uses milliseconds.
-#endif // CISST_LINUX || CISST_LINUX_RTAI
+#endif // CISST_LINUX || CISST_QNX
 
     // check that the port is opened
     if (!this->IsOpenedFlag) {
@@ -766,7 +765,7 @@ bool osaSerialPort::Flush(void)
 }
 #endif
 
-#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_LINUX_RTAI) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
+#if (CISST_OS == CISST_LINUX) || (CISST_OS == CISST_DARWIN) || (CISST_OS == CISST_QNX) || (CISST_OS == CISST_LINUX_XENOMAI)
 bool osaSerialPort::Flush(void)
 {
     // check that the port is opened

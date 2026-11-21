@@ -50,14 +50,11 @@ serverTask::serverTask(const std::string & taskName, double period):
         provided->AddEventWrite(this->EventWrite, "EventWrite", value_type());
     }
 
-    // Get a pointer to the time server
-    this->TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
-
     // Make sure we timestamp ourselves
     this->ReadValue.SetAutomaticTimestamp(false);
 
     // Allocates space for samples
-    this->Samples.SetSize(confNumberOfSamples);
+    this->Samples = Eigen::VectorXd::Zero(confNumberOfSamples);
 }
 
 
@@ -69,17 +66,16 @@ void serverTask::Write(const value_type & data)
             this->NumberOfskippedElement++;
         } else {
             double originalTime = data.Timestamp();
-            double currentTime = TimeServer->GetRelativeTime();
-            this->Samples.Element(this->SamplesCollected) = (currentTime - originalTime);
+            double currentTime = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
+            this->Samples(this->SamplesCollected) = (currentTime - originalTime);
             this->SamplesCollected++;
         }
     }
     if (this->SamplesCollected == confNumberOfSamples) {
         this->BenchmarkDoneMember = true;
-        double average = Samples.SumOfElements() / Samples.size();
-        double min = 0.0;
-        double max = 0.0;
-        Samples.MinAndMaxElement(min, max);
+        double average = Samples.array().sum() / Samples.size();
+        double min = Samples.minCoeff();
+        double max = Samples.maxCoeff();
         std::cout << "scs: server->client->server: client read (previous cycle data) and writes back (queued)" << std::endl
                   << "scs: Client period (ms): " << cmnInternalTo_ms(confClientPeriod) << std::endl
                   << "scs: Server period (ms): " << cmnInternalTo_ms(confServerPeriod) << std::endl
@@ -111,8 +107,7 @@ void serverTask::Run(void)
     ProcessQueuedCommands();
 
     // at the end, timestamp the ReadValue
-    double time;
-    time = this->TimeServer->GetRelativeTime();
+    double time = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
     this->ReadValue.SetTimestamp(time);
 }
 

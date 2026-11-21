@@ -1,9 +1,8 @@
 name: Ubuntu 22.04
 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ main, devel ]
+    branches: [ main, devel, cisst2 ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -102,9 +101,7 @@ jobs:
           -DCISST_cisstCommon_EXAMPLES=ON \
           -DCISST_cisstOSAbstraction_EXAMPLES=ON \
           -DCISST_cisstMultiTask_EXAMPLES=ON \
-          -DCISST_cisstParameterTypes_EXAMPLES=ON \
-          -DCISST_cisstRobot_EXAMPLES=ON \
-          -DCISST_cisstMesh_EXAMPLES=ON
+          -DCISST_cisstParameterTypes_EXAMPLES=ON
 
     - name: Build examples
       working-directory: build

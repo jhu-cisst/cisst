@@ -21,12 +21,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsCollectorState.h>
 
 #include <cisstCommon/cmnThrow.h>
-#include <cisstOSAbstraction/osaGetTime.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
+#include <cisstOSAbstraction/osaTime.h>
 
 #include <iostream>
 #include <fstream>
@@ -218,7 +217,7 @@ void mtsCollectorState::Run(void)
 }
 
 
-void mtsCollectorState::StartCollection(const double & delay)
+void mtsCollectorState::StartCollection(double delay)
 {
     mtsExecutionResult result = this->StateTableStartCollection(delay);
     if (!result.IsOK()) {
@@ -229,7 +228,7 @@ void mtsCollectorState::StartCollection(const double & delay)
 }
 
 
-void mtsCollectorState::StopCollection(const double & delay)
+void mtsCollectorState::StopCollection(double delay)
 {
     mtsExecutionResult result = this->StateTableStopCollection(delay);
     if (!result.IsOK()) {
@@ -381,9 +380,6 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
     std::string currentDateTime;
     std::ostringstream out;
     osaGetDateTimeString(currentDateTime);
-    const osaTimeServer & timeServer = mtsManagerLocal::GetInstance()->GetTimeServer();
-    osaAbsoluteTime origin;
-    timeServer.GetTimeOrigin(origin);
     out.precision(20);
     if (this->OutputHeaderStream) {
         this->OutputHeaderStream->precision(20);
@@ -421,8 +417,7 @@ void mtsCollectorState::PrintHeader(const CollectorFileFormat & fileFormat)
         // File Name
         *(this->OutputHeaderStream) << this->OutputFileName << std::endl;
         // Date
-        *(this->OutputHeaderStream) << currentDateTime << " ";
-        *(this->OutputHeaderStream) << origin.ToSeconds() << std::endl;
+        *(this->OutputHeaderStream) << currentDateTime << std::endl;
         // Format
         if (fileFormat == COLLECTOR_FILE_FORMAT_PLAIN_TEXT) {
             *(this->OutputHeaderStream) << "Text" << std::endl ;

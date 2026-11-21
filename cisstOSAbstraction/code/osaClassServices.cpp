@@ -28,8 +28,3 @@ CMN_IMPLEMENT_SERVICES(osaSocket);
 
 #include <cisstOSAbstraction/osaSocketServer.h>
 CMN_IMPLEMENT_SERVICES(osaSocketServer);
-
-#include <cisstOSAbstraction/osaTimeServer.h>
-CMN_IMPLEMENT_SERVICES(osaTimeServer);
-
-

@@ -31,6 +31,7 @@ class cmnDataFunctionsVectorTest: public CppUnit::TestFixture
         CPPUNIT_TEST(TestBinarySerializationStream);
         CPPUNIT_TEST(TestTextSerializationStream);
         CPPUNIT_TEST(TestScalars);
+        CPPUNIT_TEST(TestStandardContainers);
     }
     CPPUNIT_TEST_SUITE_END();
 
@@ -45,6 +46,7 @@ class cmnDataFunctionsVectorTest: public CppUnit::TestFixture
     void TestTextSerializationStream(void);
     void TestBinarySerializationStream(void);
     void TestScalars(void);
+    void TestStandardContainers(void);
 };
 
 

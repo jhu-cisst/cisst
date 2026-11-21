@@ -15,6 +15,9 @@
 project (cisstMultiTaskPython)
 
 # create wrappers using pybind11
+# Generated in the sibling code directory by cisstDataGenerator.
+set_source_files_properties (${cisstMultiTask_CISST_DG_PYTHON_SRCS} PROPERTIES GENERATED TRUE)
+
 cisst_add_pybind11_module (MODULE _cisstMultiTaskPython
                            FOLDER cisstMultiTask
                            SOURCES cisstMultiTaskPybind.cpp ${cisstMultiTask_CISST_DG_PYTHON_SRCS}

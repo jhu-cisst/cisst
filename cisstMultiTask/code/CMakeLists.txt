@@ -69,8 +69,6 @@ set (SOURCE_FILES
      mtsInterfaceRequired.cpp
      mtsIntervalStatistics.cpp
 
-     mtsLODMultiplexerStreambuf.cpp
-
      mtsMailBox.cpp
      mtsManagerLocal.cpp
      mtsManagerComponentBase.cpp
@@ -131,6 +129,8 @@ set (HEADER_FILES
      mtsComponentGeneratorMacros.h
      mtsComponentViewer.h
 
+     mtsDataFunctionsChrono.h
+
      mtsDelayedConnections.h
      mtsEventReceiver.h
      mtsExport.h
@@ -151,8 +151,6 @@ set (HEADER_FILES
      mtsInterface.h
      mtsInterfaceProvided.h
      mtsInterfaceRequired.h
-
-     mtsLODMultiplexerStreambuf.h
 
      mtsMacros.h
      mtsMailBox.h

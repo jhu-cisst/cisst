@@ -24,8 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstInteractive/ireFramework.h>
 
 #ifdef CISST_OSATHREAD
-#include <cisstOSAbstraction/osaThread.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstOSAbstraction/osaThread.h>
 #endif
 
 #if (CISST_OS == CISST_DARWIN)
@@ -33,6 +33,9 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 using namespace std;
+
+#include <chrono> // IWYU pragma: keep
+using namespace std::chrono_literals;
 
 #include "SineGenerator.h"
 
@@ -47,7 +50,7 @@ using namespace std;
 // corresponding to cases 1 and 2 respectively.
 //
 
-int main(int argc, char *argv[])
+int main(int CMN_UNUSED(argc), char *CMN_UNUSED(argv[]))
 {
 
 #if (CISST_OS == CISST_DARWIN)
@@ -115,7 +118,7 @@ int main(int argc, char *argv[])
     // Wait for IRE to initialize itself
     while (ireFramework::IsStarting()) {
 #ifdef CISST_OSATHREAD
-        osaSleep(0.5);  // Wait 0.5 seconds
+        osaSleep(0.5s);  // Wait 0.5 seconds
 #else
         // Need following call to give the IRE thread some time to execute.
         ireFramework::JoinIREShell(0.001);

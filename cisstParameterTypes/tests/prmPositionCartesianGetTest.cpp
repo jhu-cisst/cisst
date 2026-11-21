@@ -20,7 +20,6 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "prmPositionCartesianGetTest.h"
 #include "prmTestGenericObjectConstructor.h"
-#include "prmSetAndTestGenericObjectSerialization.h"
 
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 #include <Eigen/Geometry>
@@ -38,21 +37,6 @@ void prmPositionCartesianGetTest::TestConstructors(void)
     prmPositionCartesianGet positionCopy(position);
     prmTestGenericObjectCopyConstructor(position, positionCopy);
     CPPUNIT_ASSERT(position.Position().matrix() == positionCopy.Position().matrix());
-}
-
-
-void prmPositionCartesianGetTest::TestSerialize(void)
-{
-    prmPositionCartesianGet initial, final;
-    // test part inherited from mtsGenericObject
-    prmSetAndTestGenericObjectSerialization(initial);
-
-    initial.Position().translation() = Eigen::Vector3d::Random() * 10.0;;
-    initial.Position().linear() = Eigen::Quaterniond::UnitRandom().toRotationMatrix();
-    std::stringstream serializationStream;
-    initial.SerializeRaw(serializationStream);
-    final.DeSerializeRaw(serializationStream);
-    CPPUNIT_ASSERT(final.Position().matrix() == initial.Position().matrix());
 }
 
 

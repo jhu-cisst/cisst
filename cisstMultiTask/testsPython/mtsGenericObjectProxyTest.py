@@ -20,6 +20,13 @@ import cisstCommonPython
 import cisstMultiTaskPython
 
 class GenericObjectProxyTest(unittest.TestCase):
+    def Test_mtsStdDouble3Proxy(self):
+        values = [0.3, 700.0, 0.5]
+        variable = cisstMultiTaskPython.mtsStdDouble3Proxy(values)
+        self.assertEqual(list(variable.Data), values)
+        variable.Data = [0.1, 1200.0, 0.2]
+        self.assertEqual(list(variable.GetDataCopy()), [0.1, 1200.0, 0.2])
+
     def setUp(self):
         """Call before every test case."""
 

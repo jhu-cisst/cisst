@@ -77,8 +77,8 @@ bool mtsMailBox::ExecuteNext(void)
    mtsGenericObject *resultPointer = 0;
    mtsCommandWriteBase *finishedEvent = 0;
 
+   // TODO BB: yikes! replace with RAII
    bool isBlocking = false;
-   bool isBlockingReturn = false;
    try {
        if (!(*command)->Returns()) {
            switch ((*command)->NumberOfArguments()) {
@@ -110,7 +110,6 @@ bool mtsMailBox::ExecuteNext(void)
                    CMN_ASSERT(commandRead);
                    resultPointer = commandRead->ReturnGet();
                    finishedEvent = commandRead->FinishedEventGet();
-                   isBlockingReturn = true;
                    result = commandRead->GetCallable()(*resultPointer);
                }
                break;
@@ -121,7 +120,6 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandQualifiedRead);
                resultPointer = commandQualifiedRead->ReturnGet();
                finishedEvent = commandQualifiedRead->FinishedEventGet();
-               isBlockingReturn = true;
                try {
                    result = commandQualifiedRead->GetCallable()( *(commandQualifiedRead->ArgumentPeek()), *resultPointer);
                }
@@ -142,7 +140,6 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandVoidReturn);
                resultPointer = commandVoidReturn->ReturnGet();
                finishedEvent = commandVoidReturn->FinishedEventGet();
-               isBlockingReturn = true;
                result = commandVoidReturn->GetCallable()(*resultPointer);
                break;
            case 1:
@@ -150,7 +147,6 @@ bool mtsMailBox::ExecuteNext(void)
                CMN_ASSERT(commandWriteReturn);
                resultPointer = commandWriteReturn->ReturnGet();
                finishedEvent = commandWriteReturn->FinishedEventGet();
-               isBlockingReturn = true;
                try {
                    result = commandWriteReturn->GetCallable()( *(commandWriteReturn->ArgumentPeek()), *resultPointer);
                }
@@ -196,27 +192,27 @@ bool mtsMailBox::ExecuteNext(void)
 void mtsMailBox::TriggerFinishedEventIfNeeded(const std::string &commandName, mtsCommandWriteBase *finishedEvent,
                                               mtsGenericObject *resultPointer, const mtsExecutionResult &result) const
 {
-   if (finishedEvent) {
-       mtsExecutionResult evt_result(mtsExecutionResult::COMMAND_SUCCEEDED);
-       if (resultPointer) {
-           if (resultPointer->Valid() != result.IsOK()) {
-               CMN_LOG_RUN_WARNING << "TriggerFinishedEventIfNeeded: result valid = " << resultPointer->Valid()
-                                   << ", result OK = " << result.IsOK()
-                                   << ", msg = " << mtsExecutionResult::ToString(result.Value())
-                                   << ", msg type = " << resultPointer->Services()->GetName()
-                                   << ", command name = " << commandName << std::endl;
-           }
-           resultPointer->SetValid(result.IsOK());  // Set data valid flag based on execution result
-           evt_result = finishedEvent->Execute(*resultPointer, MTS_NOT_BLOCKING);
-       }
-       else {
-           evt_result = finishedEvent->Execute(mtsExecutionResultProxy(result), MTS_NOT_BLOCKING);
-       }
-       if (!evt_result.IsOK()) {
-           CMN_LOG_RUN_ERROR << "mtsMailbox: Failed to execute FinishedEvent for command " << commandName
-                             << ", result = " << evt_result << std::endl;
-       }
-   }
+    if (!finishedEvent) { return; }
+
+    mtsExecutionResult evt_result(mtsExecutionResult::COMMAND_SUCCEEDED);
+    if (resultPointer) {
+        if (resultPointer->Valid() != result.IsOK()) {
+            CMN_LOG_RUN_WARNING << "TriggerFinishedEventIfNeeded: result valid = " << resultPointer->Valid()
+                                << ", result OK = " << result.IsOK()
+                                << ", msg = " << mtsExecutionResult::ToString(result.Value())
+                                << ", msg type = " << resultPointer->Services()->GetName()
+                                << ", command name = " << commandName << std::endl;
+        }
+        resultPointer->SetValid(result.IsOK());  // Set data valid flag based on execution result
+        evt_result = finishedEvent->Execute(*resultPointer, MTS_NOT_BLOCKING);
+    } else {
+        evt_result = finishedEvent->Execute(mtsExecutionResultProxy(result), MTS_NOT_BLOCKING);
+    }
+
+    if (!evt_result.IsOK()) {
+        CMN_LOG_RUN_ERROR << "mtsMailbox: Failed to execute FinishedEvent for command " << commandName
+                            << ", result = " << evt_result << std::endl;
+    }
 }
 
 void mtsMailBox::SetSize(size_t size)

@@ -394,8 +394,8 @@ PYBIND11_MODULE(_cisstMultiTaskPython, m)
 
     // mtsCollectorBase & mtsCollectorState
     py::class_<mtsCollectorBase, mtsTaskFromSignal>(m, "mtsCollectorBase")
-        .def("StartCollection", py::overload_cast<const double &>(&mtsCollectorBase::StartCollection))
-        .def("StopCollection", py::overload_cast<const double &>(&mtsCollectorBase::StopCollection))
+        .def("StartCollection", &mtsCollectorBase::StartCollection)
+        .def("StopCollection", &mtsCollectorBase::StopCollection)
         .def("SetOutputToDefault", py::overload_cast<>(&mtsCollectorBase::SetOutputToDefault));
 
     py::class_<mtsCollectorState, mtsCollectorBase>(m, "mtsCollectorState")
@@ -436,6 +436,7 @@ PYBIND11_MODULE(_cisstMultiTaskPython, m)
     bindGenericObjectProxy<std::string>(m, "mtsStdString");
     bindGenericObjectProxy<stdStringVec>(m, "mtsStdStringVecProxy");
     bindGenericObjectProxy<stdDoubleVec>(m, "mtsStdDoubleVecProxy");
+    bindGenericObjectProxy<stdDouble3>(m, "mtsStdDouble3Proxy");
     bindGenericObjectProxy<stdCharVec>(m, "mtsStdCharVecProxy");
     bindGenericObjectProxy<mtsDescriptionConnectionVec>(m, "mtsDescriptionConnectionVecProxy");
     bindGenericObjectProxy<mtsDescriptionComponentClassVec>(m, "mtsDescriptionComponentClassVecProxy");

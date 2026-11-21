@@ -30,13 +30,11 @@ class clientTask: public mtsTaskPeriodic {
 protected:
     mtsFunctionQualifiedRead QualifiedReadFunction;
 
-    const osaTimeServer * TimeServer;
-    
     unsigned int NumberOfSamplesSkipped;
 	unsigned int NumberOfSamplesCollected;
     bool BenchmarkCompleted;
 
-    vctDynamicVector<double> Results;
+    Eigen::VectorXd Results;
 
 public:
     // see sineTask.h documentation

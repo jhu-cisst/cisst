@@ -26,7 +26,6 @@ class prmPositionJointGetTest: public CppUnit::TestFixture
     CPPUNIT_TEST_SUITE(prmPositionJointGetTest);
     {
         CPPUNIT_TEST(TestConstructors);
-        CPPUNIT_TEST(TestSerialize);
         CPPUNIT_TEST(TestTimestamps);
     }
     CPPUNIT_TEST_SUITE_END();
@@ -37,7 +36,6 @@ public:
     void tearDown(void) {}
 
     void TestConstructors(void);
-    void TestSerialize(void);
     void TestTimestamps(void);
 };
 

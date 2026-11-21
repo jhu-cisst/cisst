@@ -51,10 +51,10 @@ http://www.cisst.org/cisst/license.txt.
 #define CISST_WINDOWS        1
 #define CISST_LINUX          2
 #define CISST_RTLINUX        3
-#define CISST_IRIX           4
-#define CISST_SOLARIS        5
-#define CISST_LINUX_RTAI     6
-#define CISST_CYGWIN         7
+//#define CISST_IRIX           4
+//#define CISST_SOLARIS        5
+//#define CISST_LINUX_RTAI     6
+//#define CISST_CYGWIN         7
 #define CISST_DARWIN         8
 #define CISST_QNX            9
 #define CISST_LINUX_XENOMAI 10
@@ -107,44 +107,17 @@ http://www.cisst.org/cisst/license.txt.
   #if (defined(linux) || defined(__linux__)) // see cpp -dM and ctrl+d
     #define CISST_OS CISST_LINUX
   #endif // linux
-  #if CISST_HAS_LINUX_RTAI // overwrite if RTAI
-    #undef CISST_OS
-    #define CISST_OS CISST_LINUX_RTAI
-  #endif // linux RTAI
   #if CISST_HAS_LINUX_XENOMAI // overwrite if Xenomai
     #undef CISST_OS
     #define CISST_OS CISST_LINUX_XENOMAI
   #endif // linux Xenomai
-  #ifdef sun
-    #define CISST_OS CISST_SOLARIS
-  #endif // sun
-  #ifdef sgi
-    #define CISST_OS CISST_IRIX
-  #endif // sgi
-  #ifdef __CYGWIN__
-    #define CISST_OS CISST_CYGWIN
-  #endif // __CYGWIN__
   #ifdef __APPLE__
     #define CISST_OS CISST_DARWIN
   #endif // __APPLE__
   #ifdef __QNX__
     #define CISST_OS CISST_QNX
   #endif // __QNX__
-#else // __GNUC__
-  #ifdef sgi
-    #define CISST_OS CISST_IRIX
-    #ifndef __GNUC__
-       #define CISST_COMPILER CISST_SGI_CC
-    #endif
-  #endif // sgi
-  #ifdef sun
-    #define CISST_OS CISST_SOLARIS
-    #ifndef __GNUC__
-       #define CISST_COMPILER CISST_SUN_CC
-    #endif
-  #endif // sun
 #endif // __GNUC__
-
 
 // CLang compiler
 #ifdef __clang__  // clang -dM -E -x c /dev/null
@@ -152,12 +125,11 @@ http://www.cisst.org/cisst/license.txt.
   #define CISST_COMPILER CISST_CLANG
 #endif // __clang__
 
-
 // Microsoft compilers
 #ifdef _WIN32  // see msdn.microsoft.com
-// we require Windows 2000, XP or more
+// we require Windows 10, 11, or higher
 #ifndef _WIN32_WINNT
-  #define _WIN32_WINNT 0x0500
+  #define _WIN32_WINNT 0x0A00
 #endif
   #define CISST_OS CISST_WINDOWS
 
@@ -201,10 +173,6 @@ http://www.cisst.org/cisst/license.txt.
   #if defined (__linux__) // linux
     #define CISST_OS CISST_LINUX
   #endif // linux
-  #if CISST_HAS_LINUX_RTAI // overwrite if RTAI
-    #undef CISST_OS
-    #define CISST_OS CISST_LINUX_RTAI
-  #endif // linux RTAI
   #if CISST_HAS_LINUX_XENOMAI // overwrite if Xenomai
     #undef CISST_OS
     #define CISST_OS CISST_LINUX_XENOMAI
@@ -224,27 +192,6 @@ http://www.cisst.org/cisst/license.txt.
   #define CISST_OS CISST_UNDEFINED
 #endif
 
-// We define unifying macros for the two Windows environments:
-// Windows and Cygwin
-#if (CISST_OS == CISST_WINDOWS) || (CISST_OS == CISST_CYGWIN)
-// CISST_OS_IS_WINDOWS is set to 1 for Windows and Cygwin,
-// and set to zero otherwise
-#  define CISST_OS_IS_WINDOWS 1
-// Define WIN32 as 1 for any case (Cygwin is not entirely compatible
-// otherwise).
-#  ifndef WIN32
-#    define WIN32 1
-#  else
-#    undef WIN32
-#    define WIN32 1
-#  endif
-#else
-// CISST_OS_IS_WINDOWS is set to 1 for Windows and Cygwin,
-// and set to zero otherwise
-#  define CISST_OS_IS_WINDOWS 0
-#endif
-
-
 // Define CISST_DATA_MODEL, i.e. either CISST_LLP64 (Windows) or CISST_LP64 (Unix, most of them).  Also use ILP32.
 #if (CISST_COMPILER == CISST_GCC)
   #ifdef _LP64
@@ -253,7 +200,6 @@ http://www.cisst.org/cisst/license.txt.
     #ifdef _LLP64
       #define CISST_DATA_MODEL CISST_LLP64
     #else
-      // default for now, might have to refine for cygwin?
       #define CISST_DATA_MODEL CISST_ILP32
     #endif
   #endif
@@ -354,7 +300,7 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 #endif
 /*!  Discard of the Windows.h definition of macros min and max
 */
-#if CISST_OS_IS_WINDOWS
+#if (CISST_OS == CISST_WINDOWS)
 
 #ifndef NOMINMAX
   #define NOMINMAX
@@ -558,6 +504,39 @@ bool CISST_EXPORT cmnIsFinite(const double & value);
 #ifndef CISST_THROW
   #define CISST_THROW(exceptionParameter) throw (exceptionParameter)
 #endif
+
+
+#include <filesystem>
+/* Safely converts a UTF-8 encoded std::string/std::string_view to std::filesystem::path
+ *
+ * Since std::filesystem::path is UTF16 on Windows, if the local code page active
+   on Windows is not UTF8 (default is Windows-1252), the implicit conversion of
+   std::string to std::filesystem::path will assume the string is in the local
+   code page rather than UTF8, and garble the path.
+ */
+inline std::filesystem::path pathFromUTF8(std::string_view utf8_str) {
+#if defined(__cpp_lib_char8_t)
+    // C++20 and later: construct using std::u8string_view
+    return std::filesystem::path(
+        std::u8string_view(reinterpret_cast<const char8_t*>(utf8_str.data()), utf8_str.size())
+    );
+#else
+    // C++17: use std::filesystem::u8path
+    return std::filesystem::u8path(utf8_str);
+#endif
+}
+
+// Safely converts a std::filesystem::path back to a UTF-8 std::string
+inline std::string pathToUTF8(const std::filesystem::path& p) {
+#if defined(__cpp_lib_char8_t)
+    // C++20: u8string() returns std::u8string
+    const std::u8string u8str = p.u8string();
+    return std::string(reinterpret_cast<const char*>(u8str.data()), u8str.size());
+#else
+    // C++17: u8string() returns std::string directly
+    return p.u8string();
+#endif
+}
 
 
 /*! Older versions of SWIG don't support the keywords override (and final)

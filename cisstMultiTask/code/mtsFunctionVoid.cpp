@@ -32,8 +32,8 @@ mtsFunctionVoid::~mtsFunctionVoid()
 
 bool mtsFunctionVoid::Detach(void)
 {
-    if (this->IsValid()) {
-        this->Command = 0;
+    if (IsValid()) {
+        Command = nullptr;
         DeleteCompletionCommand();
         return true;
     }
@@ -43,7 +43,7 @@ bool mtsFunctionVoid::Detach(void)
 
 bool mtsFunctionVoid::IsValid(void) const
 {
-    return (this->Command != 0);
+    return Command != nullptr;
 }
 
 
@@ -56,7 +56,7 @@ bool mtsFunctionVoid::Bind(CommandType * command)
     if (this->Command) {
         InitCompletionCommand(this->Command->GetName() + "Blocking");
     }
-    return (command != 0);
+    return command != nullptr;
 }
 
 
@@ -74,7 +74,7 @@ mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
     // If Command is valid (not NULL), then CompletionCommand should also be valid
     CMN_ASSERT(CompletionCommand);
     mtsExecutionResultProxy remoteResult(mtsExecutionResult::UNDEFINED);
-    CompletionCommand->PrepareToWait(remoteResult);
+    CompletionCommand->PrepareWait(remoteResult);
     mtsExecutionResult executionResult = Command->Execute(MTS_BLOCKING, CompletionCommand->GetCommand());
     if (executionResult.GetResult() == mtsExecutionResult::COMMAND_QUEUED) {
         executionResult = WaitForResult();
@@ -90,7 +90,6 @@ mtsExecutionResult mtsFunctionVoid::ExecuteBlocking(void) const
         CMN_LOG_RUN_WARNING << "mtsFunctionVoid::ExecuteBlocking: execution result = "
                             << executionResult << std::endl;
     }
-    CompletionCommand->ClearWait();
     return executionResult;
 }
 

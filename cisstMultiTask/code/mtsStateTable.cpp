@@ -16,16 +16,20 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstCommon/cmnAssert.h>
-#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsStateTable.h>
-#include <cisstMultiTask/mtsForwardDeclarations.h>
-#include <cisstMultiTask/mtsManagerLocal.h>
-#include <cisstMultiTask/mtsCollectorState.h>
 
+#include <cisstCommon/cmnAssert.h>
+#include <cisstMultiTask/mtsCollectorState.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstMultiTask/mtsGenericObjectProxy.h>
+#include <cisstMultiTask/mtsManagerLocal.h>
+#include <cisstOSAbstraction/osaTime.h>
+
+#include <chrono>
 #include <iostream>
 #include <string>
 
+using namespace std::chrono_literals;
 
 void mtsStateTable::IndexRange::ToStreamRaw(std::ostream & outputStream, const char delimiter,
                                             bool headerOnly, const std::string & headerPrefix) const
@@ -48,30 +52,28 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
     StateVector(0),
     StateVectorDataNames(0),
     Ticks(size, mtsStateIndex::TimeTicksType(0)),
-    Tic(0.0),
-    Toc(0.0),
-    Period(0.0),
+    Tic(Clock_t::time_point::min()),
+    Toc(Clock_t::time_point::min()),
+    Period(Clock_t::duration::zero()),
     SumOfPeriods(0.0),
     AveragePeriod(0.0),
     Name(name)
 {
     // make sure history length is at least 3
-    if (this->HistoryLength < 3) {
+    if (HistoryLength < 3) {
         CMN_LOG_CLASS_INIT_VERBOSE << "constructor: history lenght sets to 3 (minimum required)" << std::endl;
-        this->HistoryLength = 3;
+        HistoryLength = 3;
     }
 
     // set the default number of elements for data collection batch
-    this->DataCollection.BatchSize = this->HistoryLength / 3;
-    if (this->DataCollection.BatchSize == 0) {
-        this->DataCollection.BatchSize = 1;
+    DataCollection.BatchSize = HistoryLength / 3;
+    if (DataCollection.BatchSize == 0) {
+        DataCollection.BatchSize = 1;
     }
-    this->DataCollection.TimeIntervalForProgressEvent = 1.0 * cmn_s;
-    this->DataCollection.BatchRange.SetValid(true);
-    this->DataCollection.BatchRange.SetAutomaticTimestamp(false);
 
-    // Get a pointer to the time server
-    TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
+    DataCollection.TimeIntervalForProgressEvent = std::chrono::duration_cast<Clock_t::duration>(1.0ms);
+    DataCollection.BatchRange.SetValid(true);
+    DataCollection.BatchRange.SetAutomaticTimestamp(false);
 
     // Add Tic and Toc to the StateTable. We add Toc first, to make things easier
     // in mtsStateTable::Advance.  Do not change this.
@@ -87,9 +89,7 @@ mtsStateTable::mtsStateTable(size_t size, const std::string & name):
 mtsStateTable::~mtsStateTable()
 {
     // remove all elements from the state table
-    for (size_t index = 0;
-         index < StateVector.size();
-         ++index) {
+    for (size_t index = 0; index < StateVector.size(); ++index) {
         // accessor
         delete StateVectorAccessors.back();
         StateVectorAccessors.pop_back();
@@ -123,12 +123,14 @@ bool mtsStateTable::SetSize(const size_t size) {
 /* All the const methods that can be called from reader or writer */
 mtsStateIndex mtsStateTable::GetIndexReader(void) const {
     size_t tmp = IndexReader;
-    return mtsStateIndex(this->Tic, static_cast<int>(tmp), Ticks[tmp], static_cast<int>(HistoryLength));
+    const double timestamp = getTimestamp(Tic.Data);
+    return mtsStateIndex(timestamp, static_cast<int>(tmp), Ticks[tmp], static_cast<int>(HistoryLength));
 }
 
 mtsStateIndex mtsStateTable::GetIndexDelayed(void) const {
     size_t tmp = IndexDelayed;
-    return mtsStateIndex(this->Tic, static_cast<int>(tmp), Ticks[tmp], static_cast<int>(HistoryLength));
+    const double timestamp = getTimestamp(Tic.Data);
+    return mtsStateIndex(timestamp, static_cast<int>(tmp), Ticks[tmp], static_cast<int>(HistoryLength));
 }
 
 size_t mtsStateTable::SetDelay(size_t newDelay) {
@@ -145,7 +147,8 @@ mtsStateTable::AccessorBase * mtsStateTable::GetAccessorByName(const std::string
             return StateVectorAccessors[i];
         }
     }
-    return 0;
+
+    return nullptr;
 }
 
 
@@ -161,7 +164,8 @@ mtsStateTable::AccessorBase * mtsStateTable::GetAccessorById(const size_t id) co
 
 /* All the non-const methods that can be called from writer only */
 mtsStateIndex mtsStateTable::GetIndexWriter(void) const {
-    return mtsStateIndex(this->Tic, static_cast<int>(IndexWriter), Ticks[IndexWriter], static_cast<int>(HistoryLength));
+    const double timestamp = getTimestamp(Tic.Data);
+    return mtsStateIndex(timestamp, static_cast<int>(IndexWriter), Ticks[IndexWriter], static_cast<int>(HistoryLength));
 }
 
 
@@ -185,40 +189,42 @@ bool mtsStateTable::Write(mtsStateDataId id, const mtsGenericObject & object) {
 
 
 void mtsStateTable::Start(void) {
-    if (TimeServer) {
-        Tic = TimeServer->GetRelativeTime(); // in seconds
-        // Since IndexReader and IndexWriter are initialized to 0,
-        // the first period will be 0
-        mtsDouble oldTic;
-        StateVector[TicId]->Get(IndexReader, oldTic);
-        Period = Tic - oldTic;  // in seconds
+    Tic = Clock_t::now();
+
+    // Since IndexReader and IndexWriter are initialized to 0,
+    // the first period will be 0
+    mtsGenericObjectProxy<Clock_t::time_point> previous_tic;
+    StateVector[TicId]->Get(IndexReader, previous_tic);
+    if (previous_tic.Data != Clock_t::time_point::min()) {
+        Period = Tic.Data - previous_tic.Data;
+    } else {
+        Period = Clock_t::duration::zero();
     }
+
     // update "started" status
     mStarted = true;
 }
 
 
 void mtsStateTable::StartIfAutomatic(void) {
-    if (this->AutomaticAdvanceFlag) {
-        this->Start();
+    if (AutomaticAdvanceFlag) {
+        Start();
     }
 }
 
 
 void mtsStateTable::Advance(void) {
-    size_t i;
-    size_t tmpIndex;
     // newIndexWriter is the next row of the State Table.  Note that this
     // also corresponds to the row with the oldest data.
     size_t newIndexWriter = (IndexWriter + 1) % HistoryLength;
 
     // Update SumOfPeriods (add newest and subtract oldest)
-    SumOfPeriods += Period;
+    SumOfPeriods += durationToSeconds(Clock_t::duration{Period});
     // If the table is full (all entries valid), subtract the oldest one
     if (Ticks[IndexWriter] == (Ticks[newIndexWriter] + HistoryLength - 1)) {
-        mtsDouble oldPeriod;
+        mtsGenericObjectProxy<Clock_t::duration> oldPeriod;
         StateVector[PeriodId]->Get(newIndexWriter, oldPeriod);
-        SumOfPeriods -= oldPeriod;
+        SumOfPeriods -= durationToSeconds(oldPeriod.Data);
         AveragePeriod = SumOfPeriods / (HistoryLength-1);
     }
     else if (Ticks[IndexWriter] > 0) {
@@ -236,14 +242,15 @@ void mtsStateTable::Advance(void) {
     The following block doesn't modify IndexReader,
     so the above condition still holds.
     */
-    tmpIndex = IndexWriter;
+    const size_t tmpIndex = IndexWriter;
 
     // Write data in the state table from the different state data objects.
     // Note that we start at TicId, which should correspond to the second
     // element in the array (after Toc).
-    for (i = TicId; i < StateVector.size(); i++) {
+    const double timestamp = getTimestamp(Tic.Data);
+    for (size_t i = TicId; i < StateVector.size(); i++) {
         if (StateVectorElements[i]) {
-            StateVectorElements[i]->SetTimestampIfAutomatic(Tic.Data);
+            StateVectorElements[i]->SetTimestampIfAutomatic(timestamp);
             Write(static_cast<mtsStateDataId>(i), *(StateVectorElements[i]));
         }
     }
@@ -251,34 +258,34 @@ void mtsStateTable::Advance(void) {
     // data collection, test if we are currently collecting
     if (!this->DataCollection.Collecting) {
         // check if a start time is set and has arrived
-        if ((this->DataCollection.StartTime != 0.0)
-            && (this->Tic >= this->DataCollection.StartTime)) {
+        if ((this->DataCollection.StartTime.has_value())
+            && (Tic.Data >= this->DataCollection.StartTime)) {
             // start collection
-            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection started at " << this->Tic << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection started at " << timestamp << std::endl;
             // send collection started event
             this->DataCollection.CollectionStarted();
             // reset start time
-            this->DataCollection.StartTime = 0.0;
+            this->DataCollection.StartTime = std::nullopt;
             this->DataCollection.BatchRange.First = this->GetIndexReader();
             this->DataCollection.BatchCounter = 0;
             this->DataCollection.Collecting = true;
             // reset counter for event
             this->DataCollection.CounterForEvent = 0;
-            this->DataCollection.TimeOfLastProgressEvent = this->Tic;
+            this->DataCollection.TimeOfLastProgressEvent = Tic.Data;
         }
     }
     // are we collecting?
     if (this->DataCollection.Collecting) {
         // check if a stop time is set and has arrived
-        if ((this->DataCollection.StopTime != 0.0)
-            && (this->Tic >= this->DataCollection.StopTime)) {
+        if ((this->DataCollection.StopTime.has_value())
+            && (Tic.Data >= this->DataCollection.StopTime)) {
             // stop collection
-            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection stopped at " << this->Tic << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "Advance: data collection stopped at " << timestamp << std::endl;
             // reset start time
-            this->DataCollection.StopTime = 0.0;
+            this->DataCollection.StopTime = std::nullopt;
             this->DataCollection.BatchRange.Last = this->GetIndexReader();
             // request data actual for range collection
-            this->DataCollection.BatchRange.SetTimestamp(this->Tic);
+            this->DataCollection.BatchRange.SetTimestamp(timestamp);
             this->DataCollection.BatchReady(this->DataCollection.BatchRange);
             // send collection stopped event
             this->DataCollection.CollectionStopped(this->DataCollection.CounterForEvent);
@@ -295,27 +302,25 @@ void mtsStateTable::Advance(void) {
                                         << " element(s) available for data collection" << std::endl;
                 this->DataCollection.BatchRange.Last = this->GetIndexReader();
                 // request data actual for range collection
-                this->DataCollection.BatchRange.SetTimestamp(this->Tic);
+                this->DataCollection.BatchRange.SetTimestamp(timestamp);
                 this->DataCollection.BatchReady(this->DataCollection.BatchRange);
                 this->DataCollection.BatchCounter = 0;
                 this->DataCollection.BatchRange.First = this->GetIndexWriter();
             }
             // check if we have spent enough time for a progress event
-            if ((this->Tic - this->DataCollection.TimeOfLastProgressEvent) >= this->DataCollection.TimeIntervalForProgressEvent) {
+            if ((Tic.Data - this->DataCollection.TimeOfLastProgressEvent) >= this->DataCollection.TimeIntervalForProgressEvent) {
                 this->DataCollection.Progress(this->DataCollection.CounterForEvent);
                 this->DataCollection.CounterForEvent = 0;
-                this->DataCollection.TimeOfLastProgressEvent = this->Tic;
+                this->DataCollection.TimeOfLastProgressEvent = Tic.Data;
             }
         }
     }
 
     // Get the Toc value and write it to the state table.
-    if (TimeServer) {
-        Toc = TimeServer->GetRelativeTime(); // in seconds
-    }
+    Toc = Clock_t::now(); // in seconds
 
     // Update Period Statistics (last time interval, current compute time)
-    PeriodStats.Update(Period.Data, this->Toc - this->Tic);
+    PeriodStats.Update(durationToSeconds(Period.Data), durationToSeconds(Toc.Data - Tic.Data));
 
     Write(TocId, Toc);
     // now increment the IndexWriter and set its Tick value
@@ -497,24 +502,24 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
     CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: received request to start data collection in "
                             << delay.Data << " seconds" << std::endl;
     // set start time based on current time and delay
-    const double startTime = this->TimeServer->GetRelativeTime() + delay.Data;
+    const auto startTime = Clock_t::now() + durationFromSeconds<Clock_t>(delay);
     // if we are not yet collection
-    if (!this->DataCollection.Collecting) {
+    if (!DataCollection.Collecting) {
         // if there is no collection scheduled
-        if (this->DataCollection.StartTime == 0) {
+        if (!DataCollection.StartTime) {
             // set time to start
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                    << startTime << " for state table \"" << this->GetName() << "\"" << std::endl;
-            this->DataCollection.StartTime = startTime;
+                                    << durationToSeconds(startTime.time_since_epoch()) << " for state table \"" << GetName() << "\"" << std::endl;
+            DataCollection.StartTime = startTime;
         } else {
             // we are set to collect but later, advance the collection
             // time.  this is a conservative approach, if we have 2
             // different start times, we take the earliest of both to
             // collect more data.
-            if (this->DataCollection.StartTime > startTime) {
+            if (DataCollection.StartTime > startTime) {
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                        << startTime << " (moved forward) for state table \"" << this->GetName() << "\"" << std::endl;
-                this->DataCollection.StartTime = startTime;
+                                        << durationToSeconds(startTime.time_since_epoch()) << " (moved forward) for state table \"" << GetName() << "\"" << std::endl;
+                DataCollection.StartTime = startTime;
             } else {
                 CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received a new request to start data collection after previous request, ignored"
                                           << std::endl;
@@ -522,18 +527,18 @@ void mtsStateTable::DataCollectionStart(const mtsDouble & delay)
         }
     } else {
         // we are already collecting, see if a time to stop has been set
-        if (this->DataCollection.StopTime == 0) {
+        if (!DataCollection.StopTime) {
             CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received request to start collection while still set to collect, ignored" << std::endl;
         } else {
             // make sure the request to start comes after the next scheduled stop
-            if (startTime <= this->DataCollection.StartTime) {
+            if (startTime <= DataCollection.StartTime) { // TODO BB: should this be startTime <= DataCollection.StopTime?
                 CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStart: received request to start collection before next scheduled stop, ignored" << std::endl;
             } else {
                 // this will schedule a start after the scheduled stop
                 CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStart: data collection scheduled to start at "
-                                        << startTime << " (after a scheduled stop) for state table \""
-                                        << this->GetName() << "\"" << std::endl;
-                this->DataCollection.StartTime = startTime;
+                                        << durationToSeconds(startTime.time_since_epoch()) << " (after a scheduled stop) for state table \""
+                                        << GetName() << "\"" << std::endl;
+                DataCollection.StartTime = startTime;
             }
         }
     }
@@ -546,22 +551,22 @@ void mtsStateTable::DataCollectionStop(const mtsDouble & delay)
                             << delay.Data << " seconds for state table \""
                             << this->GetName() << "\"" << std::endl;
     // set stop time based on current time and delay
-    const double stopTime = this->TimeServer->GetRelativeTime() + delay.Data;
+    const auto stopTime = Clock_t::now() + durationFromSeconds<Clock_t>(delay);
     // check is there is already a stop time scheduled
-    if (this->DataCollection.StopTime == 0) {
+    if (DataCollection.StopTime.has_value()) {
         CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                                << stopTime << " for state table \""
-                                << this->GetName() << "\"" << std::endl;
+                                << durationToSeconds(stopTime.time_since_epoch()) << " for state table \""
+                                << GetName() << "\"" << std::endl;
         DataCollection.StopTime = stopTime;
     } else {
         // we are set to stop but earlier, delay the collection stop
         // time.  this is a conservative approach, if we have 2
         // different stop times, we take the latest of both to collect
         // more data.
-        if (this->DataCollection.StopTime < stopTime) {
+        if (DataCollection.StopTime < stopTime) {
             CMN_LOG_CLASS_RUN_DEBUG << "DataCollectionStop: data collection scheduled to stop at "
-                                    << stopTime << " (moved back) for state table \""
-                                    << this->GetName() << "\"" << std::endl;
+                                    << durationToSeconds(stopTime.time_since_epoch()) << " (moved back) for state table \""
+                                    << GetName() << "\"" << std::endl;
             DataCollection.StopTime = stopTime;
         } else {
             CMN_LOG_CLASS_RUN_WARNING << "DataCollectionStop: received a new request to stop data collection before previous request, ignored"

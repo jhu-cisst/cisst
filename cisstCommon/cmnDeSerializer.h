@@ -35,10 +35,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnThrow.h>
 #include <cisstCommon/cmnAssert.h>
 
-#include <string>
+#include <cstddef>
 #include <fstream>
 #include <map>
-#include <cstddef>
+#include <string>
+#include <vector>
+#include <array>
+#include <type_traits>
 
 #include <cisstCommon/cmnExport.h>
 
@@ -135,12 +138,20 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::string & data)
 }
 
 
-/*! De-serialization helper function for an STL vector.  This function
-  first de-serializes the vector size, resizes the vector and then
-  alls cmnDeSerializeRaw for each element of the vector.  This assumes that
-  cmnDeSerializeRaw is defined for the element type.
-  If the read operation fails, an exception is thrown
-  (<code>std::runtime_error</code>). */
+template <class _elementType>
+inline void cmnDeSerializeRaw(std::istream & inputStream, std::vector<_elementType> & data)
+    CISST_THROW(std::runtime_error);
+
+/*! Deserialize each element of a fixed-size STL array. */
+template <class _elementType, size_t _size>
+inline void cmnDeSerializeRaw(std::istream & inputStream, std::array<_elementType, _size> & data)
+{
+    for (auto & value : data) {
+        cmnDeSerializeRaw(inputStream, value);
+    }
+}
+
+/*! Deserialize an STL vector's size followed by each element. */
 template <class _elementType>
 inline void cmnDeSerializeRaw(std::istream & inputStream, std::vector<_elementType> & data)
     CISST_THROW(std::runtime_error)
@@ -149,7 +160,13 @@ inline void cmnDeSerializeRaw(std::istream & inputStream, std::vector<_elementTy
     cmnDeSerializeSizeRaw(inputStream, size);
     data.resize(size);
     for (size_t i = 0; i < size; i++) {
-        cmnDeSerializeRaw(inputStream, data[i]);
+        if constexpr (std::is_same_v<_elementType, bool>) {
+            bool value;
+            cmnDeSerializeRaw(inputStream, value);
+            data[i] = value;
+        } else {
+            cmnDeSerializeRaw(inputStream, data[i]);
+        }
         if (inputStream.fail()) {
             cmnThrow("cmnDeSerializeRaw(std::vector<_elementType>): Error occured with std::istream::read");
         }

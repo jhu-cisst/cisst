@@ -10,7 +10,6 @@ set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "")
 set (CISST_USE_SI_UNITS ON CACHE BOOL "")
 
 # Force compilation for optional libraries
-set (CISST_cisstMesh ON CACHE BOOL "")
 set (CISST_cisstRobot ON CACHE BOOL "")
 
 # XML parsing
@@ -27,3 +26,6 @@ set (CISST_BUILD_EXAMPLES OFF CACHE BOOL "")
 
 # Qt
 set (CISST_HAS_QT6 ON CACHE BOOL "")
+
+# KDL
+set (CISST_HAS_KDL ON CACHE BOOL "")

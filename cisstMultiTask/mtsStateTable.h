@@ -36,15 +36,14 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsFunctionWrite.h>
 #include <cisstMultiTask/mtsIntervalStatistics.h>
 
-
-#include <vector>
+#include <chrono>
 #include <iostream>
+#include <optional>
+#include <vector>
+#include "cisstMultiTask/mtsGenericObjectProxy.h"
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
-
-// Forward declaration
-class osaTimeServer;
 
 
 /*! mtsStateDataId.  Unique identifier for the columns of the State
@@ -75,6 +74,8 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
     friend class mtsCollectorBaseTest;
 
  public:
+    using Clock_t = std::chrono::steady_clock;
+
     /*! Collection is performed by batches, this requires to save
       the state indices for begin/end. */
     class CISST_EXPORT IndexRange: public mtsGenericObject
@@ -100,12 +101,12 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         /*! Delay in second before data collection should start.  This
           is measured in seconds based on the state table Tic and Toc.
           0 means that there is no defined start time. */
-        double StartTime;
+        std::optional<Clock_t::time_point> StartTime;
 
         /*! Delay in second before data collection should stop.  This
           is measured in seconds based on the state table Tic and
           Toc. 0 means that there is no defined stop time. */
-        double StopTime;
+        std::optional<Clock_t::time_point> StopTime;
 
         /*! Range for the batch */
         mtsStateTable::IndexRange BatchRange;
@@ -120,10 +121,10 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         size_t CounterForEvent;
 
         /*! Interval between two progress events (in seconds) */
-        double TimeIntervalForProgressEvent;
+        Clock_t::duration TimeIntervalForProgressEvent;
 
         /*! Time of last progress event */
-        double TimeOfLastProgressEvent;
+        Clock_t::time_point TimeOfLastProgressEvent;
 
         /*! Function used to trigger event sent to state collector
           when the data collection is needed.  The payload is the
@@ -144,8 +145,6 @@ class CISST_EXPORT mtsStateTable: public cmnGenericObject {
         /*! Default constructors */
         inline DataCollectionInfo(void):
             Collecting(false),
-            StartTime(0.0),
-            StopTime(0.0),
             BatchSize(0),
             BatchCounter(0),
             CounterForEvent(0)
@@ -282,17 +281,15 @@ public:
     mtsStateDataId TicId, TocId;
     mtsStateDataId PeriodId;
 
-    /*! The time server used to provide absolute and relative times. */
-    const osaTimeServer * TimeServer;
-
 public:
-
-    /* The start/end times for the current row of data. */
-    mtsDouble Tic, Toc;
+    /* The start/end times for the current row of data. Since we can't
+       direction put a std::chrono time_point into the state vector,
+       we use a proxy instead. TODO BB: remove once mtsStateTable uses proxys instead */
+    mtsGenericObjectProxy<Clock_t::time_point> Tic, Toc;
 
     /*! The measured task period (difference between current Tic and
         previous Tic). */
-    mtsDouble Period;
+    mtsGenericObjectProxy<Clock_t::duration> Period;
 
    /*! Periodicist Statistics */
     mtsIntervalStatistics PeriodStats;
@@ -331,7 +328,7 @@ public:
       methods, that can be called from a reader and writer. */
     mtsStateIndex GetIndexReader(void) const;
 
-    inline void GetIndexReader(mtsStateIndex & timeIndex) const {
+    void GetIndexReader(mtsStateIndex & timeIndex) const {
         timeIndex = GetIndexReader();
     }
 
@@ -344,18 +341,18 @@ public:
     size_t SetDelay(size_t newDelay);
 
     /*! Verifies if the data is valid. */
-    inline bool ValidateReadIndex(const mtsStateIndex &timeIndex) const {
+    bool ValidateReadIndex(const mtsStateIndex &timeIndex) const {
         return (Ticks[timeIndex.Index()] == timeIndex.Ticks());
     }
 
     /*! Get method for auto advance flag. See AutomaticAdvanceFlag */
-    inline const bool & AutomaticAdvance(void) const {
-        return this->AutomaticAdvanceFlag;
+    const bool & AutomaticAdvance(void) const {
+        return AutomaticAdvanceFlag;
     }
 
     /*! Set method for auto advance flag.  See AutoAdvanceFlag. */
-    inline void SetAutomaticAdvance(bool automaticAdvance) {
-        this->AutomaticAdvanceFlag = automaticAdvance;
+    void SetAutomaticAdvance(bool automaticAdvance) {
+        AutomaticAdvanceFlag = automaticAdvance;
     }
 
     /*! Check if the signal has been registered. */
@@ -378,9 +375,8 @@ public:
       This element is the same type as the state data table entry. */
     template <class _elementType>
     _elementType * GetStateDataElement(mtsStateDataId id) const {
-        return StateVectorElements[id]; // WEIRD???
+        return StateVectorElements[id]; // WEIRD??? TODO BB: why does it say weird?
     }
-
 
     mtsGenericObject * GetStateVectorElement(size_t id) const {
         return StateVectorElements[id];
@@ -388,14 +384,14 @@ public:
 
     /*! Return pointer to accessor functions for the state data element.
       \param element Pointer to state data element (i.e., working copy)
-      \returns Pointer to accessor class (0 if not found)
+      \returns Pointer to accessor class (nullptr if not found)
     */
     template<class _elementType>
     mtsStateTable::AccessorBase * GetAccessorByInstance(const _elementType & element) const;
 
     /*! Return pointer to accessor functions for the state data element.
       \param name Name of state data element
-      \returns Pointer to accessor class (0 if not found)
+      \returns Pointer to accessor class (nullptr if not found)
     */
     //@{
     mtsStateTable::AccessorBase * GetAccessorByName(const std::string & name) const;
@@ -404,7 +400,7 @@ public:
 
     /*! Return pointer to accessor functions for the state data element.
       \param id Id of state data element
-      \returns Pointer to accessor class (0 if not found)
+      \returns Pointer to accessor class (nullptr if not found)
     */
     mtsStateTable::AccessorBase * GetAccessorById(const size_t id) const;
 
@@ -460,12 +456,12 @@ public:
     /*! Cleanup called when the task is being stopped. */
     void Cleanup(void);
 
-    inline double GetTic(void) const {
-        return this->Tic.Data;
+    Clock_t::time_point GetTic(void) const {
+        return Tic;
     }
 
-    inline double GetToc(void) const {
-        return this->Toc.Data;
+    Clock_t::time_point GetToc(void) const {
+        return Toc;
     }
 
     inline size_t GetHistoryLength(void) const {

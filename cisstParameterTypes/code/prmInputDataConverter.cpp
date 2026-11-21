@@ -51,17 +51,17 @@ public:
 
     inline bool Update(const prmInputData & data) {
         // make sure the value exists at index
-        if (data.DigitalInputs().size() < static_cast<Eigen::Index>(Index)) {
+        if (Index < 0 || static_cast<size_t>(Index) >= data.DigitalInputs().size()) {
             return false;
         }
         // check if value is new, except for first run
-        const bool value = data.DigitalInputs()(Index);
+        const bool value = data.DigitalInputs()[Index];
         if ((value == Previous) && !FirstRun) {
             return true;
         }
         FirstRun = false;
         // figure out which event to send
-        if (data.DigitalInputs()(Index)) {
+        if (data.DigitalInputs()[Index]) {
             Payload.Type() = prmEventButton::PRESSED;
         } else {
             Payload.Type() = prmEventButton::RELEASED;

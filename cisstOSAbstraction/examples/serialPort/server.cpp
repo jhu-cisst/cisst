@@ -18,6 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+#include <thread>
 
 // include what is needed from cisst
 #include <cisstOSAbstraction/osaSerialPort.h>
@@ -26,6 +27,7 @@ http://www.cisst.org/cisst/license.txt.
 // system includes
 #include <iostream>
 
+using namespace std::chrono_literals;
 
 // main function
 int main(void) {
@@ -49,7 +51,7 @@ int main(void) {
         if (serialPort.Read(buffer, 512) > 0) {
             std::cout << std::endl << buffer << std::endl;
         }
-        osaSleep(100 * cmn_ms);
+        osaSleep(100ms);
     }
 
     return 0;

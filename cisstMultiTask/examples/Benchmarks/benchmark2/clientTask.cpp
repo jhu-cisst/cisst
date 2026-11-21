@@ -39,11 +39,8 @@ clientTask::clientTask(const std::string & taskName, double period):
         requiredInterface->AddFunction("QualifiedRead", QualifiedReadFunction);
     }
 
-	// Get a pointer to the time server
-    TimeServer = &mtsManagerLocal::GetInstance()->GetTimeServer();
-
 	// Reserve memory space for results
-    Results.SetSize(confNumberOfSamples);
+    Results = Eigen::VectorXd::Zero(confNumberOfSamples);
 }
 
 
@@ -65,14 +62,14 @@ void clientTask::Run(void)
 	mtsDouble currentTic, previousTic;
 
 	// Keep the current relative time.
-	currentTic.Data = TimeServer->GetRelativeTime();
+	currentTic.Data = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch());
 
 	// Execute the qualified read command across a network.
 	QualifiedReadFunction(currentTic, previousTic);
 
     // Obtain the elapsed time and keep it.
-	const double elapsedTime = TimeServer->GetRelativeTime() - previousTic;
-    Results.Element(NumberOfSamplesCollected++) = elapsedTime;
+	const double elapsedTime = durationToSeconds(std::chrono::steady_clock::now().time_since_epoch()) - previousTic;
+    Results(NumberOfSamplesCollected++) = elapsedTime;
 
 	if (NumberOfSamplesCollected == confNumberOfSamples) {        
         ShowResults();
@@ -91,10 +88,9 @@ bool clientTask::IsBenchmarkCompleted(void) const
 
 void clientTask::ShowResults()
 {
-    double average = Results.SumOfElements() / Results.size();
-    double min = 0.0;
-    double max = 0.0;
-    Results.MinAndMaxElement(min, max);
+    double average = Results.sum() / Results.size();
+    double min = Results.minCoeff();
+    double max = Results.maxCoeff();
 
     std::cout << std::endl << std::endl
               << "--------------------------------------------------------------------" << std::endl

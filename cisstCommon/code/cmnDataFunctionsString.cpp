@@ -2,10 +2,10 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  Author(s):  Anton Deguet
-  Created on: 2011-06-27
+  Author(s):  Brendan Burkhart
+  Created on: 2026-11-13
 
-  (C) Copyright 2011-2018 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 20126 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -16,7 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <cisstCommon/cmnDataFunctionsString.h>
+#include <cisstCommon/cmnDataFunctionsPath.h>
 
 size_t cmnDataSerializeBinary(const std::string & data, char * buffer, size_t bufferSize)
 {

@@ -113,12 +113,13 @@ class CISST_EXPORT mtsCollectorFactory: public mtsCollectorBase
     std::list<mtsCollectorBaseData *> mAllCollectors;
 
     /* methods to mimic any collector */
-    void StartCollection(const double & delayInSeconds) override;
-    void StopCollection(const double & delayInSeconds) override;
-    void SetWorkingDirectory(const std::string & directory) override;
-    void SetOutputToDefault(void) override;
-    void CollectionStartedEventHandler(const bool & started);
-    void ProgressEventHandler(const size_t & counter);
+    void StartCollection(double delayInSeconds) override;
+    void StopCollection(double delayInSeconds) override;
+    void SetWorkingDirectory(const std::filesystem::path& directory) override;
+    void SetOutputToDefault() override;
+
+    void CollectionStartedEventHandler(const bool& started);
+    void ProgressEventHandler(const size_t& counter);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsCollectorFactory)

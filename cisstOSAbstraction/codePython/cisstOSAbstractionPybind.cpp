@@ -17,8 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl/filesystem.h>
 
-#include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstOSAbstraction/osaSerialPort.h>
 #include <cisstOSAbstraction/osaDynamicLoader.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -29,19 +29,7 @@ PYBIND11_MODULE(cisstOSAbstractionPython, m)
 {
     m.doc() = "pybind11 bindings for cisstOSAbstraction";
 
-    py::class_<osaAbsoluteTime>(m, "osaAbsoluteTime")
-        .def(py::init<>())
-        .def(py::init<long, long>())
-        .def_readwrite("sec", &osaAbsoluteTime::sec)
-        .def_readwrite("nsec", &osaAbsoluteTime::nsec)
-        .def("ToSeconds", &osaAbsoluteTime::ToSeconds)
-        .def("FromSeconds", &osaAbsoluteTime::FromSeconds);
-
-    py::class_<osaTimeServer, cmnGenericObject>(m, "osaTimeServer")
-        .def(py::init<>())
-        .def("SetTimeOrigin", &osaTimeServer::SetTimeOrigin)
-        .def("GetRelativeTime", &osaTimeServer::GetRelativeTime)
-        .def("GetAbsoluteTimeInSeconds", &osaTimeServer::GetAbsoluteTimeInSeconds);
+    py::module_::import("cisstCommonPython");
 
     py::class_<osaSerialPort, cmnGenericObject>(m, "osaSerialPort")
         .def(py::init<>())
@@ -53,9 +41,8 @@ PYBIND11_MODULE(cisstOSAbstractionPython, m)
 
     py::class_<osaDynamicLoader>(m, "osaDynamicLoader")
         .def(py::init<>())
-        .def("Load", py::overload_cast<const std::string &, const std::string &>(&osaDynamicLoader::Load),
-             py::arg("file"), py::arg("path") = "")
+        .def("Load", &osaDynamicLoader::Load, py::arg("file"))
         .def("UnLoad", &osaDynamicLoader::UnLoad);
 
-    m.def("osaSleep", &osaSleep, py::arg("timeInSeconds"));
+    m.def("osaSleep", static_cast<void (*)(double)>(&osaSleep), py::arg("timeInSeconds"));
 }

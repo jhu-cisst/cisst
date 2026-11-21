@@ -22,7 +22,6 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _clientTask_h
 #define _clientTask_h
 
-#include "configuration.h"
 #include <cisstMultiTask/mtsTaskPeriodic.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
@@ -42,11 +41,10 @@ protected:
     void EventWriteHandler(const value_type & value);
 
     // time benchmarking
-    const osaTimeServer * TimeServer;
     bool BenchmarkDoneMember;
     unsigned int NumberOfskippedElement;
     unsigned int SamplesCollected;
-    vctDynamicVector<double> Samples;
+    Eigen::VectorXd Samples;
 
 public:
     // see sineTask.h documentation

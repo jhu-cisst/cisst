@@ -17,7 +17,8 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
-#include <string.h>
+#include <chrono>
+#include <thread>
 
 #include <cisstOSAbstraction/osaSleep.h>
 #include <cisstOSAbstraction/osaSocket.h>
@@ -25,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "osaSocketTest.h"
 
+using namespace std::chrono_literals;
 
 void osaSocketTest::TestUDP(void)
 {
@@ -43,7 +45,7 @@ void osaSocketTest::TestUDP(void)
     bytes = clientSocket.Send("testing");
     CPPUNIT_ASSERT_EQUAL(7, bytes);
 
-    osaSleep(10.0 * cmn_ms);
+    osaSleep(10ms);
 
     buffer[0] = '\0';
     bytes = serverSocket.Receive(buffer, sizeof(buffer));
@@ -85,7 +87,7 @@ void osaSocketTest::TestTCP(void)
     bytes = clientSocket.Send("testing");
     CPPUNIT_ASSERT_EQUAL(7, bytes);
 
-    osaSleep(10.0 * cmn_ms);
+    osaSleep(10ms);
 
     buffer[0] = '\0';
     bytes = serverSocket->Receive(buffer, sizeof(buffer));
@@ -94,7 +96,7 @@ void osaSocketTest::TestTCP(void)
 
 //    clientSocket.Close();
 //
-//    osaSleep(1.0 * cmn_s);
+//    osaSleep(1s);
 //
 //    bytes = serverSocket->Send("testing");
 //    CPPUNIT_ASSERT_EQUAL(-1, bytes);
@@ -112,7 +114,7 @@ void osaSocketTest::TestTCP(void)
 //    bytes = clientSocket.Send("testing");
 //    CPPUNIT_ASSERT_EQUAL(7, bytes);
 //
-//    osaSleep(10.0 * cmn_ms);
+//    osaSleep(10ms);
 //
 //    buffer[0] = '\0';
 //    bytes = serverSocket->Receive(buffer, sizeof(buffer));

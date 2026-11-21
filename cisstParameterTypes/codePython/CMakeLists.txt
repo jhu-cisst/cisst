@@ -13,6 +13,9 @@
 
 project (cisstParameterTypesPython)
 
+# Generated in the sibling code directory by cisstDataGenerator.
+set_source_files_properties (${cisstParameterTypes_CISST_DG_PYTHON_SRCS} PROPERTIES GENERATED TRUE)
+
 cisst_add_pybind11_module (MODULE cisstParameterTypesPython
                            FOLDER cisstParameterTypes
                            SOURCES cisstParameterTypesPybind.cpp ${cisstParameterTypes_CISST_DG_PYTHON_SRCS}

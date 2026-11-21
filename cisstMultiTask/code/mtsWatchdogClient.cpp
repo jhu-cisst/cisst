@@ -16,6 +16,7 @@ http://www.cisst.org/cisst/license.txt.
 --- end cisst license ---
 */
 
+
 #include <cisstMultiTask/mtsWatchdogClient.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
@@ -34,8 +35,8 @@ void mtsWatchdogClient::AddToRequiredInterface(mtsInterfaceRequired &reqInt) {
 
 bool mtsWatchdogClient::CheckAndUpdate(void) {
 
-    if (!IsOK)
-        return false;
+    if (!IsOK) { return false; } 
+
     mtsExecutionResult executionResult;
     bool updatedBool = false;
 
@@ -50,18 +51,15 @@ bool mtsWatchdogClient::CheckAndUpdate(void) {
 
     //if it is OK reset watchdogtimer and reset the remote variable to false. return true
     if (updatedBool) {
-        if (!Reset())
-            return false;
-        else
-            return true;
+        return Reset();
     }
     //else check if time has exceeded timeout, if not return true, else return false;
-    else if (StopWatch.GetElapsedTime() > Timeout) {
-            IsOK = false;
-            return false;
-    }
-    else
+    else if (StopWatch.GetElapsedTime().count() > Timeout) {
+        IsOK = false;
+        return false;
+    } else {
         return true;
+    }
 }
 
 bool mtsWatchdogClient::Reset(void) {

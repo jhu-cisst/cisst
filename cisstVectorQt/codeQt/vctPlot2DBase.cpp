@@ -396,11 +396,16 @@ void vctPlot2DBase::Signal::ComputeDataRangeXY(Eigen::Vector2d& min, Eigen::Vect
     // Points can be appended but not removed, so either buffer is partially full
     // and 0 = IndexFirst <= IndexLast, or buffer is full and IndexLast < IndexFirst
 
-    min = data.leftCols(IndexLast + 1).rowwise().minCoeff();
-    max = data.leftCols(IndexLast + 1).rowwise().maxCoeff();
+    if (IndexFirst <= IndexLast) {
+        min = data.leftCols(IndexLast + 1).rowwise().minCoeff();
+        max = data.leftCols(IndexLast + 1).rowwise().maxCoeff();
+    } else {
+        min = data.rowwise().minCoeff();
+        max = data.rowwise().maxCoeff();
+    }
 }
 
-void vctPlot2DBase::Signal::ComputeDataRangeX(double & min, double & max,  bool assumesDataSorted) const
+void vctPlot2DBase::Signal::ComputeDataRangeX(double & min, double & max, bool assumesDataSorted) const
 {
     if (assumesDataSorted) {
         min = data.col(IndexFirst).x();
@@ -408,8 +413,13 @@ void vctPlot2DBase::Signal::ComputeDataRangeX(double & min, double & max,  bool 
         return;
     }
 
-    min = data.row(0).head(IndexLast + 1).minCoeff();
-    max = data.row(0).head(IndexLast + 1).maxCoeff();
+    if (IndexFirst <= IndexLast) {
+        min = data.row(0).head(IndexLast + 1).minCoeff();
+        max = data.row(0).head(IndexLast + 1).maxCoeff();
+    } else {
+        min = data.row(0).minCoeff();
+        max = data.row(0).maxCoeff();
+    }
 }
 
 void vctPlot2DBase::Signal::ComputeDataRangeY(double & min, double & max) const
@@ -417,8 +427,13 @@ void vctPlot2DBase::Signal::ComputeDataRangeY(double & min, double & max) const
     min = std::numeric_limits<double>::max();
     max = std::numeric_limits<double>::lowest();
 
-    min = data.row(1).head(IndexLast + 1).minCoeff();
-    max = data.row(1).head(IndexLast + 1).maxCoeff();
+    if (IndexFirst <= IndexLast) {
+        min = data.row(1).head(IndexLast + 1).minCoeff();
+        max = data.row(1).head(IndexLast + 1).maxCoeff();
+    } else {
+        min = data.row(1).minCoeff();
+        max = data.row(1).maxCoeff();
+    }
 }
 
 size_t vctPlot2DBase::Signal::GetSize(void) const

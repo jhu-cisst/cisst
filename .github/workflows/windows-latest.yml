@@ -1,9 +1,8 @@
 name: Windows Latest
 
 on:
-  # Build pushes to the main and development branches.
   push:
-    branches: [ main, devel ]
+    branches: [ main, devel, cisst2 ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -20,6 +19,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Set up vcpkg at the manifest baseline
+      shell: pwsh
+      run: |
+        $manifestPath = Join-Path $env:GITHUB_WORKSPACE "vcpkg.json"
+        $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+        $baseline = $manifest.'builtin-baseline'
+        if (-not $baseline) { throw "builtin-baseline is missing from $manifestPath" }
+
+        git -C $env:VCPKG_INSTALLATION_ROOT fetch --no-tags https://github.com/microsoft/vcpkg.git $baseline
+        if ($LASTEXITCODE -ne 0) { throw "Failed to fetch vcpkg baseline commit $baseline" }
+
+        git -C $env:VCPKG_INSTALLATION_ROOT checkout --detach $baseline
+        if ($LASTEXITCODE -ne 0) { throw "Failed to check out vcpkg baseline commit $baseline" }
+
+        & (Join-Path $env:VCPKG_INSTALLATION_ROOT "bootstrap-vcpkg.bat") -disableMetrics
+        if ($LASTEXITCODE -ne 0) { throw "Failed to bootstrap vcpkg at commit $baseline" }
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -27,30 +43,55 @@ jobs:
         arch: win64_msvc2019_64
         cache: 'true'
 
-    - name: Set up vcpkg binary cache
-      shell: bash
+    - name: Get vcpkg and MSVC cache versions
+      id: toolchain-versions
+      shell: pwsh
       run: |
-        mkdir -p "$GITHUB_WORKSPACE/vcpkg_cache"
-        echo "VCPKG_DEFAULT_BINARY_CACHE=$GITHUB_WORKSPACE/vcpkg_cache" >> "$GITHUB_ENV"
+        $vcpkgExe = Join-Path $env:VCPKG_INSTALLATION_ROOT "vcpkg.exe"
+        if (-not (Test-Path -LiteralPath $vcpkgExe)) { throw "vcpkg executable not found: $vcpkgExe" }
+        $vcpkgVersionOutput = & $vcpkgExe version 2>&1
+        $vcpkgExitCode = $LASTEXITCODE
+        if ($vcpkgExitCode -ne 0) { throw "vcpkg version command failed ($vcpkgExitCode): $($vcpkgVersionOutput -join ' ')" }
+        $versionMatch = [regex]::Match(($vcpkgVersionOutput -join ' '), '(?i)\bversion\s+([^\s]+)')
+        if (-not $versionMatch.Success) { throw "Unable to parse vcpkg version output: $($vcpkgVersionOutput -join ' ')" }
+        $vcpkgVersion = $versionMatch.Groups[1].Value
 
-    # vcpkg's per-package ABI hashes validate compiler/toolchain compatibility.
-    # Use a fresh archive key so newly built packages can always be saved.
-    - name: Restore vcpkg binary artifacts
+        $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+        $vsPath = & $vswhere -latest -products '*' -property installationPath
+        $toolsetRoot = Join-Path $vsPath "VC\Tools\MSVC"
+        $toolset = Get-ChildItem $toolsetRoot -Directory | Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+        if (-not $toolset) { throw "Unable to determine MSVC toolset version" }
+
+        $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+        [System.IO.File]::AppendAllText($env:GITHUB_OUTPUT, "vcpkg=$vcpkgVersion`nmsvc=$($toolset.Name)`n", $utf8NoBom)
+
+    - name: Set up vcpkg binary cache
+      shell: pwsh
+      run: |
+        $cacheDir = Join-Path $env:GITHUB_WORKSPACE "vcpkg_cache"
+        New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
+        "VCPKG_BINARY_SOURCES=clear;files,$cacheDir,readwrite" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    # vcpkg/msvc versions are added to cache key even though vcpkg already uses both in the ABI hash,
+    # in order to re-trigger the "Save vcpkg binary cache" step with the new vcpkg/msvc artifacts
+    - name: Restore vcpkg binary cache
       id: vcpkg-cache
       uses: actions/cache/restore@v4
       with:
         path: ${{ github.workspace }}/vcpkg_cache
-        key: ${{ runner.os }}-vcpkg-bin-v3-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', '.github/workflows/vcpkg-triplets/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', '.github/workflows/vcpkg-triplets/**') }}-${{ steps.toolchain-versions.outputs.vcpkg }}-${{ steps.toolchain-versions.outputs.msvc }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-bin-v3-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', '.github/workflows/vcpkg-triplets/**') }}-
-          ${{ runner.os }}-vcpkg-bin-v3-
+          ${{ runner.os }}-vcpkg-
 
     - name: Install dependencies via vcpkg
+      shell: pwsh
       run: |
-        C:\vcpkg\vcpkg install --triplet x64-windows --overlay-triplets="${{github.workspace}}/.github/workflows/vcpkg-triplets" --x-install-root="${{github.workspace}}/build/vcpkg_installed"
+        C:\vcpkg\vcpkg.exe install `
+          --triplet x64-windows `
+          --overlay-triplets="${{ github.workspace }}/.github/workflows/vcpkg-triplets" `
+          --x-install-root="${{ github.workspace }}/build/vcpkg_installed"
 
-    # Preserve successful dependency builds even if a later build or test fails.
-    - name: Save vcpkg binary artifacts
+    - name: Save vcpkg binary cache
       if: steps.vcpkg-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
@@ -59,15 +100,6 @@ jobs:
 
     - name: Test CppUnit finder
       run: cmake -S tests/cmake/cppunit-discovery -B cppunit-discovery-check
-
-    - name: Configure CMake smoke test
-      run: |
-        cmake -S . -B build-configure-check `
-          -DCMAKE_BUILD_TYPE=Release `
-          "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" `
-          "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" `
-          -DVCPKG_MANIFEST_INSTALL=OFF `
-          -C "${{github.workspace}}/.github/workflows/cmake-windows-smoke-cache.cmake"
 
     - name: Configure CMake
       run: |
@@ -92,9 +124,7 @@ jobs:
           -DCISST_cisstCommon_EXAMPLES=ON `
           -DCISST_cisstOSAbstraction_EXAMPLES=ON `
           -DCISST_cisstMultiTask_EXAMPLES=ON `
-          -DCISST_cisstParameterTypes_EXAMPLES=ON `
-          -DCISST_cisstRobot_EXAMPLES=ON `
-          -DCISST_cisstMesh_EXAMPLES=ON
+          -DCISST_cisstParameterTypes_EXAMPLES=ON
 
     - name: Build examples
       working-directory: ${{github.workspace}}/build
@@ -111,7 +141,7 @@ jobs:
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
           -DVCPKG_MANIFEST_INSTALL=OFF ^
-          -Dcisst_DIR="${{github.workspace}}/build" ^
+          -Dcisst_DIR="${{github.workspace}}/build"
         cmake --build test_export_build_tree_build --config Release --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Install cisst
@@ -125,7 +155,7 @@ jobs:
           "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
           "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
           -DVCPKG_MANIFEST_INSTALL=OFF ^
-          -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.5/cmake" ^
+          -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.5/cmake"
         cmake --build test_export_install_tree_build --config Release --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Test downstream package discovery
@@ -142,7 +172,7 @@ jobs:
               "-Dcisst_DIR=$($packages[$tree])", "-DMODE=$mode",
               "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake",
               "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed",
-              '-DVCPKG_MANIFEST_INSTALL=OFF', '-DCMAKE_DISABLE_FIND_PACKAGE_SWIG=ON',
+              '-DVCPKG_MANIFEST_INSTALL=OFF', '-DCMAKE_DISABLE_FIND_PACKAGE_SWIG=ON'
             )
             if ($mode -eq 'core') {
               $options += '-DCMAKE_DISABLE_FIND_PACKAGE_Qt5=ON', '-DCMAKE_DISABLE_FIND_PACKAGE_Qt6=ON'

@@ -22,8 +22,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnDeSerializer.h>
 CMN_IMPLEMENT_SERVICES(cmnDeSerializer);
 
-#include <cisstCommon/cmnPath.h>
-CMN_IMPLEMENT_SERVICES(cmnPath);
+#include <cisstCommon/cmnSearchPath.h>
+CMN_IMPLEMENT_SERVICES(cmnSearchPath);
 
 #include <cisstCommon/cmnSerializer.h>
 CMN_IMPLEMENT_SERVICES(cmnSerializer);

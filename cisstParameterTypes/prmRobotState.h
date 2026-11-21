@@ -43,6 +43,7 @@ http://www.cisst.org/cisst/license.txt.
 
 /*! motion command arguments for Actuator state , Position, Velocity, etc.
 TODO: seperate cartesian state and the joint state to 2 different classes.
+// TODO BB: Can we delete this?
 */
 class CISST_EXPORT prmRobotState: public mtsGenericObject
 {

@@ -23,6 +23,91 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstCommon/cmnDataFunctionsString.h>
 #include <cisstCommon/cmnDataFunctionsVector.h>
+#include <cisstCommon/cmnDataFunctionsArray.h>
+#include <cisstCommon/cmnDataFunctionsJSON.h>
+#include <cisstCommon/cmnSerializer.h>
+#include <cisstCommon/cmnDeSerializer.h>
+
+void cmnDataFunctionsVectorTest::TestStandardContainers(void)
+{
+    const cmnDataFormat format;
+    for (const std::vector<bool> & source : {std::vector<bool>{}, {false}, {true, false, true}}) {
+        std::vector<bool> data;
+        cmnData<std::vector<bool>>::Copy(data, source);
+        CPPUNIT_ASSERT(data == source);
+
+        std::stringstream text;
+        cmnData<std::vector<bool>>::SerializeText(source, text, ',');
+        data.clear();
+        cmnData<std::vector<bool>>::DeSerializeText(data, text, ',');
+        CPPUNIT_ASSERT(data == source);
+
+        std::stringstream binary;
+        cmnData<std::vector<bool>>::SerializeBinary(source, binary);
+        data.clear();
+        cmnData<std::vector<bool>>::DeSerializeBinary(data, binary, format, format);
+        CPPUNIT_ASSERT(data == source);
+
+        std::stringstream raw;
+        cmnSerializeRaw(raw, source);
+        data.clear();
+        cmnDeSerializeRaw(raw, data);
+        CPPUNIT_ASSERT(data == source);
+
+#if CISST_HAS_JSON
+        Json::Value json;
+        cmnDataJSON<std::vector<bool>>::SerializeText(source, json);
+        data.clear();
+        cmnDataJSON<std::vector<bool>>::DeSerializeText(data, json);
+        CPPUNIT_ASSERT(data == source);
+#endif
+    }
+
+    typedef std::array<double, 3> ArrayType;
+    const ArrayType source{0.3, 700.0, 0.5};
+    ArrayType data{};
+    cmnData<ArrayType>::Copy(data, source);
+    CPPUNIT_ASSERT(data == source);
+    CPPUNIT_ASSERT(cmnData<ArrayType>::ScalarNumberIsFixed(source));
+    CPPUNIT_ASSERT_EQUAL(size_t(3), cmnData<ArrayType>::ScalarNumber(source));
+    CPPUNIT_ASSERT_EQUAL(700.0, cmnData<ArrayType>::Scalar(source, 1));
+    CPPUNIT_ASSERT(!cmnData<ArrayType>::HumanReadable(source).empty());
+    CPPUNIT_ASSERT(!cmnData<ArrayType>::SerializeDescription(source, ',').empty());
+    CPPUNIT_ASSERT(!cmnData<ArrayType>::ScalarDescription(source, 2).empty());
+    CPPUNIT_ASSERT_THROW(cmnData<ArrayType>::Scalar(source, 3), std::out_of_range);
+
+    std::stringstream text;
+    cmnData<ArrayType>::SerializeText(source, text, ',');
+    data.fill(0.0);
+    cmnData<ArrayType>::DeSerializeText(data, text, ',');
+    CPPUNIT_ASSERT(data == source);
+
+    std::stringstream binary;
+    cmnData<ArrayType>::SerializeBinary(source, binary);
+    data.fill(0.0);
+    cmnData<ArrayType>::DeSerializeBinary(data, binary, format, format);
+    CPPUNIT_ASSERT(data == source);
+
+    std::stringstream raw;
+    cmnSerializeRaw(raw, source);
+    data.fill(0.0);
+    cmnDeSerializeRaw(raw, data);
+    CPPUNIT_ASSERT(data == source);
+
+    // Array elements can themselves own dynamic storage.
+    const std::array<std::vector<double>, 2> nested{{{1.0, 2.0}, {}}};
+    std::array<std::vector<double>, 2> nestedRestored;
+    std::stringstream nestedRaw;
+    cmnSerializeRaw(nestedRaw, nested);
+    cmnDeSerializeRaw(nestedRaw, nestedRestored);
+    CPPUNIT_ASSERT(nestedRestored == nested);
+
+    typedef std::array<double, 0> EmptyArray;
+    const EmptyArray empty{};
+    CPPUNIT_ASSERT(cmnData<EmptyArray>::ScalarNumberIsFixed(empty));
+    CPPUNIT_ASSERT_EQUAL(size_t(0), cmnData<EmptyArray>::ScalarNumber(empty));
+    CPPUNIT_ASSERT_THROW(cmnData<EmptyArray>::Scalar(empty, 0), std::out_of_range);
+}
 
 void cmnDataFunctionsVectorTest::TestCopy(void)
 {

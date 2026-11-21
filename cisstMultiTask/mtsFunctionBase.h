@@ -26,9 +26,9 @@ http://www.cisst.org/cisst/license.txt.
 #ifndef _mtsFunctionBase_h
 #define _mtsFunctionBase_h
 
-#include <cisstOSAbstraction/osaForwardDeclarations.h>
 #include <cisstMultiTask/mtsExecutionResult.h>
 #include <cisstMultiTask/mtsForwardDeclarations.h>
+#include <cisstOSAbstraction/osaThreadSignal.h>
 
 // Always include last
 #include <cisstMultiTask/mtsExport.h>
@@ -40,16 +40,14 @@ class CISST_EXPORT mtsFunctionBase {
 protected:
     /*! Default constructor. */
     mtsFunctionBase();
-
-    /*! Destructor. */
     virtual ~mtsFunctionBase();
 
     /*! Reference to an existing thread signal used to block the execution. */
-    osaThreadSignal * ThreadSignal;
+    osaThreadSignal* ThreadSignal;
 
     /*! Event receiver for events containing return value or indication that
       blocking command has finished. */
-    mtsEventReceiverWrite *CompletionCommand;
+    std::unique_ptr<mtsEventReceiverWrite> CompletionCommand;
 
 public:
     /*! Detach the function from the command used.  Internally, sets the command pointer to 0 */
@@ -68,17 +66,13 @@ public:
     virtual void DeleteCompletionCommand(void);
 
     /*! Set the thread signal used for blocking commands */
-    void SetThreadSignal(osaThreadSignal * threadSignal);
+    void SetThreadSignal(osaThreadSignal* threadSignal);
 
     /*! Wait for internal thread signal */
     void ThreadSignalWait(void) const;
 
-    /*! Wait for return value. Note that return object is specified via CompletionCommand (PrepareToWait).
-        Return object contains:
-          - result  --  for read, qualified read, void return, write return
-          - execution result -- for blocking void, blocking write
-    */
-    mtsExecutionResult WaitForResult(void) const;
+    /*! Wait for return value. */
+    mtsExecutionResult WaitForResult() const;
 };
 
 

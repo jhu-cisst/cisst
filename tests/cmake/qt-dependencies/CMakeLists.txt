@@ -5,7 +5,7 @@ project (cisstQtDependencies LANGUAGES CXX)
 # MODE=core can be used with -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=ON (or Qt5).
 # MODE=qt, repeated, and all require the matching Qt installation.
 set (MODE core CACHE STRING "Consumer scenario: core, qt, repeated, or all")
-set (_core cisstCommon cisstVector cisstOSAbstraction cisstMultiTask cisstParameterTypes)
+set (_core cisstCommon cisstOSAbstraction cisstMultiTask cisstParameterTypes)
 if (MODE STREQUAL "all")
   find_package (cisst 1.5 REQUIRED)
   if ("cisstTestsDriver" IN_LIST CISST_LIBRARIES AND NOT TARGET CppUnit::CppUnit)

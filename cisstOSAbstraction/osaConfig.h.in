@@ -25,7 +25,4 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstConfig.h>
 
-// Do we have linux/module.h, used only by RTAI
-#cmakedefine01 CISST_OSA_HAS_MODULE_H
-
 #endif // _osaConfig_h
