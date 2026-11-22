@@ -133,10 +133,11 @@ jobs:
 
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: cmd
+      shell: pwsh
       run: |
-        call cisstvars.bat Release
-        cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
+        . .\cisstvars.ps1 Release
+        cmake --build . --config Release --parallel $env:NUMBER_OF_PROCESSORS
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     - name: Configure CMake examples
       run: |
@@ -149,35 +150,46 @@ jobs:
 
     - name: Build examples
       working-directory: ${{github.workspace}}/build
-      shell: cmd
+      shell: pwsh
       run: |
-        call cisstvars.bat Release
-        cmake --build . --config Release --parallel %NUMBER_OF_PROCESSORS%
+        . .\cisstvars.ps1 Release
+        cmake --build . --config Release --parallel $env:NUMBER_OF_PROCESSORS
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     - name: Test exported targets against build tree
-      shell: cmd
+      shell: pwsh
       run: |
-        cmake -S cisstMultiTask/examples/PeriodicTask -B test_export_build_tree_build ^
-          -DCMAKE_BUILD_TYPE=Release ^
-          "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
-          "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
-          -DVCPKG_MANIFEST_INSTALL=OFF ^
-          -Dcisst_DIR="${{github.workspace}}/build"
-        cmake --build test_export_build_tree_build --config Release --parallel %NUMBER_OF_PROCESSORS%
+        $toolchainFile = Join-Path $env:VCPKG_INSTALLATION_ROOT 'scripts/buildsystems/vcpkg.cmake'
+        $installedDir = Join-Path $env:GITHUB_WORKSPACE 'build/vcpkg_installed'
+        $buildTree = Join-Path $env:GITHUB_WORKSPACE 'build'
+        cmake -S cisstMultiTask/examples/PeriodicTask -B test_export_build_tree_build `
+          -DCMAKE_BUILD_TYPE=Release `
+          "-DCMAKE_TOOLCHAIN_FILE=$toolchainFile" `
+          "-DVCPKG_INSTALLED_DIR=$installedDir" `
+          -DVCPKG_MANIFEST_INSTALL=OFF `
+          "-Dcisst_DIR=$buildTree"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        cmake --build test_export_build_tree_build --config Release --parallel $env:NUMBER_OF_PROCESSORS
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     - name: Install cisst
       run: cmake --install build --config Release --prefix cisst-install
 
     - name: Test exported targets against install tree
-      shell: cmd
+      shell: pwsh
       run: |
-        cmake -S cisstMultiTask/examples/PeriodicTask -B test_export_install_tree_build ^
-          -DCMAKE_BUILD_TYPE=Release ^
-          "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake" ^
-          "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed" ^
-          -DVCPKG_MANIFEST_INSTALL=OFF ^
-          -Dcisst_DIR="${{github.workspace}}/cisst-install/share/cisst-1.5/cmake"
-        cmake --build test_export_install_tree_build --config Release --parallel %NUMBER_OF_PROCESSORS%
+        $toolchainFile = Join-Path $env:VCPKG_INSTALLATION_ROOT 'scripts/buildsystems/vcpkg.cmake'
+        $installedDir = Join-Path $env:GITHUB_WORKSPACE 'build/vcpkg_installed'
+        $installTree = Join-Path $env:GITHUB_WORKSPACE 'cisst-install/share/cisst-1.5/cmake'
+        cmake -S cisstMultiTask/examples/PeriodicTask -B test_export_install_tree_build `
+          -DCMAKE_BUILD_TYPE=Release `
+          "-DCMAKE_TOOLCHAIN_FILE=$toolchainFile" `
+          "-DVCPKG_INSTALLED_DIR=$installedDir" `
+          -DVCPKG_MANIFEST_INSTALL=OFF `
+          "-Dcisst_DIR=$installTree"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        cmake --build test_export_install_tree_build --config Release --parallel $env:NUMBER_OF_PROCESSORS
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     - name: Test downstream package discovery
       shell: pwsh
@@ -215,19 +227,24 @@ jobs:
 
     - name: Run Tests
       working-directory: ${{github.workspace}}/build
-      shell: cmd
+      shell: pwsh
       run: |
-        call cisstvars.bat Release
-        bin\Release\cisstCommonTests.exe -r -v
-        bin\Release\cisstVectorQtTests.exe -r -v
-        bin\Release\cisstOSAbstractionTests.exe -r -v
-        bin\Release\cisstParameterTypesTests.exe -r -v
-        bin\Release\cisstMultiTaskTests.exe -r -v
+        . .\cisstvars.ps1 Release
+        & .\bin\Release\cisstCommonTests.exe -r -v
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & .\bin\Release\cisstVectorQtTests.exe -r -v
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & .\bin\Release\cisstOSAbstractionTests.exe -r -v
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & .\bin\Release\cisstParameterTypesTests.exe -r -v
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & .\bin\Release\cisstMultiTaskTests.exe -r -v
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     - name: Run Python Tests
       working-directory: ${{github.workspace}}/build
-      shell: cmd
+      shell: pwsh
       run: |
-        call cisstvars.bat Release
-        ctest -R "^Python:" --output-on-failure
-        if errorlevel 1 exit /b 1
+        . .\cisstvars.ps1 Release
+        ctest -R '^Python:' --output-on-failure
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

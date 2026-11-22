@@ -20,6 +20,7 @@ cisst_add_pybind11_module (MODULE _cisstMultiTaskPython
                            SOURCES cisstMultiTaskPybind.cpp ${cisstMultiTask_CISST_DG_PYTHON_SRCS}
                            MODULE_LINK_LIBRARIES cisstMultiTask cisstOSAbstraction cisstCommon
                            INSTALL_FILES)
+set_target_properties (_cisstMultiTaskPython PROPERTIES CXX_VISIBILITY_PRESET default)
 
 add_custom_command (OUTPUT "${LIBRARY_OUTPUT_PATH}/cisstMultiTaskPython.py"
                     COMMAND ${CMAKE_COMMAND} -E copy_if_different

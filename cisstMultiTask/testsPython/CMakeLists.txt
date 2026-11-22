@@ -25,6 +25,7 @@ cisst_add_pybind11_module (MODULE cisstMultiTaskPythonTest
          SOURCES cisstMultiTaskPythonTestPybind.cpp
            mtsPeriodicTaskTest.cpp
          MODULE_LINK_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask)
+set_target_properties (cisstMultiTaskPythonTest PROPERTIES CXX_VISIBILITY_PRESET default)
 
 # Create the scripts from .in
 set (LIB cisstMultiTask)
