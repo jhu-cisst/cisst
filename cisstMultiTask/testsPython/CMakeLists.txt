@@ -43,7 +43,7 @@ endif (CMAKE_CONFIGURATION_TYPES)
 # Run the script to generate the list of tests automatically
 if (WIN32)
   add_custom_target (cisstMultiTask_CREATE_PYTHON_TESTS_LIST ALL
-                     COMMAND ${cisstTestsDriver_BINARY_DIR}/cisstTestsDriverPython.bat ${CMAKE_CFG_INTDIR}
+                     COMMAND ${cisst_BINARY_DIR}/cisstTestsDriver/cisstTestsDriverPython.bat ${CMAKE_CFG_INTDIR}
                              ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstMultiTaskTests.py ${CTEST_TEST_FILE_AUTO}
                      SOURCES ${TEST_PROGRAMS})
 else (WIN32)

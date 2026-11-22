@@ -46,7 +46,6 @@ jobs:
       with:
         key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/macos-15.yml') }}
         max-size: 1G
-        ccache-command: ccache
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build

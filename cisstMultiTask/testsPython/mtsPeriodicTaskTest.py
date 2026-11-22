@@ -79,22 +79,11 @@ class PeriodicTaskTest(unittest.TestCase):
         taskManager.CreateAll()
         self.assertTrue(periodicTask.WaitToStart(10.0))
         taskManager.StartAll()
-
-        def read_double_when(expected_value):
-            deadline = time.monotonic() + 10.0
-            last_result = None
-            result = cisstMultiTask.mtsDouble()
-            while time.monotonic() < deadline:
-                last_result = periodicTask.MainInterface.GetDouble.Execute(result)
-                if last_result.IsOK() and result.Data == expected_value:
-                    return result
-                time.sleep(min(period / 4.0, max(0.0, deadline - time.monotonic())))
-            self.fail(f"GetDouble did not return {expected_value}; last result was {last_result}")
-
         # and now use the task ...
         # -1- set all to zero and check result
         periodicTask.MainInterface.ZeroAll()
-        result1 = read_double_when(0.0)
+        time.sleep(2 * period)
+        result1 = periodicTask.MainInterface.GetDouble()
         timestamp1 = result1.GetTimestamp()
         self.assertTrue(result1.Data == 0.0)
         resultVector = periodicTask.MainInterface.GetVector()
@@ -104,7 +93,8 @@ class PeriodicTaskTest(unittest.TestCase):
         self.assertTrue((data == expected).all())
         # -2- use the AddDouble to modify all and test
         periodicTask.MainInterface.AddDouble(1.0)
-        result2 = read_double_when(1.0)
+        time.sleep(2 * period)
+        result2 = periodicTask.MainInterface.GetDouble()
         timestamp2 = result2.GetTimestamp()
         self.assertTrue(result2.Data == 1.0)
         resultVector = periodicTask.MainInterface.GetVector()
@@ -114,7 +104,8 @@ class PeriodicTaskTest(unittest.TestCase):
         self.assertTrue((data == expected).all())
         # -3- set to zero again and test
         periodicTask.MainInterface.ZeroAll()
-        result3 = read_double_when(0.0)
+        time.sleep(2 * period)
+        result3 = periodicTask.MainInterface.GetDouble()
         timestamp3 = result3.GetTimestamp()
         self.assertTrue(result3.Data == 0.0)
         resultVector = periodicTask.MainInterface.GetVector()
