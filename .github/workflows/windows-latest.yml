@@ -20,13 +20,17 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python
+      id: setup-python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
     - name: Install Python build dependencies
       shell: pwsh
-      run: python -m pip install numpy pybind11==3.1.0
+      run: |
+        $pythonExecutable = '${{ steps.setup-python.outputs.python-path }}'
+        & $pythonExecutable -m pip install numpy pybind11==3.1.0
+        if ($LASTEXITCODE -ne 0) { throw "Failed to install Python build dependencies" }
 
     - name: Set up vcpkg at the manifest baseline
       shell: pwsh
@@ -113,9 +117,10 @@ jobs:
     - name: Configure CMake
       shell: pwsh
       run: |
-        $pythonExecutable = (Get-Command python).Source
-        $pythonRoot = Split-Path -Parent $pythonExecutable
-        $pybind11Dir = python -m pybind11 --cmakedir
+        $pythonExecutable = '${{ steps.setup-python.outputs.python-path }}'
+        $pythonRoot = & $pythonExecutable -c "import sys; print(sys.base_prefix)"
+        $pybind11Dir = & $pythonExecutable -m pybind11 --cmakedir
+        if ($LASTEXITCODE -ne 0) { throw "Failed to locate pybind11 CMake package" }
         cmake -S . -B build `
           -DCMAKE_BUILD_TYPE=Release `
           "-DPython_EXECUTABLE:FILEPATH=$pythonExecutable" `
