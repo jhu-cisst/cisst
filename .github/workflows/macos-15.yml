@@ -131,6 +131,4 @@ jobs:
         ./bin/cisstOSAbstractionTests -r -v
         ./bin/cisstParameterTypesTests -r -v
         ./bin/cisstMultiTaskTests -r -v
-        python ./bin/cisstCommonTests.py -r
-        python ./bin/cisstMultiTaskTests.py -r
-        python ./bin/cisstParameterTypesTests.py -r
+        ctest -R '^Python:' --output-on-failure

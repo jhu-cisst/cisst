@@ -153,9 +153,7 @@ jobs:
         cisstOSAbstractionTests -r -v
         cisstParameterTypesTests -r -v
         cisstMultiTaskTests -r -v
-        python3 ./bin/cisstCommonTests.py -r
-        python3 ./bin/cisstMultiTaskTests.py -r
-        python3 ./bin/cisstParameterTypesTests.py -r
+        ctest -R '^Python:' --output-on-failure
 
     - name: ccache stats (after)
       run: ccache -s
