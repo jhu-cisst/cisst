@@ -165,7 +165,7 @@ def RunAllTests(prefix):
             print((result.failures[i])[1])
     else:
         print("successful")
-    return 0
+    return 0 if result.wasSuccessful() else 1
 
 
 

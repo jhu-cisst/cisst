@@ -29,9 +29,17 @@ jobs:
         HOMEBREW_NO_AUTO_UPDATE: "1"
         HOMEBREW_NO_INSTALL_CLEANUP: "1"
       run: |
-        brew install graphviz jsoncpp qt pkg-config cppunit ccache eigen orocos-kdl
+        brew install graphviz jsoncpp qt pkg-config cppunit ccache eigen orocos-kdl pybind11
         # Ensure homebrew bin is in path for subsequent steps
         echo "/opt/homebrew/bin" >> $GITHUB_PATH
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install NumPy
+      run: python -m pip install numpy
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
@@ -50,6 +58,7 @@ jobs:
         cmake ${{github.workspace}} \
           -DCMAKE_BUILD_TYPE=Release \
           -DCISST_QT_VERSION=6 \
+          -DCISST_HAS_PYTHON=ON \
           -DCMAKE_OSX_ARCHITECTURES=arm64 \
           -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt;/opt/homebrew" \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
@@ -122,3 +131,6 @@ jobs:
         ./bin/cisstOSAbstractionTests -r -v
         ./bin/cisstParameterTypesTests -r -v
         ./bin/cisstMultiTaskTests -r -v
+        python ./bin/cisstCommonTests.py -r
+        python ./bin/cisstMultiTaskTests.py -r
+        python ./bin/cisstParameterTypesTests.py -r
