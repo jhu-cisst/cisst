@@ -17,11 +17,11 @@ jobs:
       VCPKG_ROOT: C:\vcpkg
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Set up Python
       id: setup-python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: '3.12'
 
@@ -89,7 +89,7 @@ jobs:
     # in order to re-trigger the "Save vcpkg binary cache" step with the new vcpkg/msvc artifacts
     - name: Restore vcpkg binary cache
       id: vcpkg-cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v6
       with:
         path: ${{ github.workspace }}/vcpkg_cache
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', '.github/workflows/vcpkg-triplets/**') }}-${{ steps.toolchain-versions.outputs.vcpkg }}-${{ steps.toolchain-versions.outputs.msvc }}
@@ -106,7 +106,7 @@ jobs:
 
     - name: Save vcpkg binary cache
       if: steps.vcpkg-cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v6
       with:
         path: ${{ github.workspace }}/vcpkg_cache
         key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}

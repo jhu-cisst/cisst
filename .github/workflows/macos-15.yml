@@ -13,10 +13,10 @@ jobs:
     runs-on: macos-15
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup Homebrew cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/Library/Caches/Homebrew
@@ -34,7 +34,7 @@ jobs:
         echo "/opt/homebrew/bin" >> $GITHUB_PATH
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: '3.12'
 
