@@ -20,9 +20,6 @@
     },
     {
       "name": "orocos-kdl"
-    },
-    {
-      "name": "pybind11"
     }
   ]
 }

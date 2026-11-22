@@ -75,8 +75,9 @@ class PeriodicTaskTest(unittest.TestCase):
         self.assertTrue(isinstance(taskManager, cisstMultiTask.mtsManagerLocal))
         # add the task
         self.assertTrue(taskManager.AddComponent(periodicTask))
-        # create and start the task(s)
+        # Wait for asynchronous task initialization before starting it.
         taskManager.CreateAll()
+        self.assertTrue(periodicTask.WaitToStart(10.0))
         taskManager.StartAll()
         # and now use the task ...
         # -1- set all to zero and check result
