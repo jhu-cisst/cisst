@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(cisstMultiTaskPythonTestPython, m)
+PYBIND11_MODULE(cisstMultiTaskPythonTest, m)
 {
     m.doc() = "pybind11 bindings for cisstMultiTaskPythonTest";
 

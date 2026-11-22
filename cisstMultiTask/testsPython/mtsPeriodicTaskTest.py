@@ -20,7 +20,7 @@ import time
 
 import cisstCommonPython as cisstCommon
 import cisstMultiTaskPython as cisstMultiTask
-import cisstMultiTaskPythonTestPython as cisstMultiTaskPythonTest # contains test classes
+import cisstMultiTaskPythonTest # contains test classes
 
 class PeriodicTaskTest(unittest.TestCase):
     def setUp(self):
