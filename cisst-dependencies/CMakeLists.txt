@@ -376,7 +376,27 @@ if (NOT EIGEN_FOUND)
     GIT_TAG        3147391d946bb4b6c68edd901f2add6ac1f31f8c # v3.4.0
     GIT_SHALLOW    TRUE
   )
+
+  # Eigen adds its own CTest suite when BUILD_TESTING is enabled. Keep the
+  # parent project's test setting while suppressing only Eigen's test targets.
+  if (DEFINED BUILD_TESTING)
+    set (_cisst_build_testing ${BUILD_TESTING})
+    set (_cisst_had_build_testing TRUE)
+  else ()
+    set (_cisst_had_build_testing FALSE)
+  endif ()
+  set (BUILD_TESTING OFF)
+  set (BUILD_TESTING OFF CACHE BOOL "Enable testing" FORCE)
   FetchContent_MakeAvailable(Eigen)
+  if (_cisst_had_build_testing)
+    set (BUILD_TESTING ${_cisst_build_testing})
+    set (BUILD_TESTING ${_cisst_build_testing} CACHE BOOL "Enable testing" FORCE)
+  else ()
+    unset (BUILD_TESTING)
+    unset (BUILD_TESTING CACHE)
+  endif ()
+  unset (_cisst_build_testing)
+  unset (_cisst_had_build_testing)
 endif (NOT EIGEN_FOUND)
 
 # Required support for Orocos-KDL

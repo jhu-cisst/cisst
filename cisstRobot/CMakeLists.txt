@@ -15,7 +15,7 @@ project (cisstRobotLibs)
 if (CISST_HAS_KDL)
   add_subdirectory (code)
   target_link_libraries(cisstRobot Eigen3::Eigen orocos-kdl)
-endif (CISST_HAS_KDL)
 
-# Python wrappers
-cisst_offer_python (cisstRobot)
+  # Python wrappers require the cisstRobot library defined above.
+  cisst_offer_python (cisstRobot)
+endif (CISST_HAS_KDL)
