@@ -19,11 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsQtApplication.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-<<<<<<< HEAD
 #include <cisstOSAbstraction/osaSleep.h>
-=======
 #include <cisstCommon/cmnQt.h>
->>>>>>> 4b4d14c10f00f2d64a6a5f517ccb2765f0478122
 
 #include <QApplication>
 #include <QBasicTimer>
