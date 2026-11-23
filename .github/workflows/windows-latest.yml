@@ -195,6 +195,8 @@ jobs:
     - name: Test downstream package discovery
       shell: pwsh
       run: |
+        $pythonExecutable = '${{ steps.setup-python.outputs.python-path }}'
+        $pythonRoot = & $pythonExecutable -c "import sys; print(sys.base_prefix)"
         $source = "${{github.workspace}}/tests/cmake/qt-dependencies"
         $installedConfig = Get-ChildItem "${{github.workspace}}/cisst-install/share/cisst-*/cmake/cisst-config.cmake" | Select-Object -First 1
         if (-not $installedConfig) { throw "Installed cisst package configuration not found" }
@@ -204,6 +206,7 @@ jobs:
             $binary = "${{github.workspace}}/qt-dependencies-$tree-$mode"
             $options = @(
               "-Dcisst_DIR=$($packages[$tree])", "-DMODE=$mode",
+              "-DPython_EXECUTABLE:FILEPATH=$pythonExecutable", "-DPython_ROOT_DIR:PATH=$pythonRoot",
               "-DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake",
               "-DVCPKG_INSTALLED_DIR=${{github.workspace}}/build/vcpkg_installed",
               '-DVCPKG_MANIFEST_INSTALL=OFF', '-DCMAKE_DISABLE_FIND_PACKAGE_SWIG=ON'
