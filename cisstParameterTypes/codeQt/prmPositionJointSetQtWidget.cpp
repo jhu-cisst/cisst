@@ -47,8 +47,8 @@ void prmPositionJointSetQtWidget::setupUi(void)
     QPBMove->setEnabled(false);
     layout->addWidget(QPBMove);
 
-    QVWPosition = new vctQtWidgetDynamicVectorDoubleWrite(vctQtWidgetDynamicVectorWriteBase::SPINBOX_WIDGET);
-    QVWPosition->SetPrecision(3);
+    QVWPosition = new EigenQt::VectorEditor(EigenQt::VectorEditor::SpinBox);
+    QVWPosition->setPrecision(3);
     QVWPosition->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     layout->addWidget(QVWPosition);
 
@@ -89,20 +89,20 @@ void prmPositionJointSetQtWidget::SlotRead(void)
 
             // set position first to resize vector widget
             mTemp1.fill(0.0);
-            QVWPosition->SetValue(mTemp1);
+            QVWPosition->setValue(mTemp1);
 
             // set range
             mTemp1.array() = mFactors.array().cwiseProduct(configuration.PositionMin());
             mTemp2.array() = mFactors.array().cwiseProduct(configuration.PositionMax());
-            QVWPosition->SetRange(mTemp1, mTemp2);
+            QVWPosition->setRange(mTemp1, mTemp2);
 
             // set position again but this time with actual values
             mTemp1.array() = mFactors.array().cwiseProduct(state.Position().array());
-            QVWPosition->SetValue(mTemp1);
+            QVWPosition->setValue(mTemp1);
             QPBMove->setEnabled(true);
         }
     } else {
-        QVWPosition->SetValue(state.Position());
+        QVWPosition->setValue(state.Position());
         QPBMove->setEnabled(true);
     }
 }
@@ -114,7 +114,7 @@ void prmPositionJointSetQtWidget::SlotSetPositionGoalJoint(void)
     }
     // get the values from the widget
     mTemp1.resize(QVWPosition->columnCount());
-    QVWPosition->GetValue(mTemp1);
+    QVWPosition->readValues(mTemp1);
     // prepare goal with proper units
     prmPositionJointSet goal;
     goal.Goal().resize(mTemp1.size());

@@ -29,7 +29,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsQtCommandSelector.h>
 #include <cisstMultiTask/mtsQtScaleAndSignalTool.h>
 
-mtsQtScaleAndSignalTool::mtsQtScaleAndSignalTool(mtsManagerLocal * componentManager, vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)
+mtsQtScaleAndSignalTool::mtsQtScaleAndSignalTool(mtsManagerLocal * componentManager, EigenQt::Plot2DWidget * visualizer, QWidget * parent)
     : QWidget(parent), Visualizer(visualizer)
 {
     QLayout * layout = new QVBoxLayout();
@@ -44,7 +44,7 @@ mtsQtScaleAndSignalTool::mtsQtScaleAndSignalTool(mtsManagerLocal * componentMana
     splitter->addWidget(new mtsQtCommandSelector(componentManager));
 }
 
-mtsQtScaleEditor::mtsQtScaleEditor(vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)
+mtsQtScaleEditor::mtsQtScaleEditor(EigenQt::Plot2DWidget * visualizer, QWidget * parent)
     : QTreeWidget(parent), Visualizer(visualizer), ScaleNameCounter(0)
 {
     QStringList headerLabels;
@@ -57,26 +57,26 @@ mtsQtScaleEditor::mtsQtScaleEditor(vctPlot2DOpenGLQtWidget * visualizer, QWidget
 }
 
 
-void mtsQtScaleEditor::BuildTree(vctPlot2DOpenGLQtWidget * visualizer)
+void mtsQtScaleEditor::BuildTree(EigenQt::Plot2DWidget * visualizer)
 {
-    const vctPlot2DOpenGLQtWidget::ScalesType & scales = visualizer->GetScales();
-    vctPlot2DOpenGLQtWidget::ScalesType::const_iterator scalesIt = scales.begin();
-    const vctPlot2DOpenGLQtWidget::ScalesType::const_iterator scalesEnd = scales.end();
-    vctPlot2DOpenGLQtWidget::Scale::SignalsType::const_iterator signalsIt;
-    vctPlot2DOpenGLQtWidget::Scale::SignalsType::const_iterator signalsEnd;
+    const EigenQt::Plot2DWidget::ScalesType & scales = visualizer->scales();
+    EigenQt::Plot2DWidget::ScalesType::const_iterator scalesIt = scales.begin();
+    const EigenQt::Plot2DWidget::ScalesType::const_iterator scalesEnd = scales.end();
+    EigenQt::Plot2DWidget::Scale::SignalsType::const_iterator signalsIt;
+    EigenQt::Plot2DWidget::Scale::SignalsType::const_iterator signalsEnd;
     QTreeWidgetItem * scaleItem;
     QStringList strings;
 
     for (; scalesIt != scalesEnd; ++scalesIt) {
-        strings << scalesIt->second->GetName().c_str();
+        strings << scalesIt->second->name().c_str();
         scaleItem = new QTreeWidgetItem(strings);
         scaleItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
         strings.clear();
         addTopLevelItem(scaleItem);
-        signalsIt = scalesIt->second->GetSignals().begin();
-        signalsEnd = scalesIt->second->GetSignals().end();
+        signalsIt = scalesIt->second->signalMap().begin();
+        signalsEnd = scalesIt->second->signalMap().end();
         for (; signalsIt != signalsEnd; ++signalsIt) {
-            strings << signalsIt->second->GetName().c_str();
+            strings << signalsIt->second->name().c_str();
             scaleItem->addChild(new QTreeWidgetItem(strings));
             strings.clear();
         }
@@ -88,11 +88,11 @@ void mtsQtScaleEditor::NewScale(void)
 {
     std::stringstream ss;
     ss << "Scale " << ++ScaleNameCounter;
-    while(Visualizer->FindScale(ss.str()) != 0) {
+    while(Visualizer->findScale(ss.str()) != 0) {
         ss.clear();
         ss << "Scale " << ++ScaleNameCounter;
     }
-    Visualizer->AddScale(ss.str());
+    Visualizer->addScale(ss.str());
     QStringList strings;
     strings << ss.str().c_str();
     QTreeWidgetItem * scaleItem = new QTreeWidgetItem(strings);
@@ -110,7 +110,7 @@ void mtsQtScaleEditor::RenameScale(void)
 
 void mtsQtScaleEditor::DeleteScale(void)
 {
-    Visualizer->RemoveScale(CurrentScale.toLocal8Bit().data());
+    Visualizer->removeScale(CurrentScale.toLocal8Bit().data());
     QTreeWidgetItem * scaleItem = this->findItems(CurrentScale.toLocal8Bit().data(), Qt::MatchCaseSensitive | Qt::MatchFixedString).first();
     this->takeTopLevelItem(this->indexOfTopLevelItem(scaleItem));
 }

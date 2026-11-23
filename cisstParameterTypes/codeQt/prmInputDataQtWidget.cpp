@@ -42,22 +42,22 @@ prmInputDataQtWidget::prmInputDataQtWidget(const std::string & name):
     QHBoxLayout * digitalLayout = new QHBoxLayout;
     QLabel * digitalLabel = new QLabel("Digital Signals");
     digitalLayout->addWidget(digitalLabel);
-    QVRDigitalInputsWidget = new vctQtWidgetDynamicVectorBoolRead();
+    QVRDigitalInputsWidget = new EigenQt::VectorView();
     digitalLayout->addWidget(QVRDigitalInputsWidget);
     dataLayout->addLayout(digitalLayout);
 
     QHBoxLayout * analogLayout = new QHBoxLayout;
     QLabel * analogLabel = new QLabel("Analog Signals");
     analogLayout->addWidget(analogLabel);
-    QVRAnalogInputsWidget = new vctQtWidgetDynamicVectorDoubleRead();
+    QVRAnalogInputsWidget = new EigenQt::VectorView();
     analogLayout->addWidget(QVRAnalogInputsWidget);
     dataLayout->addLayout(analogLayout);
 
     // plot
-    QVPlot = new vctPlot2DOpenGLQtWidget();
-    vctPlot2DBase::Scale * scaleSignal = QVPlot->AddScale("signal");
-    AnalogSignal = scaleSignal->AddSignal("analog");
-    AnalogSignal->SetColor(Eigen::Vector3d(1.0, 0.0, 0.0));
+    QVPlot = new EigenQt::Plot2DWidget();
+    EigenQt::Plot2D::Scale * scaleSignal = QVPlot->addScale("signal");
+    AnalogSignal = scaleSignal->addSignal("analog");
+    AnalogSignal->setColor(Eigen::Vector3d(1.0, 0.0, 0.0));
     QVPlot->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     dataLayout->addWidget(QVPlot);
 
@@ -72,8 +72,8 @@ prmInputDataQtWidget::prmInputDataQtWidget(const std::string & name):
 void prmInputDataQtWidget::SetValue(const prmInputData & newValue)
 {
     // update text display
-    QVRAnalogInputsWidget->SetValue(newValue.AnalogInputs());
-    QVRDigitalInputsWidget->SetValue(newValue.DigitalInputs());
+    QVRAnalogInputsWidget->setValue(newValue.AnalogInputs());
+    QVRDigitalInputsWidget->setValue(newValue.DigitalInputs());
 
     // check if analog signals are provided
     const int nbAnalogInputs = newValue.AnalogInputs().size();
@@ -84,7 +84,7 @@ void prmInputDataQtWidget::SetValue(const prmInputData & newValue)
             QSBPlotIndex->setEnabled(true);
             PlotIndex = 0;
         }
-        AnalogSignal->AppendPoint(Eigen::Vector2d(newValue.Timestamp(), newValue.AnalogInputs()[PlotIndex]));
+        AnalogSignal->appendPoint(Eigen::Vector2d(newValue.Timestamp(), newValue.AnalogInputs()[PlotIndex]));
         QVPlot->update();
     } else {
         QSBPlotIndex->setMaximum(-1);
@@ -95,7 +95,7 @@ void prmInputDataQtWidget::SetValue(const prmInputData & newValue)
 void prmInputDataQtWidget::SlotPlotIndex(int newAxis)
 {
     PlotIndex = newAxis;
-    QVPlot->SetContinuousExpandYResetSlot();
+    QVPlot->setContinuousExpandYResetSlot();
 }
 
 CMN_IMPLEMENT_SERVICES_DERIVED_ONEARG(prmInputDataQtWidgetComponent, mtsComponent, std::string);

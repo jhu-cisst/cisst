@@ -45,8 +45,8 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
     size = positionLabel->sizeHint();
     labelWidth = size.width();
     positionLayout->addWidget(positionLabel);
-    QVRPosition = new vctQtWidgetDynamicVectorDoubleRead();
-    QVRPosition->SetPrecision(3);
+    QVRPosition = new EigenQt::VectorView();
+    QVRPosition->setPrecision(3);
     positionLayout->addWidget(QVRPosition);
     layout->addWidget(QWPosition);
 
@@ -60,8 +60,8 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
     if (size.width() > labelWidth) {
         labelWidth = size.width();
     }
-    QVRVelocity = new vctQtWidgetDynamicVectorDoubleRead();
-    QVRVelocity->SetPrecision(3);
+    QVRVelocity = new EigenQt::VectorView();
+    QVRVelocity->setPrecision(3);
     velocityLayout->addWidget(QVRVelocity);
     layout->addWidget(QWVelocity);
 
@@ -75,8 +75,8 @@ prmStateJointQtWidget::prmStateJointQtWidget(void):
     if (size.width() > labelWidth) {
         labelWidth = size.width();
     }
-    QVREffort = new vctQtWidgetDynamicVectorDoubleRead();
-    QVREffort->SetPrecision(3);
+    QVREffort = new EigenQt::VectorView();
+    QVREffort->setPrecision(3);
     effortLayout->addWidget(QVREffort);
     layout->addWidget(QWEffort);
 
@@ -101,9 +101,9 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
             }
             mTempVector.resize(newValue.Position().size());
             mTempVector.array() = mPositionFactors.array().cwiseProduct(newValue.Position().array());
-            QVRPosition->SetValue(mTempVector);
+            QVRPosition->setValue(mTempVector);
         } else {
-            QVRPosition->SetValue(newValue.Position());
+            QVRPosition->setValue(newValue.Position());
         }
     } else {
         QWPosition->hide();
@@ -122,9 +122,9 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
             }
             mTempVector.resize(newValue.Velocity().size());
             mTempVector.array() = mVelocityFactors.array().cwiseProduct(newValue.Velocity().array());
-            QVRVelocity->SetValue(mTempVector);
+            QVRVelocity->setValue(mTempVector);
         } else {
-            QVRVelocity->SetValue(newValue.Velocity());
+            QVRVelocity->setValue(newValue.Velocity());
         }
     } else {
         QWVelocity->hide();
@@ -133,7 +133,7 @@ void prmStateJointQtWidget::SetValue(const prmStateJoint & newValue)
     // -- effort
     if (newValue.Effort().size() != 0) {
         QWEffort->show();
-        QVREffort->SetValue(newValue.Effort());
+        QVREffort->setValue(newValue.Effort());
     } else {
         QWEffort->hide();
     }

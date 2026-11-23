@@ -23,7 +23,6 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                    FOLDER cisstParameterTypes
                    DEPENDENCIES cisstCommon
                                 cisstOSAbstraction
-                                cisstVectorQt
                                 cisstMultiTask
                                 cisstParameterTypes
                    SOURCE_FILES prmEventButtonQtWidget.cpp
@@ -49,4 +48,4 @@ cisst_add_library (LIBRARY cisstParameterTypesQt
                                 prmStateRobotQtWidget.h
                                 prmExportQt.h)
 
-target_link_libraries (cisstParameterTypesQt ${CISST_QT_LIBRARIES})
+target_link_libraries (cisstParameterTypesQt EigenQt::Geometry ${CISST_QT_LIBRARIES})

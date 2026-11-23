@@ -39,7 +39,6 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                    DEPENDENCIES cisstCommon
                                 cisstCommonQt
                                 cisstOSAbstraction
-                                cisstVectorQt
                                 cisstMultiTask
                    SOURCE_FILES mtsClassServicesQt.cpp
                                 mtsCollectorFactoryQtWidget.cpp
@@ -80,6 +79,7 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsExportQt.h)
 
 target_link_libraries (cisstMultiTaskQt
+  EigenQt::Plot
   ${CISST_QT_LIBRARIES}
   ${QTNODES_LIBRARIES})
 
