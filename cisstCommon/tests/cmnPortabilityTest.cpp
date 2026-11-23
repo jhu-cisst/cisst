@@ -82,7 +82,9 @@ void cmnPortabilityTest::TestWithCMake(void) {
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++.exe")));
     } else if (CISST_COMPILER == CISST_CLANG) {
         CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == std::string("c++"))
-                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang++")));
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang++"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang-cl"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang-cl.exe")));
     } else {
         CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == CMakeCompilerStrings[CISST_COMPILER])
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == CMakeCompilerStrings[CISST_COMPILER] + ".exe"));

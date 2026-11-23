@@ -40,6 +40,8 @@ int main (void) {
 
 #if (CISST_COMPILER == CISST_GCC)
     std::cout << "Compiling with gcc" << std::endl;
+#elif (CISST_COMPILER == CISST_CLANG)
+    std::cout << "Compiling with Clang" << std::endl;
 #elif (CISST_COMPILER == CISST_INTEL_CC)
     std::cout << "Compiling with Intel CC" << std::endl;
 #elif (CISST_COMPILER == CISST_DOTNET2003)

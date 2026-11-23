@@ -141,6 +141,8 @@ http://www.cisst.org/cisst/license.txt.
       #define CISST_COMPILER_IS_MSVC_64
     #endif
 
+    // clang-cl defines _MSC_VER for MSVC compatibility but remains Clang.
+    #ifndef __clang__
     #if (_MSC_VER >= 1910)
       #define CISST_COMPILER CISST_DOTNET2017
     #elif (_MSC_VER >= 1900)
@@ -162,6 +164,7 @@ http://www.cisst.org/cisst/license.txt.
     #elif (_MSC_VER >= 1200)
       #define CISST_COMPILER CISST_VCPP6
     #endif
+    #endif // __clang__
   #endif
 
 #endif // _WIN32
@@ -501,17 +504,17 @@ inline std::string pathToUTF8(const std::filesystem::path& p) {
 // compiler option.
 
 
-// Visual C++
-#ifdef CISST_COMPILER_IS_MSVC
+// Clang, GNU CC and Intel CC
+#if (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_INTEL_CC) || (CISST_COMPILER == CISST_CLANG)
+  #define CMN_PRETTY_FUNCTION __PRETTY_FUNCTION__
+
+// MSVC-compatible compilers
+#elif defined(CISST_COMPILER_IS_MSVC)
     #ifdef __FUNCSIG__
         #define CMN_PRETTY_FUNCTION __FUNCSIG__
     #else
         #warning "With Visual Studio, you need /EP or /P to have __FUNCSIG__"
     #endif
-
-// GNU CC and Intel CC
-#elif (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_INTEL_CC) || (CISST_COMPILER == CISST_CLANG)
-    #define CMN_PRETTY_FUNCTION __PRETTY_FUNCTION__
 
 // Otherwise
 #else

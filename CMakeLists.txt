@@ -316,26 +316,6 @@ check_size_t_native_type (CISST_SIZE_T_NATIVE)
 include (CheckIfDifferentTypes)
 check_if_different_types (CISST_LONG_LONG_NATIVE "long long" "long")
 
-# Determine if we can use std::isnan and std::isfinite
-include (CheckCXXSourceCompiles)
-check_cxx_source_compiles (
-  "#include <cmath>
-   int main(int argc, char ** argv) {
-       return std::isnan(1.0 / 0.0);
-   }" CISST_HAS_STD_ISNAN)
-check_cxx_source_compiles (
-  "#include <cmath>
-   int main(int argc, char ** argv) {
-       float f = 1.0;
-       double d = 1.0;
-       return (std::isfinite(f) && std::isfinite(d));
-   }" CISST_HAS_STD_ISFINITE)
-
-# Look for isfinite function, this will only be used if not CISST_HAS_STD_ISFINITE
-include (CheckSymbolExists)
-check_symbol_exists (isfinite "math.h" CISST_HAS_ISFINITE)
-
-
 # Path of all CISST shared libraries.
 link_directories (${LIBRARY_OUTPUT_PATH})
 

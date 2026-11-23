@@ -122,6 +122,10 @@ public:
 typedef mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn> mtsCommandQueuedWriteReturn;
 typedef mtsCommandQueuedWriteReturnBase<mtsCommandQualifiedRead> mtsCommandQueuedQualifiedRead;
 
+// Declare specializations before first instantiations
+template <> std::string mtsCommandQueuedWriteReturn::GetClassName(void) const;
+template <> std::string mtsCommandQueuedQualifiedRead::GetClassName(void) const;
+
 #ifdef CISST_COMPILER_IS_MSVC
 #pragma warning ( disable : 4661 )
 template class CISST_EXPORT mtsCommandQueuedWriteReturnBase<mtsCommandWriteReturn>;

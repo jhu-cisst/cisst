@@ -104,8 +104,13 @@ public:
     void ToStream(std::ostream & outputStream) const;
 };
 
+
 typedef mtsCommandQueuedVoidReturnBase<mtsCommandVoidReturn> mtsCommandQueuedVoidReturn;
 typedef mtsCommandQueuedVoidReturnBase<mtsCommandRead> mtsCommandQueuedRead;
+
+// Declare specializations before first instantiations
+template <> std::string mtsCommandQueuedVoidReturn::GetClassName(void) const;
+template <> std::string mtsCommandQueuedRead::GetClassName(void) const;
 
 #ifdef CISST_COMPILER_IS_MSVC
 #pragma warning ( disable : 4661 )
