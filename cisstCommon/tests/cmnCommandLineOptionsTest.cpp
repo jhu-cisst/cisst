@@ -22,6 +22,26 @@ http://www.cisst.org/cisst/license.txt.
 #include "cmnCommandLineOptionsTest.h"
 
 
+void cmnCommandLineOptionsTest::TestBooleanValues(void) {
+    const char * values[] = {"true", "false", "1", "0", "invalid", "", "truejunk", "2"};
+    for (size_t index = 0; index < sizeof(values) / sizeof(values[0]); ++index) {
+        cmnCommandLineOptions options;
+        bool result = true;
+        CPPUNIT_ASSERT(options.AddOptionOneValue("Z", "zoom", "Boolean value",
+                                                cmnCommandLineOptions::OPTIONAL_OPTION, &result));
+        const char * argv[] = {"programName", "-Z", values[index], 0};
+        std::string errorMessage;
+        if (index < 4) {
+            CPPUNIT_ASSERT(options.Parse(3, argv, errorMessage));
+            CPPUNIT_ASSERT_EQUAL((index == 0) || (index == 2), result);
+        } else {
+            CPPUNIT_ASSERT(!options.Parse(3, argv, errorMessage));
+            CPPUNIT_ASSERT(result); // invalid input must not change the destination
+        }
+    }
+}
+
+
 void cmnCommandLineOptionsTest::TestNoOption(void) {
     // without option all Parse should fail
     cmnCommandLineOptions options;
