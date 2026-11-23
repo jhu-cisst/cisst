@@ -6,9 +6,6 @@ set (CISST_USE_EXTERNAL ON CACHE BOOL "")
 # Compile for shared libraries
 set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "")
 
-# Use SI units
-set (CISST_USE_SI_UNITS ON CACHE BOOL "")
-
 # Force compilation for optional libraries
 set (CISST_cisstRobot ON CACHE BOOL "")
 

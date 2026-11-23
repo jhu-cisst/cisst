@@ -302,11 +302,6 @@ if (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 endif (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 
 
-# Determine is cisst is SI or not
-option (CISST_USE_SI_UNITS "Use SI units, if not, distances are in millimeters (default if ON)" ON)
-mark_as_advanced (CISST_USE_SI_UNITS)
-
-
 # Determine if size_t is a native type
 include (CheckSizeTNativeType)
 check_size_t_native_type (CISST_SIZE_T_NATIVE)

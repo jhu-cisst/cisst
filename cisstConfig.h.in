@@ -91,7 +91,4 @@ http://www.cisst.org/cisst/license.txt.
 
 #cmakedefine01 CISST_HAS_KDL
 
-// Using SI units (ie meters) or mm for distances
-#cmakedefine01 CISST_USE_SI_UNITS
-
 #endif // _cisstConfig_h

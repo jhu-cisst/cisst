@@ -59,7 +59,7 @@ cmnLogger::cmnLogger(const std::string & defaultLogFileName):
     result = "undefined";
     cmnSearchPath::GetCisstShare(result);
     *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cisst share: " << result << std::endl;
-    *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cmn_m: " << cmn_m << ", cmn_kg: " << cmn_kg << ", CISST_USE_SI_UNITS is set to " << CISST_USE_SI_UNITS << std::endl;
+    *(DefaultLogFile()) << cmnLogLevelToString(CMN_LOG_LEVEL_INIT_VERBOSE) << " cmn_m: " << cmn_m << ", cmn_kg: " << cmn_kg << std::endl;
 }
 
 
