@@ -26,7 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 
 // cisst
 #include <cisstCommon/cmnConstants.h>
-#include <cisstVectorQt/vctPose3DQtWidget.h>
+#include <eigenqt/PositionsWidget.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 #include <cisstParameterTypes/prmPositionCartesianArrayGet.h>
 #include <cisstParameterTypes/prmPositionCartesianArrayGetQtWidget.h>
@@ -88,12 +88,12 @@ void prmPositionCartesianArrayGetQtWidget::timerEvent(QTimerEvent * CMN_UNUSED(e
 
     prmPositionCartesianArrayGet poses;
     Controller.measured_cp_array(poses);
-    QVPoses->Clear();
+    QVPoses->clear();
     typedef prmPositionCartesianArrayGet::Type Type;
     const Type::const_iterator end = poses.Positions().end();
     Type::const_iterator iter = poses.Positions().begin();
     for (; iter != end; ++iter) {
-        QVPoses->SetValue(*iter);
+        QVPoses->setValue(*iter);
     }
 }
 
@@ -101,8 +101,8 @@ void prmPositionCartesianArrayGetQtWidget::setupUi(void)
 {
     QVBoxLayout * mainLayout = new QVBoxLayout;
 
-    QVPoses = new vctPose3DQtWidget();
-    QVPoses->SetPrismaticRevoluteFactors(1.0 / cmn_mm, cmn180_PI);
+    QVPoses = new EigenQt::PositionsWidget();
+    QVPoses->setPrismaticRevoluteFactors(1.0 / cmn_mm, cmn180_PI);
     mainLayout->addWidget(QVPoses);
 
     this->setLayout(mainLayout);

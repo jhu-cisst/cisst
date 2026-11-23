@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsQtScaleAndSignalTool.h>
 #include <cisstMultiTask/mtsQtVisualizerShell.h>
 
-mtsQtVisualizerShell::mtsQtVisualizerShell(mtsManagerLocal * componentManager, vctPlot2DOpenGLQtWidget * visualizer, QWidget * parent)
+mtsQtVisualizerShell::mtsQtVisualizerShell(mtsManagerLocal * componentManager, EigenQt::Plot2DWidget * visualizer, QWidget * parent)
     : QWidget(parent), Visualizer(visualizer)
 {
     QLayout * layout = new QHBoxLayout();
@@ -33,7 +33,7 @@ mtsQtVisualizerShell::mtsQtVisualizerShell(mtsManagerLocal * componentManager, v
     QSplitter * splitter = new QSplitter();
     layout->addWidget(splitter);
 
-    if(Visualizer == 0) Visualizer = new vctPlot2DOpenGLQtWidget();
+    if(Visualizer == 0) Visualizer = new EigenQt::Plot2DWidget();
 
     mtsQtScaleAndSignalTool * scaleAndSignalTool = new mtsQtScaleAndSignalTool(componentManager, Visualizer);
     scaleAndSignalTool->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);

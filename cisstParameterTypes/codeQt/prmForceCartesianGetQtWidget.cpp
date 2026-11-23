@@ -18,7 +18,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstParameterTypes/prmForceCartesianGetQtWidget.h>
 
-#include <cisstVectorQt/vctForceTorqueQtWidget.h>
+#include <eigenqt/WrenchWidget.h>
 #include <cisstMultiTask/mtsInterfaceRequired.h>
 
 #include <QVBoxLayout>
@@ -48,7 +48,7 @@ prmForceCartesianGetQtWidget::prmForceCartesianGetQtWidget(void):
     QLTime->setStyleSheet("QLabel { background-color: rgb(255, 100, 100) }");
     topLayout->addWidget(QLTime);
 
-    QForce = new vctForceTorqueQtWidget(vctForceTorqueQtWidget::PLOT_2D_WIDGET);
+    QForce = new EigenQt::WrenchWidget(EigenQt::WrenchWidget::Plot2D);
     layout->addWidget(QForce);
 }
 
@@ -67,7 +67,7 @@ void prmForceCartesianGetQtWidget::SetValue(const prmForceCartesianGet & newValu
         QLReferenceFrame->hide();
     }
     // position
-    QForce->SetValue(newValue.F(), newValue.T(), newValue.Timestamp());
+    QForce->setValue(newValue.F(), newValue.T(), newValue.Timestamp());
     // timestamp & valid
     QTime time(0, 0);
     QLTime->setText(time.addSecs(static_cast<int>(newValue.Timestamp())).toString("hh:mm:ss"));

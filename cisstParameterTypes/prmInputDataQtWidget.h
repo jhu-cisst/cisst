@@ -24,8 +24,8 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstCommon/cmnUnits.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmInputData.h>
-#include <cisstVectorQt/vctPlot2DOpenGLQtWidget.h>
-#include <cisstVectorQt/vctQtWidgetDynamicVector.h>
+#include <eigenqt/Plot2DWidget.h>
+#include <eigenqt/VectorWidget.h>
 
 // Always include last
 #include <cisstParameterTypes/prmExportQt.h>
@@ -50,11 +50,11 @@ private slots:
     void SlotPlotIndex(int newAxis);
 
 protected:
-    vctQtWidgetDynamicVectorDoubleRead * QVRAnalogInputsWidget;
-    vctQtWidgetDynamicVectorBoolRead * QVRDigitalInputsWidget;
+    EigenQt::VectorView * QVRAnalogInputsWidget;
+    EigenQt::VectorView * QVRDigitalInputsWidget;
 
-    vctPlot2DOpenGLQtWidget * QVPlot;
-    vctPlot2DBase::Signal * AnalogSignal;
+    EigenQt::Plot2DWidget * QVPlot;
+    EigenQt::Plot2D::Signal * AnalogSignal;
     QSpinBox * QSBPlotIndex;
     int PlotIndex;
 };

@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QWidget>
 
-#include <cisstVectorQt/vctQtWidgetDynamicVector.h>
+#include <eigenqt/VectorWidget.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmStateJoint.h>
 #include <cisstParameterTypes/prmConfigurationJoint.h>
@@ -58,7 +58,7 @@ public:
     }
 
 protected:
-    vctQtWidgetDynamicVectorDoubleRead
+    EigenQt::VectorView
         * QVRPosition,
         * QVRVelocity,
         * QVREffort;

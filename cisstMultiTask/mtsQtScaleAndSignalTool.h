@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QWidget>
 #include <QTreeWidget>
 
-#include <cisstVectorQt/vctPlot2DOpenGLQtWidget.h>
+#include <eigenqt/Plot2DWidget.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
@@ -37,7 +37,7 @@ class CISST_EXPORT mtsQtScaleAndSignalTool: public QWidget
     Q_OBJECT;
 
 public:
-    mtsQtScaleAndSignalTool(mtsManagerLocal * componentManager, vctPlot2DOpenGLQtWidget * visualizer, QWidget* parent = 0);
+    mtsQtScaleAndSignalTool(mtsManagerLocal * componentManager, EigenQt::Plot2DWidget * visualizer, QWidget* parent = 0);
 
 public slots:
     //void AddScale(/*Scale*/);
@@ -47,7 +47,7 @@ public slots:
     //void MoveSignal(/*Scale*/);
 
 private:
-    vctPlot2DOpenGLQtWidget * Visualizer;
+    EigenQt::Plot2DWidget * Visualizer;
 };
 
 class mtsQtScaleEditor: public QTreeWidget
@@ -55,16 +55,16 @@ class mtsQtScaleEditor: public QTreeWidget
     Q_OBJECT;
 
 public:
-    mtsQtScaleEditor(vctPlot2DOpenGLQtWidget * visualizer, QWidget* parent = 0);
+    mtsQtScaleEditor(EigenQt::Plot2DWidget * visualizer, QWidget* parent = 0);
 
     friend class mtsQtScaleAndSignalTool;
 
 private:
-    vctPlot2DOpenGLQtWidget * Visualizer;
+    EigenQt::Plot2DWidget * Visualizer;
     int ScaleNameCounter;
     QString CurrentScale;
 
-    void BuildTree(vctPlot2DOpenGLQtWidget * visualizer);
+    void BuildTree(EigenQt::Plot2DWidget * visualizer);
 
 private slots:
     void NewScale();

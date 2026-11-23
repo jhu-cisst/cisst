@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QGridLayout>
 #include <QLabel>
 #include <QWidget>
-#include <cisstVectorQt/vctPlot2DOpenGLQtWidget.h>
+#include <eigenqt/Plot2DWidget.h>
 
 
 class displayQtWidget: public QWidget
@@ -37,8 +37,8 @@ class displayQtWidget: public QWidget
 
     QDial * DialAmplitude;
     QGridLayout * CentralLayout;
-    vctPlot2DOpenGLQtWidget * Plot;
-    vctPlot2DBase::Signal * DataSignal;
+    EigenQt::Plot2DWidget * Plot;
+    EigenQt::Plot2D::Signal * DataSignal;
     QLabel * LabelAmplitude;
     QLabel * ValueAmplitude;
     QLabel * LabelData;

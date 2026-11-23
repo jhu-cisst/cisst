@@ -217,8 +217,11 @@ endif ()
 # to include some CMake "use" files without polluting the environment
 add_subdirectory (cisst-dependencies)
 
+find_package (Eigen3 CONFIG REQUIRED)
+
 if (CISST_HAS_QT)
   find_package (Qt${CISST_QT_VERSION} REQUIRED COMPONENTS ${CISST_QT_COMPONENTS})
+  include (cisstEigenQt)
   set (CISST_QT_LIBRARIES)
   foreach (component ${CISST_QT_COMPONENTS})
     list (APPEND CISST_QT_LIBRARIES Qt${CISST_QT_VERSION}::${component})
@@ -241,8 +244,6 @@ if (CISST_HAS_OPENGL)
     list (APPEND CISST_OPENGL_LIBRARIES ${OPENGL_opengl_LIBRARY} ${OPENGL_glx_LIBRARY})
   endif ()
 endif ()
-
-find_package(Eigen3 CONFIG REQUIRED)
 
 IF (CISST_HAS_KDL)
   find_package(orocos_kdl CONFIG REQUIRED)
@@ -412,7 +413,6 @@ endif (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
 # Which libraries to build
 set (CISST_LIBRARIES_DEFAULT
      cisstCommon
-     cisstVectorQt
      cisstOSAbstraction
      cisstMultiTask
      cisstParameterTypes
@@ -524,6 +524,14 @@ foreach (lib ${CISST_LIBS})
   endif (CISST_${lib})
 endforeach (lib)
 
+
+if (TARGET cisstEigenQtExternal)
+ foreach (lib ${CISST_LIBS_WITH_QT})
+    if (TARGET ${lib}Qt)
+      add_dependencies (${lib}Qt cisstEigenQtExternal)
+    endif ()
+  endforeach ()
+endif ()
 
 # Create misc. config files
 set (CISST_INCLUDE_DIR_FOR_CONFIG ${CISST_INCLUDE_DIR})
@@ -646,8 +654,8 @@ set (CPACK_COMPONENT_CISSTCOMMON_REQUIRED ON)
 # cisstCommon dependency because it is a required component)
 set (CPACK_COMPONENT_CISSTCOMMONXML_DEPENDS       cisstCommon)
 set (CPACK_COMPONENT_CISSTOSABSTRACTION_DEPENDS   cisstCommon)
-set (CPACK_COMPONENT_CISSTMULTITASK_DEPENDS       cisstCommon cisstVectorQt cisstOSAbstraction)
-set (CPACK_COMPONENT_CISSTPARAMETERTYPES_DEPENDS  cisstCommon cisstVectorQtcisstOSAbstraction cisstMultiTask)
+set (CPACK_COMPONENT_CISSTMULTITASK_DEPENDS       cisstCommon cisstOSAbstraction)
+set (CPACK_COMPONENT_CISSTPARAMETERTYPES_DEPENDS  cisstCommon cisstOSAbstraction cisstMultiTask)
 set (CPACK_COMPONENT_CISSTROBOT_DEPENDS           cisstCommon)
 if (WIN32)
   set(CPACK_NSIS_MODIFY_PATH ON)
