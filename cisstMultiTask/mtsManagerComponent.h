@@ -33,7 +33,6 @@ http://www.cisst.org/cisst/license.txt.
 #define _mtsManagerComponent_h
 
 #include <string>
-#include <map>
 
 #include <cisstCommon/cmnNamedMap.h>
 #include <cisstMultiTask/mtsManagerComponentBase.h>
@@ -90,15 +89,12 @@ protected:
     void ComponentResume(const mtsComponentStatusControl & arg);
     void ComponentGetState(const mtsDescriptionComponent &component, mtsComponentState &state) const;
     void LoadLibrary(const mtsDescriptionLoadLibrary & lib, bool & result) const;
-    void GetNamesOfProcesses(std::vector<std::string> & names) const;
-    void GetNamesOfComponents(const std::string & processName, std::vector<std::string> & names) const;
-    void GetDescriptionsOfComponents(const std::string & processName,
-                                     std::vector<mtsDescriptionComponent> & descriptions) const;
+    void GetNamesOfComponents(std::vector<std::string> & names) const;
+    void GetDescriptionsOfComponents(std::vector<mtsDescriptionComponent> & descriptions) const;
     void GetNamesOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterface & interfaces) const;
     void GetDescriptionsOfInterfaces(const mtsDescriptionComponent & component, mtsDescriptionInterfaceFull & interfaces) const;
     void GetListOfConnections(std::vector <mtsDescriptionConnection> & listOfConnections) const;
-    void GetListOfComponentClasses(const std::string & processName,
-                                   std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
+    void GetListOfComponentClasses(std::vector<mtsDescriptionComponentClass> & listOfComponentClasses) const;
     void GetInterfaceProvidedDescription(const mtsDescriptionInterface & intfc,
                                          mtsInterfaceProvidedDescription & description) const;
     void GetInterfaceRequiredDescription(const mtsDescriptionInterface & intfc,
@@ -153,8 +149,7 @@ public:
     void Cleanup(void) override;
 
     /*! Generate unique representation of interface as string */
-    static std::string GetInterfaceUID(
-        const std::string & processName, const std::string & componentName, const std::string & interfaceName);
+    static std::string GetInterfaceUID(const std::string & componentName, const std::string & interfaceName);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(mtsManagerComponent);

@@ -359,9 +359,9 @@ public:
 };
 
 template <class _elementType>
-class CISST_EXPORT mtsTestDevice1: public mtsComponent
+class mtsTestDevice1: public mtsComponent
 {
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
+    CMN_DECLARE_SERVICES_EXPORT(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_DEFAULT);
 public:
 
     typedef _elementType value_type;

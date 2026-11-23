@@ -341,21 +341,12 @@ class CISST_EXPORT cmnLogger {
         Instance()->SetMaskInstance(mask);
     }
 
-    static void CISST_DEPRECATED SetLoD(cmnLogMask mask) {
-        Instance()->SetMaskInstance(mask);
-    }
-
     /*! Get the global mask used to filter the log messages.
       \return The global mask used to filter the log.
       \sa GetMaskInstance */
     static cmnLogMask GetMask(void) {
         return Instance()->GetMaskInstance();
     }
-
-    static cmnLogMask CISST_DEPRECATED GetLoD(void) {
-        return Instance()->GetMaskInstance();
-    }
-
 
     /*! Set the "function" mask used to filter the log messages.
       \param mask The function mask used to filter the log.

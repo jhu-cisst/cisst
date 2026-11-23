@@ -13,10 +13,10 @@ jobs:
     runs-on: macos-15
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup Homebrew cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/Library/Caches/Homebrew
@@ -29,16 +29,23 @@ jobs:
         HOMEBREW_NO_AUTO_UPDATE: "1"
         HOMEBREW_NO_INSTALL_CLEANUP: "1"
       run: |
-        brew install graphviz jsoncpp qt pkg-config cppunit ccache eigen orocos-kdl
+        brew install graphviz jsoncpp qt pkg-config cppunit ccache eigen orocos-kdl pybind11
         # Ensure homebrew bin is in path for subsequent steps
         echo "/opt/homebrew/bin" >> $GITHUB_PATH
+
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.12'
+
+    - name: Install NumPy
+      run: python -m pip install numpy
 
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: ${{ runner.os }}-ccache-${{ hashFiles('.github/workflows/macos-15.yml') }}
         max-size: 1G
-        ccache-command: ccache
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
@@ -50,6 +57,7 @@ jobs:
         cmake ${{github.workspace}} \
           -DCMAKE_BUILD_TYPE=Release \
           -DCISST_QT_VERSION=6 \
+          -DCISST_HAS_PYTHON=ON \
           -DCMAKE_OSX_ARCHITECTURES=arm64 \
           -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt;/opt/homebrew" \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
@@ -122,3 +130,4 @@ jobs:
         ./bin/cisstOSAbstractionTests -r -v
         ./bin/cisstParameterTypesTests -r -v
         ./bin/cisstMultiTaskTests -r -v
+        ctest -R '^Python:' --output-on-failure

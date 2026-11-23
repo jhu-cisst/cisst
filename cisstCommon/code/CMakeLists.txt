@@ -36,7 +36,6 @@ set (SOURCE_FILES
      cmnObjectRegister.cpp
      cmnOutputMultiplexer.cpp
      cmnPortability.cpp
-     cmnRandomSequence.cpp
      cmnSearchPath.cpp
      cmnSerializer.cpp
      cmnStreamRawParser.cpp
@@ -88,7 +87,6 @@ set (HEADER_FILES
      cmnOutputMultiplexer.h
      cmnPortability.h
      cmnPrintf.h
-     cmnRandomSequence.h
      cmnRequiresDeepCopy.h
      cmnSearchPath.h
      cmnSerializer.h

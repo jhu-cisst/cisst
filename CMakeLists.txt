@@ -303,11 +303,6 @@ if (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 endif (CISST_CMN_ASSERT_THROWS_EXCEPTION)
 
 
-# Determine is cisst is SI or not
-option (CISST_USE_SI_UNITS "Use SI units, if not, distances are in millimeters (default if ON)" ON)
-mark_as_advanced (CISST_USE_SI_UNITS)
-
-
 # Determine if size_t is a native type
 include (CheckSizeTNativeType)
 check_size_t_native_type (CISST_SIZE_T_NATIVE)
@@ -316,26 +311,6 @@ check_size_t_native_type (CISST_SIZE_T_NATIVE)
 # for "unsigned long" and "unsigned long long")
 include (CheckIfDifferentTypes)
 check_if_different_types (CISST_LONG_LONG_NATIVE "long long" "long")
-
-# Determine if we can use std::isnan and std::isfinite
-include (CheckCXXSourceCompiles)
-check_cxx_source_compiles (
-  "#include <cmath>
-   int main(int argc, char ** argv) {
-       return std::isnan(1.0 / 0.0);
-   }" CISST_HAS_STD_ISNAN)
-check_cxx_source_compiles (
-  "#include <cmath>
-   int main(int argc, char ** argv) {
-       float f = 1.0;
-       double d = 1.0;
-       return (std::isfinite(f) && std::isfinite(d));
-   }" CISST_HAS_STD_ISFINITE)
-
-# Look for isfinite function, this will only be used if not CISST_HAS_STD_ISFINITE
-include (CheckSymbolExists)
-check_symbol_exists (isfinite "math.h" CISST_HAS_ISFINITE)
-
 
 # Path of all CISST shared libraries.
 link_directories (${LIBRARY_OUTPUT_PATH})
@@ -669,6 +644,8 @@ if (WIN32)
   file (TO_NATIVE_PATH ${cisst_BINARY_DIR} cisst_BINARY_DIR_NATIVE)
   configure_file (${cisst_SOURCE_DIR}/utils/cisstvars.bat.in
                   ${cisst_BINARY_DIR}/cisstvars.bat)
+  configure_file (${cisst_SOURCE_DIR}/utils/cisstvars.ps1.in
+                  ${cisst_BINARY_DIR}/cisstvars.ps1)
   # Script to set Microsoft compiler environment variables
   get_filename_component (BUILD_TOOL_DIRECTORY ${CMAKE_MAKE_PROGRAM} PATH)
   find_program (VSVARS32_BAT

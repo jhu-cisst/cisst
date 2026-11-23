@@ -1,7 +1,7 @@
 Configuring *cisst* for Python
 ==============================
 
-To use the *cisst/SAW* Python wrappers, you will need both SWIG and Python installed. If you plan to use the *cisstVector* data types as well you will need numpy.
+To use the *cisst/SAW* Python wrappers, you will need SWIG, Python, and Numpy installed.
 
 Once you've installed all the prerequisites, set the following options during the *cisst/SAW* CMake configuration
 
@@ -20,7 +20,7 @@ When you're done configuring *cisst/SAW* you should have the following variables
 Using the *cisst* Python wrappers
 =================================
 
-Most cisst libraries come with some Python wrappers generated using SWIG. To see if a library has been wrapped, check if the interface file ``cisstXyz/cisstXyz.i`` exists (e.g. ``cisstVector/cisstVector.i``).
+Most cisst libraries come with some Python wrappers generated using SWIG. To see if a library has been wrapped, check if the interface file ``cisstXyz/cisstXyz.i`` exists (e.g. ``cisstOSAbstraction/cisstOSAbstraction.i``).
 
 Before you can load any *cisst* Python wrappers, you should make sure your paths are set properly. Do to so, see :doc:`compiling and running cisst/SAW </getting-started/compiling>`.
 

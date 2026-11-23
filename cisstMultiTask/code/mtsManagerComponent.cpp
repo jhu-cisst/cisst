@@ -68,11 +68,11 @@ void mtsManagerComponent::Cleanup(void)
 }
 
 std::string mtsManagerComponent::GetInterfaceUID(
-    const std::string& processName, const std::string & componentName, const std::string & interfaceName)
+    const std::string & componentName, const std::string & interfaceName)
 {
-    return (processName.empty()) ? (componentName + ":" + interfaceName)
-                                 : processName + ":" + componentName + ":" + interfaceName;
+    return componentName + ":" + interfaceName;
 }
+
 //***************************** Dynamic Component Management (provided interface) ***********************************
 
 bool mtsManagerComponent::AddInterfaceComponent(void)
@@ -125,11 +125,9 @@ bool mtsManagerComponent::AddInterfaceComponent(void)
     provided->AddCommandQualifiedRead(&mtsManagerComponent::LoadLibrary,
                                       this, mtsManagerComponentBase::CommandNames::LoadLibrary);
     //****************************** Getters ********************************************************
-    provided->AddCommandRead(&mtsManagerComponent::GetNamesOfProcesses,
-                              this, mtsManagerComponentBase::CommandNames::GetNamesOfProcesses);
-    provided->AddCommandQualifiedRead(&mtsManagerComponent::GetNamesOfComponents,
+    provided->AddCommandRead(&mtsManagerComponent::GetNamesOfComponents,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfComponents);
-    provided->AddCommandQualifiedRead(&mtsManagerComponent::GetDescriptionsOfComponents,
+    provided->AddCommandRead(&mtsManagerComponent::GetDescriptionsOfComponents,
                               this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents);
     provided->AddCommandQualifiedRead(&mtsManagerComponent::GetNamesOfInterfaces,
                               this, mtsManagerComponentBase::CommandNames::GetNamesOfInterfaces);
@@ -137,7 +135,7 @@ bool mtsManagerComponent::AddInterfaceComponent(void)
                               this, mtsManagerComponentBase::CommandNames::GetDescriptionsOfInterfaces);
     provided->AddCommandRead(&mtsManagerComponent::GetListOfConnections,
                               this, mtsManagerComponentBase::CommandNames::GetListOfConnections);
-    provided->AddCommandQualifiedRead(&mtsManagerComponent::GetListOfComponentClasses,
+    provided->AddCommandRead(&mtsManagerComponent::GetListOfComponentClasses,
                               this, mtsManagerComponentBase::CommandNames::GetListOfComponentClasses);
     provided->AddCommandQualifiedRead(&mtsManagerComponent::GetInterfaceProvidedDescription,
                                       this, mtsManagerComponentBase::CommandNames::GetInterfaceProvidedDescription);
@@ -283,7 +281,7 @@ void mtsManagerComponent::ComponentAdd(const mtsComponentPointer & componentPtr,
                                << std::endl;
 
     CMN_LOG_CLASS_INIT_VERBOSE << "ComponentAdd: successfully added component: " << componentName << std::endl;
-    mtsDescriptionComponent componentDesc("", componentName, component->GetTags());
+    mtsDescriptionComponent componentDesc(componentName, component->GetTags());
     InterfaceComponentEvents_AddComponent(componentDesc);
     result = true;
 }
@@ -453,27 +451,18 @@ void mtsManagerComponent::LoadLibrary(const mtsDescriptionLoadLibrary &lib, bool
     result = dl.Load(pathFromUTF8(lib.LibraryName));
 }
 
-void mtsManagerComponent::GetNamesOfProcesses(std::vector<std::string> & names) const
+void mtsManagerComponent::GetNamesOfComponents(std::vector<std::string> & names) const
 {
-    names.clear();
-    names.push_back("");
-}
-void mtsManagerComponent::GetNamesOfComponents(const std::string& CMN_UNUSED(processName),
-                                               std::vector<std::string> & names) const
-{
-    // PK TODO: could check processName
     ComponentMap.GetNames(names);
 }
 
-void mtsManagerComponent::GetDescriptionsOfComponents(const std::string& CMN_UNUSED(processName),
-                                                      std::vector<mtsDescriptionComponent> & descriptions) const
+void mtsManagerComponent::GetDescriptionsOfComponents(std::vector<mtsDescriptionComponent> & descriptions) const
 {
     descriptions.clear();
     ComponentMapType::MapType::const_iterator it = ComponentMap.begin();
     const ComponentMapType::MapType::const_iterator itEnd = ComponentMap.end();
     for (; it != itEnd; ++it) {
         mtsDescriptionComponent desc;
-        desc.ProcessName = "";
         desc.ComponentName = it->first;
         mtsComponent * component = it->second;
         if (component) {
@@ -489,7 +478,6 @@ void mtsManagerComponent::GetNamesOfInterfaces(
 {
     mtsComponent * component = GetComponent(arg.ComponentName);
     if (component) {
-        interfaces.ProcessName = arg.ProcessName;
         interfaces.ComponentName = arg.ComponentName;
         // Get a list of required interfaces
         interfaces.InterfaceRequiredNames = component->GetNamesOfInterfacesRequired();
@@ -514,7 +502,6 @@ void mtsManagerComponent::GetDescriptionsOfInterfaces(
             mtsInterfaceRequired * required = component->GetInterfaceRequired(*it);
             if (required) {
                 mtsDescriptionInterfaceFullName desc;
-                desc.ProcessName = arg.ProcessName;
                 desc.ComponentName = arg.ComponentName;
                 desc.InterfaceName = *it;
                 desc.Tags = required->GetTags();
@@ -527,7 +514,6 @@ void mtsManagerComponent::GetDescriptionsOfInterfaces(
             mtsInterfaceProvided * provided = component->GetInterfaceProvided(*it);
             if (provided) {
                 mtsDescriptionInterfaceFullName desc;
-                desc.ProcessName = arg.ProcessName;
                 desc.ComponentName = arg.ComponentName;
                 desc.InterfaceName = *it;
                 desc.Tags = provided->GetTags();
@@ -557,8 +543,8 @@ void mtsManagerComponent::GetListOfConnections(std::vector<mtsDescriptionConnect
             const mtsInterfaceProvided * provided = required->GetConnectedInterface();
             if (provided) {
                 provided = provided->GetOriginalInterface();
-                mtsDescriptionConnection conn("", itComp->first, *itReq,
-                                              "", provided->GetComponent()->GetName(), provided->GetName(),
+                mtsDescriptionConnection conn(itComp->first, *itReq,
+                                              provided->GetComponent()->GetName(), provided->GetName(),
                                               required->GetConnectionID());
                 listOfConnections.push_back(conn);
             }
@@ -568,8 +554,7 @@ void mtsManagerComponent::GetListOfConnections(std::vector<mtsDescriptionConnect
     std::sort(listOfConnections.begin(), listOfConnections.end());
 }
 
-void mtsManagerComponent::GetListOfComponentClasses(const std::string& CMN_UNUSED(processName),
-                          std::vector <mtsDescriptionComponentClass> & listOfComponentClasses) const
+void mtsManagerComponent::GetListOfComponentClasses(std::vector <mtsDescriptionComponentClass> & listOfComponentClasses) const
 {
     // PK TODO: check processName
 
@@ -739,18 +724,18 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
             interfaceConnected = interfaceConnected->GetOriginalInterface();
             if (interfaceConnected == serverInterfaceProvided) {
                 CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to connect - already connected interfaces: \""
-                                         << GetInterfaceUID("", clientComponentName, clientInterfaceName)
+                                         << GetInterfaceUID(clientComponentName, clientInterfaceName)
                                          << "\" - \""
-                                         << GetInterfaceUID("", serverComponentName, serverInterfaceName)
+                                         << GetInterfaceUID(serverComponentName, serverInterfaceName)
                                          << "\"" << std::endl;
             }
             else {
                 CMN_LOG_CLASS_INIT_ERROR << "Connect: failed to connect: \""
-                                         << GetInterfaceUID("", clientComponentName, clientInterfaceName)
+                                         << GetInterfaceUID(clientComponentName, clientInterfaceName)
                                          << "\" - \""
-                                         << GetInterfaceUID("", serverComponentName, serverInterfaceName)
+                                         << GetInterfaceUID(serverComponentName, serverInterfaceName)
                                          << " -- required interface already connected to: \""
-                                         << GetInterfaceUID("", interfaceConnected->GetComponentName(), interfaceConnected->GetName())
+                                         << GetInterfaceUID(interfaceConnected->GetComponentName(), interfaceConnected->GetName())
                                          << "\"" << std::endl;
             }
             return false;
@@ -840,8 +825,8 @@ bool mtsManagerComponent::ConnectInternal(const std::string & clientComponentNam
     // Successful connection, now update data structures
 
     mtsDescriptionConnection description(
-        "", clientComponentName, clientInterfaceName,
-        "", serverComponentName, serverInterfaceName,
+        clientComponentName, clientInterfaceName,
+        serverComponentName, serverInterfaceName,
         ConnectionID);
 
     // Increase connection id
@@ -1006,8 +991,8 @@ bool mtsManagerComponent::DisconnectInternal(const std::string & clientComponent
     }
 
     mtsDescriptionConnection description(
-        "", clientComponentName, clientInterfaceName,
-        "", serverComponentName, serverInterfaceName,
+        clientComponentName, clientInterfaceName,
+        serverComponentName, serverInterfaceName,
         thisConnectionID);
 
     // Generate the event
@@ -1030,10 +1015,8 @@ bool mtsManagerComponent::FindByConnectionID(mtsDescriptionConnection & arg) con
                 const mtsInterfaceProvided * provided = required->GetConnectedInterface();
                 if (provided) {
                     provided = provided->GetOriginalInterface();
-                    arg.Client.ProcessName = "";
                     arg.Client.ComponentName = itComp->first;
                     arg.Client.InterfaceName = *itReq;
-                    arg.Server.ProcessName = "";
                     arg.Server.ComponentName = provided->GetComponent()->GetName();
                     arg.Server.InterfaceName = provided->GetName();
                     return true;

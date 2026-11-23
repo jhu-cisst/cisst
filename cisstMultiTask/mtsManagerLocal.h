@@ -65,14 +65,6 @@ private:
         we will support multiple threads. */
     std::thread::id MainThreadId;
 
-    /*! Process name (for a multi-process system).
-     */
-    std::string ProcessName;
-
-    /*! Name of this object
-     */
-    std::string Name;
-
     /*! Manager component instance (for direct access) */
     mtsManagerComponent *ManagerComponent;
 
@@ -134,11 +126,6 @@ public:
                Cleanup from its implementation, so a separate call to Cleanup
                is unnecessary. */
     static void DeleteInstance(void);
-
-    /*! Returns name of this local component manager (for mtsProxyBaseCommon.h) */
-    inline const std::string CISST_DEPRECATED GetName(void) const {
-        return Name;
-    }
 
     //------------------------------------------------------------------------------
     // Access to underlying services.
@@ -213,8 +200,6 @@ public:
     /*! \brief Add a component to the component manager.
         \param component Component instance to be added */
     bool AddComponent(mtsComponent * component);
-    bool CISST_DEPRECATED AddTask(mtsTask * component); // For backward compatibility
-    bool CISST_DEPRECATED AddDevice(mtsComponent * component); // For backward compatibility
 
     /*! \brief Remove component from component manager. */
     bool RemoveComponent(mtsComponent * component);
@@ -227,9 +212,6 @@ public:
     /*! \brief Retrieve a component by name. */
     mtsComponent * GetComponent(const std::string & componentName) const;
     mtsTask * GetComponentAsTask(const std::string & componentName) const;
-
-    mtsComponent CISST_DEPRECATED * GetDevice(const std::string & deviceName); // For backward compatibility
-    mtsTask CISST_DEPRECATED * GetTask(const std::string & taskName); // For backward compatibility
 
     /*! \brief Check if a component exists by its name */
     bool FindComponent(const std::string & componentName) const;
@@ -275,98 +257,40 @@ public:
     bool Connect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                  const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-    /*! \brief Connect two remote interfaces
-        \param clientProcessName Name of client process
-        \param clientComponentName Name of client component
-        \param clientInterfaceRequiredName Name of required interface
-        \param serverProcessName Name of server process
-        \param serverComponentName Name of server component
-        \param serverInterfaceProvidedName Name of provided interface
-        \return True if success, false otherwise
-        \note If connection is established successfully, this information is
-              reported to the global component manager. Since connection between
-              two interfaces should be established twice--once in the client
-              process and once in the server process--there are two internal
-              connection management methods: ConnectClientSideInterface() and
-              ConnectServerSideInterface().  ConnectClientSideInterface() is
-              always executed first and calls ConnectServerSideInterface()
-              internally in a blocking way (i.e., it waits for
-              ConnectServerSideInterface() to finish).
-              Connection request can be made by any process -- server process,
-              client process, or even third process -- and the result should
-              be the same regardless the request process.
-              If this method is called against two local interfaces, the other
-              Connect() method is internally called instead. */
-    bool Connect(const std::string & clientProcessName, const std::string & clientComponentName,
-                 const std::string & clientInterfaceRequiredName,
-                 const std::string & serverProcessName, const std::string & serverComponentName,
-                 const std::string & serverInterfaceProvidedName);
-
     /*! Disconnect two interfaces */
     bool Disconnect(const ConnectionIDType connectionID);
 
     bool Disconnect(const std::string & clientComponentName, const std::string & clientInterfaceRequiredName,
                     const std::string & serverComponentName, const std::string & serverInterfaceProvidedName);
 
-    bool Disconnect(const std::string & clientProcessName, const std::string & clientComponentName,
-                    const std::string & clientInterfaceRequiredName,
-                    const std::string & serverProcessName, const std::string & serverComponentName,
-                    const std::string & serverInterfaceProvidedName);
-
     //-------------------------------------------------------------------------
     //  Getters and Utilities
     //-------------------------------------------------------------------------
 
-    /*! Returns name of this local component manager */
-    inline const std::string GetProcessName(void) const {
-        return ProcessName;
-    }
-
-    /*! Get names of all processes */
-    void GetNamesOfProcesses(std::vector<std::string>& namesOfProcesses) const;
-
     /*! Enumerate all the names of components added */
     std::vector<std::string> GetNamesOfComponents(void) const;
     void GetNamesOfComponents(std::vector<std::string>& namesOfComponents) const;
-    void GetNamesOfComponents(const std::string & processName,
-                              std::vector<std::string>& namesOfComponents) const;
 
-    std::vector<mtsDescriptionComponent> GetDescriptionsOfComponents(const std::string & processName = "") const;
-
-    bool GetNamesOfInterfaces(const std::string & processName,
-                              const std::string & componentName,
-                              std::vector<std::string> & namesOfInterfacesRequired,
-                              std::vector<std::string> & namesOfInterfacesProvided) const;
+    std::vector<mtsDescriptionComponent> GetDescriptionsOfComponents() const;
 
     bool GetNamesOfInterfaces(const std::string & componentName,
                               std::vector<std::string> & namesOfInterfacesRequired,
-                              std::vector<std::string> & namesOfInterfacesProvided) const
-    { return GetNamesOfInterfaces("", componentName, namesOfInterfacesRequired, namesOfInterfacesProvided); }
-
-    bool GetDescriptionsOfInterfaces(const std::string & processName,
-                                     const std::string & componentName,
-                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsRequired,
-                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const;
+                              std::vector<std::string> & namesOfInterfacesProvided) const;
 
     bool GetDescriptionsOfInterfaces(const std::string & componentName,
                                      std::vector<mtsDescriptionInterfaceFullName> & descriptionsRequired,
-                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const
-    { return GetDescriptionsOfInterfaces("", componentName, descriptionsRequired, descriptionsProvided); }
+                                     std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const;
 
     std::vector<mtsDescriptionConnection> GetListOfConnections(void) const;
 
-    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses(const std::string & processName = "") const;
+    std::vector<mtsDescriptionComponentClass> GetListOfComponentClasses() const;
 
-    mtsInterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & processName,
-                                    const std::string & componentName, const std::string & interfaceName) const;
+    mtsInterfaceProvidedDescription GetInterfaceProvidedDescription(
+        const std::string & componentName, const std::string & interfaceName) const;
 
-    mtsInterfaceProvidedDescription GetInterfaceProvidedDescription(const std::string & componentName, const std::string & interfaceName) const
-    { return GetInterfaceProvidedDescription("", componentName, interfaceName); }
-
-    mtsInterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & processName,
-                                    const std::string & componentName, const std::string & interfaceName) const;
-    mtsInterfaceRequiredDescription GetInterfaceRequiredDescription(const std::string & componentName, const std::string & interfaceName) const
-    { return GetInterfaceRequiredDescription("", componentName, interfaceName); }
+    mtsInterfaceRequiredDescription GetInterfaceRequiredDescription(
+      const std::string & componentName, const std::string & interfaceName
+    ) const;
 
     //---------------------------------------------------------------------------------------------
     // Methods to track the "main" thread, which actually is the thread in which the Instance

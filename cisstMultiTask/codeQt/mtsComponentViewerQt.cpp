@@ -98,13 +98,9 @@ void mtsComponentViewerQt::Configure(const std::string &CMN_UNUSED(filename)) {}
 
 void mtsComponentViewerQt::Startup(void) {
     // Query existing components and connections before starting event monitoring
-    auto processNames = ManagerComponentServices->GetNamesOfProcesses();
-
-    for (const auto &processName : processNames) {
-        auto descriptions = ManagerComponentServices->GetDescriptionsOfComponents(processName);
-        for (const auto &desc : descriptions) {
-            m_component_infos.push_back(desc);
-        }
+    auto descriptions = ManagerComponentServices->GetDescriptionsOfComponents();
+    for (const auto &desc : descriptions) {
+        m_component_infos.push_back(desc);
     }
 
     // Query existing connections
@@ -272,7 +268,7 @@ void mtsComponentViewerQt::onExportDOT(void) {
     std::map<QtNodes::NodeId, Agnode_t *> graphvizNodes;
     for (const auto &key : m_components) {
         QtNodes::NodeId id = NodeIds[key];
-        std::string nodeName = key.first + ":" + key.second;
+        std::string nodeName = key;
         Agnode_t *v = agnode(g, (char *)nodeName.c_str(), 1);
         graphvizNodes[id] = v;
     }
@@ -347,14 +343,12 @@ void mtsComponentViewerQt::onAutoLayout(void) {
     std::map<QtNodes::NodeId, Agnode_t *> graphvizNodes;
     for (const auto &key : m_components) {
         QtNodes::NodeId id = NodeIds[key];
-        std::string nodeName = key.first + ":" + key.second;
-        Agnode_t *v = agnode(g, (char *)nodeName.c_str(), 1);
+        Agnode_t *v = agnode(g, (char *)key.c_str(), 1);
 
         // Subgraph for UI components
         auto it = std::find_if(m_component_infos.begin(), m_component_infos.end(),
                                [&](const mtsDescriptionComponent &desc) {
-                                   return desc.ProcessName == key.first &&
-                                          desc.ComponentName == key.second;
+                                   return desc.ComponentName == key;
                                });
         if (it != m_component_infos.end()) {
             if (it->Tags.count("UI")) {
@@ -437,8 +431,7 @@ void mtsComponentViewerQt::AddComponentHandler(
                                   // Check if component already exists to prevent duplicates
                                   auto it = std::find_if(m_component_infos.begin(), m_component_infos.end(),
                                       [&](const mtsDescriptionComponent &desc) {
-                                          return desc.ProcessName == component_description.ProcessName &&
-                                                 desc.ComponentName == component_description.ComponentName;
+                                          return desc.ComponentName == component_description.ComponentName;
                                       });
 
                                   // Only add if not found
@@ -477,10 +470,8 @@ void mtsComponentViewerQt::RemoveConnectionHandler(
                                   auto it = std::remove_if(m_connection_infos.begin(), m_connection_infos.end(),
                                                            [&](const mtsDescriptionConnection &c) {
                                                                return (c.ConnectionID == connection_description.ConnectionID &&
-                                                                       c.Client.ProcessName == connection_description.Client.ProcessName &&
                                                                        c.Client.ComponentName == connection_description.Client.ComponentName &&
                                                                        c.Client.InterfaceName == connection_description.Client.InterfaceName &&
-                                                                       c.Server.ProcessName == connection_description.Server.ProcessName &&
                                                                        c.Server.ComponentName == connection_description.Server.ComponentName &&
                                                                        c.Server.InterfaceName == connection_description.Server.InterfaceName);
                                                            });
@@ -496,7 +487,7 @@ void mtsComponentViewerQt::ChangeStateHandler(const mtsComponentStateChange &sta
     QMetaObject::invokeMethod(
                               this,
                               [=]() {
-                                  ComponentKey key = {state_change.ProcessName, state_change.ComponentName};
+                                  ComponentKey key = state_change.ComponentName;
                                   auto it = NodeIds.find(key);
                                   if (it != NodeIds.end()) {
                                       QtNodes::NodeId id = it->second;
@@ -543,9 +534,8 @@ void mtsComponentViewerQt::UpdateGraph(void) {
 
     // Re-add components
     for (const auto &desc : m_component_infos) {
-        const std::string processName = desc.ProcessName;
         const std::string componentName = desc.ComponentName;
-        const ComponentKey key = {processName, componentName};
+        const ComponentKey key = componentName;
 
         bool showComponent = true;
         for (auto & tag : desc.Tags) {
@@ -560,7 +550,7 @@ void mtsComponentViewerQt::UpdateGraph(void) {
 
         // Fetch interfaces and filter them
         std::vector<mtsDescriptionInterfaceFullName> interfacesRequiredFull, interfacesProvidedFull;
-        ManagerComponentServices->GetDescriptionsOfInterfaces(processName, componentName, interfacesRequiredFull, interfacesProvidedFull);
+        ManagerComponentServices->GetDescriptionsOfInterfaces(componentName, interfacesRequiredFull, interfacesProvidedFull);
 
         std::vector<std::string> interfacesRequired, interfacesProvided;
         for (const auto &intfc : interfacesRequiredFull) {
@@ -593,7 +583,7 @@ void mtsComponentViewerQt::UpdateGraph(void) {
         const std::set<std::string> tags = desc.Tags;
 
         Registry->registerModel<mtsComponentModelQtNodes>(
-            [processName, componentName, className, state, interfacesRequired, interfacesProvided, tags]() {
+            [componentName, className, state, interfacesRequired, interfacesProvided, tags]() {
                 QColor color;
                 if (!tags.empty()) {
                     auto firstTag = *tags.begin();
@@ -606,7 +596,7 @@ void mtsComponentViewerQt::UpdateGraph(void) {
                     }
                 }
 
-                auto model = std::make_unique<mtsComponentModelQtNodes>(processName, componentName, className, color);
+                auto model = std::make_unique<mtsComponentModelQtNodes>(componentName, className, color);
                 model->SetState(mtsComponentState::EnumToString(state.State()));
                 for (const auto &interfaceName : interfacesRequired) {
                     model->AddInterfaceRequired(interfaceName);
@@ -617,7 +607,7 @@ void mtsComponentViewerQt::UpdateGraph(void) {
                 return model;
             });
 
-        std::string registryName = processName + ":" + componentName;
+        std::string registryName = componentName;
         QtNodes::NodeId nodeId = GraphModel->addNode(QString::fromStdString(registryName));
         NodeIds[key] = nodeId;
         m_components.push_back(key);
@@ -638,9 +628,9 @@ void mtsComponentViewerQt::UpdateGraph(void) {
 
     // Re-add connections
     for (const auto &conn : m_connection_infos) {
-        const ComponentKey client_key = {conn.Client.ProcessName, conn.Client.ComponentName};
+        const ComponentKey client_key = conn.Client.ComponentName;
         const std::string client_interface = conn.Client.InterfaceName;
-        const ComponentKey server_key = {conn.Server.ProcessName, conn.Server.ComponentName};
+        const ComponentKey server_key = conn.Server.ComponentName;
         const std::string server_interface = conn.Server.InterfaceName;
 
         auto client_it = NodeIds.find(client_key);

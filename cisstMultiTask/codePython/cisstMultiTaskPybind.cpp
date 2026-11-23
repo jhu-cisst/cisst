@@ -340,19 +340,18 @@ PYBIND11_MODULE(_cisstMultiTaskPython, m)
 
     // mtsManagerComponentServices
     py::class_<mtsManagerComponentServices>(m, "mtsManagerComponentServices")
-        .def("GetNamesOfComponents", py::overload_cast<const std::string &>(&mtsManagerComponentServices::GetNamesOfComponents, py::const_),
-             py::arg("processName") = "")
-        .def("GetNamesOfInterfaces", [](mtsManagerComponentServices & self, const std::string & processName, const std::string & componentName) {
+        .def("GetNamesOfComponents", py::overload_cast<>(&mtsManagerComponentServices::GetNamesOfComponents, py::const_))
+        .def("GetNamesOfInterfaces", [](mtsManagerComponentServices & self, const std::string & componentName) {
             std::vector<std::string> required, provided;
-            if (!self.GetNamesOfInterfaces(processName, componentName, required, provided)) {
+            if (!self.GetNamesOfInterfaces(componentName, required, provided)) {
                 throw std::runtime_error("Failed to get interfaces for component: " + componentName);
             }
             return py::make_tuple(required, provided);
         })
         .def("GetInterfaceProvidedDescription",
-             py::overload_cast<const std::string &, const std::string &, const std::string &>(&mtsManagerComponentServices::GetInterfaceProvidedDescription, py::const_))
+             py::overload_cast<const std::string &, const std::string &>(&mtsManagerComponentServices::GetInterfaceProvidedDescription, py::const_))
         .def("GetInterfaceRequiredDescription",
-             py::overload_cast<const std::string &, const std::string &, const std::string &>(&mtsManagerComponentServices::GetInterfaceRequiredDescription, py::const_));
+             py::overload_cast<const std::string &, const std::string &>(&mtsManagerComponentServices::GetInterfaceRequiredDescription, py::const_));
 
     // mtsManagerLocal (singleton)
     py::class_<mtsManagerLocal, cmnGenericObject, std::unique_ptr<mtsManagerLocal, py::nodelete>>(m, "mtsManagerLocal", py::dynamic_attr())
@@ -362,9 +361,8 @@ PYBIND11_MODULE(_cisstMultiTaskPython, m)
         .def("GetComponent", &mtsManagerLocal::GetComponent,
              py::return_value_policy::reference)
         .def("FindComponent", &mtsManagerLocal::FindComponent)
-        .def("GetProcessName", &mtsManagerLocal::GetProcessName)
         .def("GetInterfaceProvidedDescription",
-             py::overload_cast<const std::string &, const std::string &, const std::string &>(&mtsManagerLocal::GetInterfaceProvidedDescription, py::const_))
+             py::overload_cast<const std::string &, const std::string &>(&mtsManagerLocal::GetInterfaceProvidedDescription, py::const_))
         .def("GetNamesOfComponents", py::overload_cast<>(&mtsManagerLocal::GetNamesOfComponents, py::const_))
         .def("CreateComponentDynamically",
              py::overload_cast<const std::string &, const std::string &, const std::string &>(&mtsManagerLocal::CreateComponentDynamically),
@@ -380,7 +378,7 @@ PYBIND11_MODULE(_cisstMultiTaskPython, m)
         .def("Connect",
              py::overload_cast<const std::string &, const std::string &, const std::string &, const std::string &>(&mtsManagerLocal::Connect))
         .def("Connect",
-             py::overload_cast<const std::string &, const std::string &, const std::string &, const std::string &, const std::string &, const std::string &>(&mtsManagerLocal::Connect))
+             py::overload_cast<const std::string &, const std::string &, const std::string &, const std::string &>(&mtsManagerLocal::Connect))
         .def("Disconnect",
              py::overload_cast<const std::string &, const std::string &, const std::string &, const std::string &>(&mtsManagerLocal::Disconnect))
         .def("CreateAll", &mtsManagerLocal::CreateAll)

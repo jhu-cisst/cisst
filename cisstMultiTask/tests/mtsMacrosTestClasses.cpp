@@ -20,27 +20,26 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsMacrosTestClasses.h"
 
-CMN_IMPLEMENT_SERVICES(mtsMacrosTestClassA);
-CMN_IMPLEMENT_SERVICES(mtsMacrosTestClassBProxy);
+CMN_IMPLEMENT_SERVICES(mtsMacrosTestClass);
 
-size_t mtsMacrosTestClassB::DefaultConstructorCalls = 0;
-size_t mtsMacrosTestClassB::DestructorCalls = 0;
-size_t mtsMacrosTestClassB::CopyConstructorCalls = 0;
+size_t mtsMacrosTestClass::DefaultConstructorCalls = 0;
+size_t mtsMacrosTestClass::DestructorCalls = 0;
+size_t mtsMacrosTestClass::CopyConstructorCalls = 0;
 
-mtsMacrosTestClassB::mtsMacrosTestClassB(void) {
+mtsMacrosTestClass::mtsMacrosTestClass(void) {
     DefaultConstructorCalls++;
 }
 
-mtsMacrosTestClassB::mtsMacrosTestClassB(const mtsMacrosTestClassB & other) {
-    this->Value = other.Value;
+mtsMacrosTestClass::mtsMacrosTestClass(const mtsMacrosTestClass & other) : mtsGenericObject() {
+    Value() = other.Value();
     CopyConstructorCalls++;
 }
 
-mtsMacrosTestClassB::~mtsMacrosTestClassB() {
+mtsMacrosTestClass::~mtsMacrosTestClass() {
     DestructorCalls++;
 }
 
-void mtsMacrosTestClassB::ResetAllCounters(void) {
+void mtsMacrosTestClass::ResetAllCounters(void) {
     DefaultConstructorCalls = 0;
     DestructorCalls = 0;
     CopyConstructorCalls = 0;

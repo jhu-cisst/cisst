@@ -34,8 +34,7 @@ class CISST_EXPORT mtsComponentModelQtNodes
     Q_OBJECT
 
  public:
-    mtsComponentModelQtNodes(const std::string &processName,
-                             const std::string &componentName,
+    mtsComponentModelQtNodes(const std::string &componentName,
                              const std::string &className,
                              const QColor &color = QColor());
     ~mtsComponentModelQtNodes() = default;
@@ -72,7 +71,6 @@ class CISST_EXPORT mtsComponentModelQtNodes
  protected:
     void UpdateWidget(void);
 
-    std::string m_processName;
     std::string m_componentName;
     std::string m_state;
     std::string m_className;

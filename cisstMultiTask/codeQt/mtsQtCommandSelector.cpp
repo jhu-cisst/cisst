@@ -38,55 +38,43 @@ mtsQtCommandSelector::mtsQtCommandSelector(mtsManagerLocal* componentManager, QW
 void mtsQtCommandSelector::BuildTree(mtsManagerLocal* componentManager) {
     clear();
 
-    QTreeWidgetItem* processItem;
     QTreeWidgetItem* componentItem;
     QTreeWidgetItem* interfaceItem;
     QTreeWidgetItem* commandItem;
     QStringList strings;
 
-    std::vector<std::string> processNames;
     std::vector<std::string> componentNames;
     std::vector<std::string> interfaceRequiredNames;
     std::vector<std::string> interfaceProvidedNames;
     std::vector<std::string> commandNames;
 
-    componentManager->GetNamesOfProcesses(processNames);
-    // Processes
-    for(std::vector<std::string>::const_iterator processName = processNames.begin(); processName < processNames.end(); ++processName) {
-        strings << processName->c_str() << "Process";
-        processItem = new QTreeWidgetItem(strings);
-        addTopLevelItem(processItem);
+    // Components
+    componentNames.clear();
+    componentManager->GetNamesOfComponents(componentNames);
+    for(std::vector<std::string>::const_iterator componentName = componentNames.begin(); componentName < componentNames.end(); ++componentName) {
+        strings << componentName->c_str() << "Component";
+        componentItem = new QTreeWidgetItem(strings);
+        addTopLevelItem(componentItem);
         strings.clear();
-        // Components
-        componentNames.clear();
-        componentManager->GetNamesOfComponents(*processName, componentNames);
-        for(std::vector<std::string>::const_iterator componentName = componentNames.begin(); componentName < componentNames.end(); ++componentName) {
-            strings << componentName->c_str() << "Component";
-            componentItem = new QTreeWidgetItem(strings);
-            processItem->addChild(componentItem);
+        // Interfaces
+        interfaceRequiredNames.clear();
+        interfaceProvidedNames.clear();
+        // Provided or output
+        componentManager->GetNamesOfInterfaces(*componentName, interfaceRequiredNames, interfaceProvidedNames);
+        for(std::vector<std::string>::const_iterator interfaceName = interfaceProvidedNames.begin();
+            interfaceName < interfaceProvidedNames.end(); ++interfaceName) {
+            strings << interfaceName->c_str() << "Interface";
+            interfaceItem = new QTreeWidgetItem(strings);
+            componentItem->addChild(interfaceItem);
             strings.clear();
-            // Interfaces
-            interfaceRequiredNames.clear();
-            interfaceProvidedNames.clear();
-            // Provided or output
-            componentManager->GetNamesOfInterfaces(*processName, *componentName, interfaceRequiredNames, interfaceProvidedNames);
-            for(std::vector<std::string>::const_iterator interfaceName = interfaceProvidedNames.begin();
-                interfaceName < interfaceProvidedNames.end(); ++interfaceName) {
-                strings << interfaceName->c_str() << "Interface";
-                interfaceItem = new QTreeWidgetItem(strings);
-                componentItem->addChild(interfaceItem);
+            // Commands
+            commandNames.clear();
+            componentManager->GetNamesOfCommands(commandNames, *componentName, *interfaceName);
+            for(std::vector<std::string>::const_iterator commandName = commandNames.begin(); commandName < commandNames.end(); ++commandName) {
+                strings << commandName->c_str() << "Command";
+                commandItem = new QTreeWidgetItem(strings);
+                interfaceItem->addChild(commandItem);
                 strings.clear();
-                // Commands
-                commandNames.clear();
-                // Note that following no longer accepts processName (as of June 2026)
-                //componentManager->GetNamesOfCommands(*processName, *componentName, *interfaceName, commandNames);
-                componentManager->GetNamesOfCommands(commandNames, *componentName, *interfaceName);
-                for(std::vector<std::string>::const_iterator commandName = commandNames.begin(); commandName < commandNames.end(); ++commandName) {
-                    strings << commandName->c_str() << "Command";
-                    commandItem = new QTreeWidgetItem(strings);
-                    interfaceItem->addChild(commandItem);
-                    strings.clear();
-                }
             }
         }
     }

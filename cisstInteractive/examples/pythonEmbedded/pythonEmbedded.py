@@ -36,7 +36,7 @@ objectRegister.Register("derived2", derived2)
 
 print("modifying derived1.FixedSizeVector()")
 fixedVector1 = derived1.FixedSizeVector()
-fixedVector1 / 100
+fixedVector1 /= 100
 
 print(objectRegister.ToString())
 

@@ -141,6 +141,8 @@ http://www.cisst.org/cisst/license.txt.
       #define CISST_COMPILER_IS_MSVC_64
     #endif
 
+    // clang-cl defines _MSC_VER for MSVC compatibility but remains Clang.
+    #ifndef __clang__
     #if (_MSC_VER >= 1910)
       #define CISST_COMPILER CISST_DOTNET2017
     #elif (_MSC_VER >= 1900)
@@ -162,6 +164,7 @@ http://www.cisst.org/cisst/license.txt.
     #elif (_MSC_VER >= 1200)
       #define CISST_COMPILER CISST_VCPP6
     #endif
+    #endif // __clang__
   #endif
 
 #endif // _WIN32
@@ -298,6 +301,7 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 #else
 #include <cmath>
 #endif
+
 /*!  Discard of the Windows.h definition of macros min and max
 */
 #if (CISST_OS == CISST_WINDOWS)
@@ -315,68 +319,6 @@ extern CISST_EXPORT const std::string cmnCompilersStrings[];
 #endif
 
 #endif
-
-
-/*!
-  \brief Detect a NaN
-
-  This macro is a wrapper for different compilers to simplify the use
-  of the NaN macro.  When possible, it uses std::isnan from cmath.
-  Otherwise, with gcc and icc, it uses isnan() and for Microsoft
-  compilers, _isnan().  In most cases, the test should look like:
-
-  \code
-  if (CMN_ISNAN(myValue)) {
-      ... deal with the problem, i.e. not a number;
-  }
-  \endcode
-
-  \param x The number to be tested.
-*/
-// we favor std::isnan
-#if CISST_HAS_STD_ISNAN
-  #include <cmath>
-  #define CMN_ISNAN(x) std::isnan(x)
-#else
-// hopefully we can removed this when we stop supporting old compilers
-  #ifdef CISST_COMPILER_IS_MSVC
-    #include <float.h>
-    #define CMN_ISNAN(x) (_isnan(x) != 0)
-  #else
-    #if (CISST_OS == CISST_DARWIN)
-      #ifndef isnan
-        extern "C" int isnan (double);
-      #endif
-    #endif
-    #ifndef CISST_USE_STD_ISNAN
-      #define CMN_ISNAN(x) isnan(x)
-    #else
-      #define CMN_ISNAN(x) std::isnan(x)
-    #endif
-  #endif
-#endif
-
-
-/*!
-  \brief Detect a finite number
-
-  This function is a wrapper for different compilers to simplify the use
-  of the finite number macro.  With gcc and icc, is uses finite() and
-  for Microsoft compilers, _finite().  In most cases, the test should
-  look like:
-  \code
-  if (!cmnIsFinite(myValue)) {
-      ... deal with the problem, i.e. infinite number;
-  }
-  \endcode
-
-  \param x The number to be tested.
-*/
-bool CISST_EXPORT cmnIsFinite(const float & value);
-bool CISST_EXPORT cmnIsFinite(const double & value);
-
-// for backward compatibility
-#define CMN_ISFINITE(x) cmnIsFinite(x)
 
 /*!
   For whatever reason, there is a syntactic incompatiblity between .NET and gcc
@@ -562,17 +504,17 @@ inline std::string pathToUTF8(const std::filesystem::path& p) {
 // compiler option.
 
 
-// Visual C++
-#ifdef CISST_COMPILER_IS_MSVC
+// Clang, GNU CC and Intel CC
+#if (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_INTEL_CC) || (CISST_COMPILER == CISST_CLANG)
+  #define CMN_PRETTY_FUNCTION __PRETTY_FUNCTION__
+
+// MSVC-compatible compilers
+#elif defined(CISST_COMPILER_IS_MSVC)
     #ifdef __FUNCSIG__
         #define CMN_PRETTY_FUNCTION __FUNCSIG__
     #else
         #warning "With Visual Studio, you need /EP or /P to have __FUNCSIG__"
     #endif
-
-// GNU CC and Intel CC
-#elif (CISST_COMPILER == CISST_GCC) || (CISST_COMPILER == CISST_INTEL_CC) || (CISST_COMPILER == CISST_CLANG)
-    #define CMN_PRETTY_FUNCTION __PRETTY_FUNCTION__
 
 // Otherwise
 #else

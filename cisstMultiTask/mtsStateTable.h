@@ -404,26 +404,6 @@ public:
     */
     mtsStateTable::AccessorBase * GetAccessorById(const size_t id) const;
 
-#ifndef SWIG
-    template<class _elementType>
-    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const _elementType & element) const {
-        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
-        return GetAccessorByInstance(element);
-    }
-    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const std::string & name) const {
-        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
-        return GetAccessorByName(name);
-    }
-    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const char * name) const {
-        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
-        return GetAccessorByName(name);
-    }
-    CISST_DEPRECATED mtsStateTable::AccessorBase * GetAccessor(const size_t id) const {
-        CMN_LOG_RUN_WARNING << "mtsStateTable::GetAccessor is deprecated, use GetAccessorBy{Instance,Name,Id}" << std::endl;
-        return GetAccessorById(id);
-    }
-#endif
-
     /*! Get a handle for data to be used by a writer */
     mtsStateIndex GetIndexWriter(void) const;
 

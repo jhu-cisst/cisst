@@ -15,7 +15,6 @@ project (cisstMultiTaskApplications)
 
 # Build applications if needed
 cisst_offer_application (cisstMultiTask ComponentGenerator OFF)
-cisst_offer_application (cisstMultiTask ComponentManager ON)
 
 # Python dependent applications
 if (CISST_HAS_PYTHON)

@@ -17,10 +17,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <chrono>
+#include <random>
 
 #include <cisstCommon/cmnAssert.h>
 #include <cisstCommon/cmnSearchPath.h>
-#include <cisstCommon/cmnRandomSequence.h>
 #include <cisstOSAbstraction/osaStopwatch.h>
 #include <cisstOSAbstraction/osaPipeExec.h>
 #include <cisstOSAbstraction/osaSleep.h>
@@ -47,6 +47,9 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     );
     CPPUNIT_ASSERT(!command.empty());
 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
     /* Test opening twice, make sure it fails the second time */
     bool opened = pipe1.Open(command, "rw", noWindow);
     CPPUNIT_ASSERT_EQUAL(true, opened);
@@ -56,17 +59,18 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
     opened = pipe2.Open(command, "rw", noWindow);
     CPPUNIT_ASSERT_EQUAL(true, opened);
 
-    /* Generate random test string between 10 and 100 characters */
-    const size_t length = cmnRandomSequence::GetInstance().ExtractRandomInt(10, 100) + 1;
-    char * testString = new char[length];
-    char * s;
-    /* Generate random alphabetic characters while avoiding '\0'. Note that,
-	on Windows, sending carriage returns and linefeeds will fail because the
-	binary mode suppresses them; this can cause osaPipeExec::Read to hang. */
-    for (s = testString; s < (testString + length-1); s++) {
-        *s = cmnRandomSequence::GetInstance().ExtractRandomChar('A', 'z');
+    /* Generate random test string between 10 and 100 characters, of random alphabetic characters */
+    std::uniform_int_distribution<int> length_dist(10, 100);
+    constexpr std::string_view chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    std::uniform_int_distribution<std::size_t> char_dist(0, chars.size() - 1);
+
+    const size_t length = length_dist(gen) + 1; // +1 for null terminator
+    std::string testString;
+    for (std::size_t i = 0; i < length - 1; ++i) {
+        testString += chars[char_dist(gen)];
     }
-    *s = '\0';
 
     /* If this gives problems, wrap this in a loop similar to the read loop */
     int charsWrittenInt = pipe1.Write(testString);
@@ -106,8 +110,8 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
 
     int result = pipe1.Write(testString);
     CPPUNIT_ASSERT_EQUAL(-1, result);
-    char * buffer = new char[length];
-    result = pipe1.Read(buffer, length);
+    std::vector<char> buffer(length);
+    result = pipe1.Read(buffer.data(), length);
     CPPUNIT_ASSERT_EQUAL(-1, result);
 
     closed = pipe2.Close();
@@ -228,9 +232,6 @@ void osaPipeExecTest::TestPipeCommon(bool noWindow)
        and process has already ended, the Close should still succeed. */
     closed = pipe1.Close();
     CPPUNIT_ASSERT_EQUAL(true, closed);
-
-    delete[] buffer;
-    delete[] testString;
 }
 
 #if (CISST_OS == CISST_WINDOWS)

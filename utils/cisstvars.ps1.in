@@ -1,0 +1,33 @@
+# Set the cisst environment in the current PowerShell session.
+# Dot-source this script, for example: . .\cisstvars.ps1 Release
+param([string]$Configuration)
+
+$env:CISST_DIR = '@cisst_BINARY_DIR_NATIVE@'
+$multiConfig = '@CMAKE_CONFIGURATION_TYPES@' -ne ''
+if ($multiConfig -and [string]::IsNullOrWhiteSpace($Configuration)) {
+    throw 'Specify a configuration, for example: . .\cisstvars.ps1 Release'
+}
+if (-not $multiConfig) {
+    $Configuration = ''
+}
+
+$configurationBin = Join-Path $env:CISST_DIR "bin\$Configuration"
+$configurationLib = Join-Path $env:CISST_DIR "lib\$Configuration"
+$libraryDir = Join-Path $env:CISST_DIR 'lib'
+$vcpkgBin = Join-Path $env:CISST_DIR 'vcpkg_installed\@VCPKG_TARGET_TRIPLET@\bin'
+
+$cisstPaths = @($configurationBin, $configurationLib, $vcpkgBin) |
+    Where-Object { Test-Path -LiteralPath $_ -PathType Container }
+$env:CISST_PATH = $cisstPaths -join ';'
+$env:CISST_PYTHONPATH = (@($libraryDir, $configurationLib) |
+    Where-Object { Test-Path -LiteralPath $_ -PathType Container }) -join ';'
+$env:CISST_ROOT = $env:CISST_DIR
+
+$existingPath = @($env:PATH -split ';' | Where-Object { $_ })
+$env:PATH = (@($cisstPaths + $existingPath | Select-Object -Unique) -join ';')
+$existingPythonPath = @($env:PYTHONPATH -split ';' | Where-Object { $_ })
+$env:PYTHONPATH = (@(($env:CISST_PYTHONPATH -split ';') + $existingPythonPath |
+    Where-Object { $_ } | Select-Object -Unique) -join ';')
+if ($env:CISST_CLASSPATH) {
+    $env:CLASSPATH = "$env:CISST_CLASSPATH;$env:CLASSPATH"
+}

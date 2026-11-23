@@ -6,9 +6,6 @@ set (CISST_USE_EXTERNAL ON CACHE BOOL "")
 # Compile for shared libraries
 set (CISST_BUILD_SHARED_LIBS ON CACHE BOOL "")
 
-# Use SI units
-set (CISST_USE_SI_UNITS ON CACHE BOOL "")
-
 # Force compilation for optional libraries
 set (CISST_cisstRobot ON CACHE BOOL "")
 
@@ -20,6 +17,7 @@ set (CISST_HAS_JSON ON CACHE BOOL "")
 
 # Unit tests
 set (CISST_BUILD_TESTS ON CACHE BOOL "")
+set (CISST_HAS_PYTHON ON CACHE BOOL "")
 
 # Build examples
 set (CISST_BUILD_EXAMPLES OFF CACHE BOOL "")

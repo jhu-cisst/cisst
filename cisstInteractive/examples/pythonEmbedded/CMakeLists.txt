@@ -15,8 +15,6 @@ set (REQUIRED_CISST_LIBRARIES cisstCommon)
 find_package (cisst COMPONENTS ${REQUIRED_CISST_LIBRARIES} QUIET)
 
 if (cisst_FOUND AND CISST_HAS_PYTHON)
-  message (WARNING "pythonEmbedded example has not been migrated to pybind11 yet.")
-
   # Create myDerivedClass as a shared library
   add_library (myDerivedClass SHARED myDerivedClass.cpp myDerivedClass.h)
   set_property (TARGET myDerivedClass PROPERTY FOLDER "cisstInteractive/examples")
@@ -29,22 +27,15 @@ if (cisst_FOUND AND CISST_HAS_PYTHON)
     ${REQUIRED_CISST_LIBRARIES}
     myDerivedClass)
 
-  # Allow generated c++ code to find header files
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR})
+  cisst_add_pybind11_module (MODULE myDerivedClassPython
+                             SOURCES myDerivedClassPybind.cpp
+                             FOLDER "cisstInteractive/examples"
+                             MODULE_LINK_LIBRARIES myDerivedClass)
 
-  # To link with build libraries
-  link_directories (${CMAKE_CURRENT_BINARY_DIR})
-
-  # Run SWIG on the interface file
-  cisst_add_swig_module (MODULE myDerivedClass
-                         INTERFACE_FILENAME myDerivedClassPython.i
-                         FOLDER "cisstInteractive/examples"
-                         MODULE_LINK_LIBRARIES myDerivedClass)
-
-  cisst_add_swig_module (MODULE myReDerivedClass
-                         INTERFACE_FILENAME myReDerivedClassPython.i
-                         FOLDER "cisstInteractive/examples"
-                         MODULE_LINK_LIBRARIES myReDerivedClass myDerivedClass)
+  cisst_add_pybind11_module (MODULE myReDerivedClassPython
+                             SOURCES myReDerivedClassPybind.cpp
+                             FOLDER "cisstInteractive/examples"
+                             MODULE_LINK_LIBRARIES myReDerivedClass myDerivedClass)
 
   # Built executable with embedding
   add_executable (pythonEmbedded pythonEmbedded.cpp)
@@ -57,6 +48,10 @@ if (cisst_FOUND AND CISST_HAS_PYTHON)
     ${CMAKE_THREAD_LIBS_INIT}
     ${PYTHON_ALL_LIBRARIES}
     util)
+  add_dependencies (pythonEmbedded
+                    cisstCommonPython
+                    myDerivedClassPython
+                    myReDerivedClassPython)
 
   if (UNIX)
     if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -73,5 +68,5 @@ if (cisst_FOUND AND CISST_HAS_PYTHON)
                       COMMENT "pythonEmbedded: copy pythonEmbedded.py to the executable directory")
 
 else ()
-  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES} and cisst Python/SWIG support")
+  message ("Information: code in ${CMAKE_CURRENT_SOURCE_DIR} will not be compiled, it requires ${REQUIRED_CISST_LIBRARIES} and cisst pybind11 support")
 endif ()

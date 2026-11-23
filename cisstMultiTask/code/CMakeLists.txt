@@ -152,7 +152,6 @@ set (HEADER_FILES
      mtsInterfaceProvided.h
      mtsInterfaceRequired.h
 
-     mtsMacros.h
      mtsMailBox.h
      mtsManagerComponentBase.h
      mtsManagerComponent.h

@@ -89,7 +89,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     // for MailBox
     friend class mtsSocketProxyServer;
 
- protected:
+protected:
 
     /*! Indicates if the interface must be connected. */
     mtsRequiredType Required;
@@ -120,7 +120,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     /*! For event receiver. */
     osaThreadSignal* GetThreadSignal(void);
 
- public:
+public:
 
     /*! Default size for mail boxes and argument queues used by event
       handlers. */
@@ -239,7 +239,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
 
     bool AddSystemEventHandlers(void);
 
- private:
+private:
     void BlockingCommandExecutedHandler(void);
     void BlockingCommandReturnExecutedHandler(void);
 
@@ -248,7 +248,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
 
     void GetEventList(mtsEventHandlerList & eventList);
     bool CheckEventList(mtsEventHandlerList & eventList) const;
- public:
+public:
 
     void DisableAllEvents(void);
 
@@ -260,8 +260,8 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     /*! Send a human readable description of the interface. */
     void ToStream(std::ostream & outputStream) const override;
 
- protected:
- public: // adeguet1 todo fix -- this has been added for ostream << operator
+protected:
+public: // adeguet1 todo fix -- this has been added for ostream << operator
 #ifndef SWIG  // SWIG cannot deal with this
     template <class _PointerType>
         class FunctionOrReceiverInfo
@@ -278,7 +278,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
 
         ~FunctionOrReceiverInfo() {}
 
-        inline void Detach(void) {
+        void Detach(void) {
             Pointer->Detach();
         }
 
@@ -298,7 +298,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     typedef FunctionOrReceiverInfo<mtsEventReceiverWrite> ReceiverWriteInfo;
 
 #endif // !SWIG
- protected:
+protected:
 
     /*! Utility method to determine if an event handler should be
       queued or not based on the default policy for the interface and
@@ -349,8 +349,7 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
     /*! Get description of this interface (with serialized argument information) */
     void GetDescription(mtsInterfaceRequiredDescription & requiredInterfaceDescription) const;
 
- public:
-
+public:
     bool AddFunction(const std::string & functionName, mtsFunctionVoid & function, mtsRequiredType required = MTS_REQUIRED);
 
     bool AddFunction(const std::string & functionName, mtsFunctionVoidReturn & function, mtsRequiredType required = MTS_REQUIRED);
@@ -371,27 +370,27 @@ class CISST_EXPORT mtsInterfaceRequired: public mtsInterface
                                          const std::string & eventName,
                                          mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
     template <class __classType>
-        inline mtsCommandVoid * AddEventHandlerVoid(void (__classType::*method)(void),
+    mtsCommandVoid * AddEventHandlerVoid(void (__classType::*method)(void),
                                                     __classType * classInstantiation,
                                                     const std::string & eventName,
                                                     mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY) {
         return this->AddEventHandlerVoid(mtsMakeCallableVoid(method, classInstantiation), eventName, queueingPolicy);
     }
 
-    inline mtsCommandVoid * AddEventHandlerVoid(void (*function)(void),
+    mtsCommandVoid * AddEventHandlerVoid(void (*function)(void),
                                                 const std::string & eventName,
                                                 mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY) {
         return this->AddEventHandlerVoid(mtsMakeCallableVoid(function), eventName, queueingPolicy);
     }
 
     template <class __classType, class __argumentType>
-        inline mtsCommandWriteBase * AddEventHandlerWrite(void (__classType::*method)(const __argumentType &),
+    mtsCommandWriteBase * AddEventHandlerWrite(void (__classType::*method)(const __argumentType &),
                                                           __classType * classInstantiation,
                                                           const std::string & eventName,
                                                           mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY);
 
     template <class __classType>
-        inline mtsCommandWriteBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
+    mtsCommandWriteBase * AddEventHandlerWriteGeneric(void (__classType::*method)(const mtsGenericObject &),
                                                                  __classType * classInstantiation,
                                                                  const std::string & eventName,
                                                                  mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY,

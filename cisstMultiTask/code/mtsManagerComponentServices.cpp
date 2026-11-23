@@ -81,8 +81,6 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
                                                ServiceComponentManagement.LoadLibrary);
 
         // Getter services
-        InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfProcesses,
-                                               ServiceGetters.GetNamesOfProcesses);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetNamesOfComponents,
                                                ServiceGetters.GetNamesOfComponents);
         InternalInterfaceRequired->AddFunction(mtsManagerComponentBase::CommandNames::GetDescriptionsOfComponents,
@@ -115,18 +113,10 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
 }
 
 
-bool mtsManagerComponentServices::ComponentCreate(const std::string & className, const std::string & componentName) const
-{
-    return ComponentCreate("", className, componentName);
-}
-
-
-bool mtsManagerComponentServices::ComponentCreate(const std::string & processName,
-                                                  const std::string & className,
+bool mtsManagerComponentServices::ComponentCreate(const std::string & className,
                                                   const std::string & componentName) const
 {
     mtsDescriptionComponent componentDescription;
-    componentDescription.ProcessName   = processName;
     componentDescription.ClassName     = className;
     componentDescription.ComponentName = componentName;
 
@@ -151,13 +141,7 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
 }
 
 
-bool mtsManagerComponentServices::ComponentCreate(const std::string & className, const mtsGenericObject & constructorArg) const
-{
-    return ComponentCreate("", className, constructorArg);
-}
-
-
-bool mtsManagerComponentServices::ComponentCreate(const std::string & processName, const std::string & className,
+bool mtsManagerComponentServices::ComponentCreate(const std::string & className,
                                                   const mtsGenericObject & constructorArg) const
 {
     if (!ServiceComponentManagement.Create.IsValid()) {
@@ -166,7 +150,6 @@ bool mtsManagerComponentServices::ComponentCreate(const std::string & processNam
     }
 
     mtsDescriptionComponent componentDescription;
-    componentDescription.ProcessName   = processName;
     componentDescription.ClassName     = className;
     componentDescription.ComponentName = "(serialized)";
     std::stringstream buffer;
@@ -281,14 +264,8 @@ mtsComponent *mtsManagerComponentServices::ComponentGet(const std::string &compo
     return componentPtr.GetPointer();
 }
 
-bool mtsManagerComponentServices::ComponentConfigure(const std::string & componentName,
-                                                     const std::string & configString) const
-{
-    return ComponentConfigure("", componentName, configString);
-}
-
 bool mtsManagerComponentServices::ComponentConfigure(
-    const std::string& processName, const std::string & componentName, const std::string & configString) const
+    const std::string & componentName, const std::string & configString) const
 {
     if (!ServiceComponentManagement.Configure.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentConfigure: invalid function - has not been bound to command" << std::endl;
@@ -296,7 +273,6 @@ bool mtsManagerComponentServices::ComponentConfigure(
     }
 
     mtsDescriptionComponent arg;
-    arg.ProcessName   = processName;
     arg.ComponentName = componentName;
     // For now, use ConstructorArgSerialized
     arg.ConstructorArgSerialized = configString;
@@ -313,24 +289,9 @@ bool mtsManagerComponentServices::Connect(const std::string & clientComponentNam
                                           const std::string & serverComponentName,
                                           const std::string & serverInterfaceName) const
 {
-    const std::string thisProcessName = "";
-    return Connect(thisProcessName, clientComponentName, clientInterfaceName,
-                   thisProcessName, serverComponentName, serverInterfaceName);
-}
-
-
-bool mtsManagerComponentServices::Connect(const std::string & clientProcessName,
-                                          const std::string & clientComponentName,
-                                          const std::string & clientInterfaceName,
-                                          const std::string & serverProcessName,
-                                          const std::string & serverComponentName,
-                                          const std::string & serverInterfaceName) const
-{
     mtsDescriptionConnection connectionDescription;
-    connectionDescription.Client.ProcessName   = clientProcessName;
     connectionDescription.Client.ComponentName = clientComponentName;
     connectionDescription.Client.InterfaceName = clientInterfaceName;
-    connectionDescription.Server.ProcessName   = serverProcessName;
     connectionDescription.Server.ComponentName = serverComponentName;
     connectionDescription.Server.InterfaceName = serverInterfaceName;
 
@@ -369,27 +330,14 @@ bool mtsManagerComponentServices::Disconnect(
     const std::string & clientComponentName, const std::string & clientInterfaceName,
     const std::string & serverComponentName, const std::string & serverInterfaceName) const
 {
-    const std::string thisProcessName = "";
-    return Disconnect(thisProcessName, clientComponentName, clientInterfaceName,
-                      thisProcessName, serverComponentName, serverInterfaceName);
-}
-
-bool mtsManagerComponentServices::Disconnect(
-    const std::string & clientProcessName,
-    const std::string & clientComponentName, const std::string & clientInterfaceName,
-    const std::string & serverProcessName,
-    const std::string & serverComponentName, const std::string & serverInterfaceName) const
-{
     if (!ServiceComponentManagement.Disconnect.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentDisconnect: invalid function - has not been bound to command" << std::endl;
         return false;
     }
 
     mtsDescriptionConnection arg;
-    arg.Client.ProcessName   = clientProcessName;
     arg.Client.ComponentName = clientComponentName;
     arg.Client.InterfaceName = clientInterfaceName;
-    arg.Server.ProcessName   = serverProcessName;
     arg.Server.ComponentName = serverComponentName;
     arg.Server.InterfaceName = serverInterfaceName;
     arg.ConnectionID = InvalidConnectionID;  // not needed
@@ -424,13 +372,8 @@ bool mtsManagerComponentServices::Disconnect(ConnectionIDType connectionID) cons
     return Disconnect(arg);
 }
 
-bool mtsManagerComponentServices::ComponentStart(const std::string & componentName, const double delayInSecond) const
-{
-    return ComponentStart("", componentName, delayInSecond);
-}
-
 bool mtsManagerComponentServices::ComponentStart(
-    const std::string& processName, const std::string & componentName, const double delayInSecond) const
+    const std::string & componentName, const double delayInSecond) const
 {
     if (!ServiceComponentManagement.Start.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentStart: invalid function - has not been bound to command" << std::endl;
@@ -438,7 +381,6 @@ bool mtsManagerComponentServices::ComponentStart(
     }
 
     mtsComponentStatusControl arg;
-    arg.ProcessName   = processName;
     arg.ComponentName = componentName;
     arg.DelayInSecond = delayInSecond;
     arg.Command       = mtsComponentStatusControl::COMPONENT_START;
@@ -451,13 +393,8 @@ bool mtsManagerComponentServices::ComponentStart(
     return true;
 }
 
-bool mtsManagerComponentServices::ComponentStop(const std::string & componentName, const double delayInSecond) const
-{
-    return ComponentStop("", componentName, delayInSecond);
-}
-
 bool mtsManagerComponentServices::ComponentStop(
-    const std::string& processName, const std::string & componentName, const double delayInSecond) const
+    const std::string & componentName, const double delayInSecond) const
 {
     if (!ServiceComponentManagement.Stop.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentStop: invalid function - has not been bound to command" << std::endl;
@@ -465,7 +402,6 @@ bool mtsManagerComponentServices::ComponentStop(
     }
 
     mtsComponentStatusControl arg;
-    arg.ProcessName   = processName;
     arg.ComponentName = componentName;
     arg.DelayInSecond = delayInSecond;
     arg.Command       = mtsComponentStatusControl::COMPONENT_STOP;
@@ -478,13 +414,8 @@ bool mtsManagerComponentServices::ComponentStop(
     return true;
 }
 
-bool mtsManagerComponentServices::ComponentResume(const std::string & componentName, const double delayInSecond) const
-{
-    return ComponentResume("", componentName, delayInSecond);
-}
-
 bool mtsManagerComponentServices::ComponentResume(
-    const std::string& processName, const std::string & componentName, const double delayInSecond) const
+    const std::string & componentName, const double delayInSecond) const
 {
     if (!ServiceComponentManagement.Resume.IsValid()) {
         CMN_LOG_CLASS_RUN_ERROR << "ComponentResume: invalid function - has not been bound to command" << std::endl;
@@ -492,7 +423,6 @@ bool mtsManagerComponentServices::ComponentResume(
     }
 
     mtsComponentStatusControl arg;
-    arg.ProcessName   = processName;
     arg.ComponentName = componentName;
     arg.DelayInSecond = delayInSecond;
     arg.Command       = mtsComponentStatusControl::COMPONENT_RESUME;
@@ -517,48 +447,32 @@ mtsComponentState mtsManagerComponentServices::ComponentGetState(const mtsDescri
 
 std::string mtsManagerComponentServices::ComponentGetState(const std::string componentName) const
 {
-    return ComponentGetState("", componentName);
-}
-
-std::string mtsManagerComponentServices::ComponentGetState(const std::string & processName,
-                                                           const std::string componentName) const
-{
-    mtsComponentState state = ComponentGetState(mtsDescriptionComponent(processName, componentName));
+    mtsComponentState state = ComponentGetState(mtsDescriptionComponent(componentName));
     return state.HumanReadable();
 }
 
-std::vector<std::string> mtsManagerComponentServices::GetNamesOfProcesses(void) const
-{
-    std::vector<std::string> namesOfProcesses;
-    if (ServiceGetters.GetNamesOfProcesses.IsValid())
-        ServiceGetters.GetNamesOfProcesses(namesOfProcesses);
-    else
-        CMN_LOG_CLASS_RUN_ERROR << "GetNamesOfProcesses: invalid function - has not been bound to command" << std::endl;
-    return namesOfProcesses;
-}
-
-std::vector<std::string> mtsManagerComponentServices::GetNamesOfComponents(const std::string & processName) const
+std::vector<std::string> mtsManagerComponentServices::GetNamesOfComponents() const
 {
     std::vector<std::string> namesOfComponents;
     if (ServiceGetters.GetNamesOfComponents.IsValid())
-        ServiceGetters.GetNamesOfComponents(processName, namesOfComponents);
+        ServiceGetters.GetNamesOfComponents(namesOfComponents);
     else
         CMN_LOG_CLASS_RUN_ERROR << "GetNamesOfComponents: invalid function - has not been bound to command" << std::endl;
     return namesOfComponents;
 }
 
-std::vector<mtsDescriptionComponent> mtsManagerComponentServices::GetDescriptionsOfComponents(const std::string & processName) const
+std::vector<mtsDescriptionComponent> mtsManagerComponentServices::GetDescriptionsOfComponents() const
 {
     std::vector<mtsDescriptionComponent> descriptions;
     if (ServiceGetters.GetDescriptionsOfComponents.IsValid())
-        ServiceGetters.GetDescriptionsOfComponents(processName, descriptions);
+        ServiceGetters.GetDescriptionsOfComponents(descriptions);
     else
         CMN_LOG_CLASS_RUN_ERROR << "GetDescriptionsOfComponents: invalid function - has not been bound to command" << std::endl;
     return descriptions;
 }
 
 bool mtsManagerComponentServices::GetNamesOfInterfaces(
-    const std::string & processName, const std::string & componentName,
+    const std::string & componentName,
     std::vector<std::string> & namesOfInterfacesRequired, std::vector<std::string> & namesOfInterfacesProvided) const
 {
     if (!ServiceGetters.GetNamesOfInterfaces.IsValid()) {
@@ -568,7 +482,6 @@ bool mtsManagerComponentServices::GetNamesOfInterfaces(
 
     // input arg
     mtsDescriptionComponent argIn;
-    argIn.ProcessName   = processName;
     argIn.ComponentName = componentName;
 
     // output arg
@@ -583,7 +496,7 @@ bool mtsManagerComponentServices::GetNamesOfInterfaces(
 }
 
 bool mtsManagerComponentServices::GetDescriptionsOfInterfaces(
-    const std::string & processName, const std::string & componentName,
+    const std::string & componentName,
     std::vector<mtsDescriptionInterfaceFullName> & descriptionsRequired, std::vector<mtsDescriptionInterfaceFullName> & descriptionsProvided) const
 {
     if (!ServiceGetters.GetDescriptionsOfInterfaces.IsValid()) {
@@ -593,7 +506,6 @@ bool mtsManagerComponentServices::GetDescriptionsOfInterfaces(
 
     // input arg
     mtsDescriptionComponent argIn;
-    argIn.ProcessName   = processName;
     argIn.ComponentName = componentName;
 
     // output arg
@@ -617,19 +529,19 @@ std::vector<mtsDescriptionConnection> mtsManagerComponentServices::GetListOfConn
     return listOfConnections;
 }
 
-std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses(const std::string &processName) const
+std::vector<mtsDescriptionComponentClass> mtsManagerComponentServices::GetListOfComponentClasses() const
 {
     std::vector<mtsDescriptionComponentClass> listOfComponentClasses;
     if (ServiceGetters.GetListOfComponentClasses.IsValid())
-        ServiceGetters.GetListOfComponentClasses(processName, listOfComponentClasses);
+        ServiceGetters.GetListOfComponentClasses(listOfComponentClasses);
     else
         CMN_LOG_CLASS_RUN_ERROR << "GetListOfComponentClasses: invalid function - has not been bound to command" << std::endl;
     return listOfComponentClasses;
 }
 
 mtsInterfaceProvidedDescription
-mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string & processName,
-                                                             const std::string & componentName, const std::string & interfaceName) const
+mtsManagerComponentServices::GetInterfaceProvidedDescription(
+    const std::string & componentName, const std::string & interfaceName) const
 {
     // output arg
     mtsInterfaceProvidedDescription argOut;
@@ -644,7 +556,6 @@ mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string &
     // For now, use mtsDescriptionInterface to pass the request. Probably should create a separate class that consists only
     // of the three required fields.
     mtsDescriptionInterface argIn;
-    argIn.ProcessName = processName;
     argIn.ComponentName = componentName;
     argIn.InterfaceProvidedNames.push_back(interfaceName);
 
@@ -654,8 +565,8 @@ mtsManagerComponentServices::GetInterfaceProvidedDescription(const std::string &
 }
 
 mtsInterfaceRequiredDescription
-mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string & processName,
-                                                             const std::string & componentName, const std::string & interfaceName) const
+mtsManagerComponentServices::GetInterfaceRequiredDescription(
+    const std::string & componentName, const std::string & interfaceName) const
 {
     // output arg
     mtsInterfaceRequiredDescription argOut;
@@ -670,7 +581,6 @@ mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string &
     // For now, use mtsDescriptionInterface to pass the request. Probably should create a separate class that consists only
     // of the three required fields.
     mtsDescriptionInterface argIn;
-    argIn.ProcessName = processName;
     argIn.ComponentName = componentName;
     argIn.InterfaceRequiredNames.push_back(interfaceName);
 
@@ -681,12 +591,7 @@ mtsManagerComponentServices::GetInterfaceRequiredDescription(const std::string &
 
 bool mtsManagerComponentServices::Load(const std::string & fileName) const
 {
-    return Load("", fileName);
-}
-
-bool mtsManagerComponentServices::Load(const std::string & processName, const std::string & fileName) const
-{
-    mtsDescriptionLoadLibrary argIn(processName, fileName);
+    mtsDescriptionLoadLibrary argIn(fileName);
     bool result = false;
     ServiceComponentManagement.LoadLibrary(argIn, result);
     return result;
@@ -718,53 +623,35 @@ bool mtsManagerComponentServices::CheckAndWait(const std::vector<std::string> &l
     return false;
 }
 
-bool mtsManagerComponentServices::WaitFor(const std::string & processName, double timeoutInSec)
+bool mtsManagerComponentServices::WaitFor(const std::string & componentName,
+                                          double timeoutInSec)
 {
     bool found = false;
     while (!found) {
-        std::vector<std::string> processList = GetNamesOfProcesses();
-        found = CheckAndWait(processList, processName, timeoutInSec, EventReceivers.AddComponent);
+        std::vector<std::string> componentList = GetNamesOfComponents();
+        found = CheckAndWait(componentList, componentName, timeoutInSec, EventReceivers.AddComponent);
         if (!found && (timeoutInSec == 0.0)) {
-            processList = GetNamesOfProcesses();
-            found = CheckAndWait(processList, processName, timeoutInSec, EventReceivers.AddComponent);
+            componentList = GetNamesOfComponents();
+            found = CheckAndWait(componentList, componentName, timeoutInSec, EventReceivers.AddComponent);
             break;
         }
     }
     return found;
 }
 
-bool mtsManagerComponentServices::WaitFor(const std::string & processName, const std::string & componentName,
-                                          double timeoutInSec)
-{
-    bool found = WaitFor(processName, timeoutInSec);
-    if (found) {
-        found = false;
-        while (!found) {
-            std::vector<std::string> componentList = GetNamesOfComponents(processName);
-            found = CheckAndWait(componentList, componentName, timeoutInSec, EventReceivers.AddComponent);
-            if (!found && (timeoutInSec == 0.0)) {
-                componentList = GetNamesOfComponents(processName);
-                found = CheckAndWait(componentList, componentName, timeoutInSec, EventReceivers.AddComponent);
-                break;
-            }
-        }
-    }
-    return found;
-}
-
-bool mtsManagerComponentServices::WaitFor(const std::string & processName, const std::string & componentName,
+bool mtsManagerComponentServices::WaitFor(const std::string & componentName,
                                           const std::string & componentState, double timeoutInSec)
 {
-    bool found = WaitFor(processName, componentName, timeoutInSec);
+    bool found = WaitFor(componentName, timeoutInSec);
     if (found) {
         found = false;
         while (!found) {
             std::vector<std::string> stateList(1);
-            stateList.push_back(ComponentGetState(processName, componentName));
+            stateList.push_back(ComponentGetState(componentName));
             found = CheckAndWait(stateList, componentState, timeoutInSec, EventReceivers.ChangeState);
             if (!found && (timeoutInSec == 0.0)) {
                 stateList.clear();
-                stateList.push_back(ComponentGetState(processName, componentName));
+                stateList.push_back(ComponentGetState(componentName));
                 found = CheckAndWait(stateList, componentState, timeoutInSec, EventReceivers.ChangeState);
                 break;
             }

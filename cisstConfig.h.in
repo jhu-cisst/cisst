@@ -51,15 +51,6 @@ http://www.cisst.org/cisst/license.txt.
 // To allow overloading of functions for long long (and unsigned long long)
 #cmakedefine01 CISST_LONG_LONG_NATIVE
 
-// Can we use cmath  std::isnan
-#cmakedefine01 CISST_HAS_STD_ISNAN
-
-// Can we use cmath  std::isfinite
-#cmakedefine01 CISST_HAS_STD_ISFINITE
-
-// Do we have isfinite global function
-#cmakedefine01 CISST_HAS_ISFINITE
-
 // Xenomai Realtime extension for Linux
 #cmakedefine01 CISST_HAS_LINUX_XENOMAI
 
@@ -99,8 +90,5 @@ http://www.cisst.org/cisst/license.txt.
 #endif
 
 #cmakedefine01 CISST_HAS_KDL
-
-// Using SI units (ie meters) or mm for distances
-#cmakedefine01 CISST_USE_SI_UNITS
 
 #endif // _cisstConfig_h

@@ -161,7 +161,7 @@ class CISST_EXPORT cmnClassServicesBase
     */
     const cmnLogMask & GetLogMask(void) const;
 
-    inline const cmnLogMask & GetLoD(void) const {
+    const cmnLogMask & GetLoD(void) const {
         return GetLogMask();
     }
 
@@ -171,10 +171,6 @@ class CISST_EXPORT cmnClassServicesBase
     \param mask The log mask.
     */
     void SetLogMask(cmnLogMask mask);
-
-    inline void CISST_DEPRECATED SetLoD(cmnLogMask mask) {
-        SetLogMask(mask);
-    }
 
     const cmnClassServicesBase * GetParentServices(void) const {
         return ParentServices;

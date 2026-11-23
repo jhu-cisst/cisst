@@ -233,17 +233,6 @@ void mtsManagerLocalTest::TestGetNamesOfComponents(void)
 }
 
 
-void mtsManagerLocalTest::TestGetProcessName(void)
-{
-    mtsManagerLocal * localManager = mtsManagerLocal::GetInstance();
-
-    //CPPUNIT_ASSERT_EQUAL(localManager->GetProcessName(), std::string(DEFAULT_PROCESS_NAME));
-    CPPUNIT_ASSERT_EQUAL(localManager->GetProcessName(), std::string(""));
-
-    mtsManagerLocal::DeleteInstance();
-}
-
-
 void mtsManagerLocalTest::TestConnectDisconnect(void)
 {
     // Local connection test

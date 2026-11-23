@@ -82,7 +82,9 @@ void cmnPortabilityTest::TestWithCMake(void) {
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("g++.exe")));
     } else if (CISST_COMPILER == CISST_CLANG) {
         CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == std::string("c++"))
-                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang++")));
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang++"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang-cl"))
+                       || (std::string(CISST_CMAKE_CXX_COMPILER) == std::string("clang-cl.exe")));
     } else {
         CPPUNIT_ASSERT((std::string(CISST_CMAKE_CXX_COMPILER) == CMakeCompilerStrings[CISST_COMPILER])
                        || (std::string(CISST_CMAKE_CXX_COMPILER) == CMakeCompilerStrings[CISST_COMPILER] + ".exe"));
@@ -117,34 +119,6 @@ void cmnPortabilityTest::TestWithCMake(void) {
         }
         // Not bothering to check later versions of Visual Studio
     }
-}
-
-
-void cmnPortabilityTest::TestCMN_ISNAN(void) {
-    // a normal number
-    double x = 20.0;
-    CPPUNIT_ASSERT(!CMN_ISNAN(x));
-
-    // inf/inf gives nan
-    x /= Zero;
-    double y = x;
-    CPPUNIT_ASSERT(CMN_ISNAN(x / y));
-}
-
-
-void cmnPortabilityTest::TestCMN_ISFINITE(void) {
-    // a normal number
-    double x = 20.0;
-    CPPUNIT_ASSERT(CMN_ISFINITE(x));
-
-    // +inf
-    x /= Zero;
-    CPPUNIT_ASSERT(!CMN_ISFINITE(x));
-
-    // -inf
-    x = -20.0;
-    x /= Zero;
-    CPPUNIT_ASSERT(!CMN_ISFINITE(x));
 }
 
 

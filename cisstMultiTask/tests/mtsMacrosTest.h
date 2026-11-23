@@ -21,13 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "mtsMacrosTestClasses.h"
-
 class mtsMacrosTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(mtsMacrosTest);
     CPPUNIT_TEST(TestMTS_DECLARE_MEMBER_AND_ACCESSORS);
-    CPPUNIT_TEST(TestMTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC);
     CPPUNIT_TEST_SUITE_END();
     
 public:
@@ -37,9 +34,6 @@ public:
     
     /*! Test the MTS_DECLARE_MEMBER_AND_ACCESSORS */
     void TestMTS_DECLARE_MEMBER_AND_ACCESSORS(void);
-
-    /*! Test the MTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC */
-    void TestMTS_MULTIPLE_INHERITANCE_FROM_MTS_GENERIC(void);
 };
 
 

@@ -85,16 +85,11 @@ The Manager Component ("MCS") is a task with its own thread. It is derived from 
      - mtsDescriptionLoadLibrary
      - bool
      - Dynamically load specified library
-   * - GetNamesOfProcesses
-     - Read
-     -
-     - std::vector<std::string>
-     - Get names of processes (OBSOLETE)
    * - GetNamesOfComponents
      - QualifiedRead
      - std::string
      - std::vector<std::string>
-     - Get names of components in process
+     - Get names of components
    * - GetDescriptionsOfComponents
      - QualifiedRead
      - std::string

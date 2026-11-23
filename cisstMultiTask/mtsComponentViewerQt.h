@@ -79,7 +79,7 @@ class CISST_EXPORT mtsComponentViewerQt : public QWidget,
     QtNodes::GraphicsView *View;
 
     // Keep track of components and their node IDs.
-    typedef std::pair<std::string, std::string> ComponentKey;
+    typedef std::string ComponentKey;
     std::vector<ComponentKey> m_components;
 
     // Keep NodeId as an unsigned int in the public header to avoid pulling

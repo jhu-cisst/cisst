@@ -18,6 +18,7 @@ add_subdirectory (code)
 
 # Python wrappers
 cisst_offer_python (cisstParameterTypes)
+cisst_offer_tests_python (cisstParameterTypes)
 
 if (CISST_HAS_QT)
   add_subdirectory (codeQt)

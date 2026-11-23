@@ -39,7 +39,6 @@ private:
         CPPUNIT_TEST(TestGetInstance);
         CPPUNIT_TEST(TestGetComponent);
         CPPUNIT_TEST(TestGetNamesOfComponents);
-        CPPUNIT_TEST(TestGetProcessName);
 
         CPPUNIT_TEST(TestConnectLocally);
         CPPUNIT_TEST(TestConnectDisconnect);
@@ -66,7 +65,6 @@ public:
     void TestGetNamesOfComponents(void);
     void TestGetNamesOfTasks(void);
     void TestGetNamesOfDevices(void);
-    void TestGetProcessName(void);
 
     void TestConnectLocally(void);
     void TestConnectDisconnect(void);

@@ -22,10 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstConfig.h>
 #include <cisstCommon/cmnObjectRegister.h>
 #include <cisstInteractive/ireFramework.h>
+#include <thread>
 
 #ifdef CISST_OSATHREAD
 #include <cisstOSAbstraction/osaSleep.h>
-#include <cisstOSAbstraction/osaThread.h>
 #endif
 
 #if (CISST_OS == CISST_DARWIN)
@@ -103,8 +103,7 @@ int main(int CMN_UNUSED(argc), char *CMN_UNUSED(argv[]))
 
 #ifdef CISST_OSATHREAD
     cout << "*** Launching IRE shell (C++ Thread) ***" << endl;
-    osaThread IreThread;
-    IreThread.Create<const char *> (&ireFramework::RunIRE_wxPython, "from pythonEmbeddedIRE import *");
+    std::thread IreThread([&]() { ireFramework::RunIRE_wxPython("from pythonEmbeddedIRE import *"); });
 #else
     cout << "*** Launching IRE shell (Python Thread) ***" << endl;
     try {
@@ -147,7 +146,7 @@ int main(int CMN_UNUSED(argc), char *CMN_UNUSED(argv[]))
 
     cout << "*** Clean up and exit ***" << endl;
 #ifdef CISST_OSATHREAD
-    IreThread.Wait();
+    IreThread.join();
 #else
     ireFramework::FinalizeShell();
 #endif

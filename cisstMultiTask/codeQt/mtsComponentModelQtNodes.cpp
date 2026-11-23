@@ -22,12 +22,10 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsComponentModelQtNodes.h>
 #include <iostream>
 
-mtsComponentModelQtNodes::mtsComponentModelQtNodes(const std::string &processName,
-                                                   const std::string &componentName,
+mtsComponentModelQtNodes::mtsComponentModelQtNodes(const std::string &componentName,
                                                    const std::string &className,
                                                    const QColor &color)
-    : m_processName(processName)
-    , m_componentName(componentName)
+    : m_componentName(componentName)
     , m_className(className)
     , m_color(color) {}
 
@@ -42,9 +40,8 @@ bool mtsComponentModelQtNodes::captionVisible(void) const {
 }
 
 QString mtsComponentModelQtNodes::name(void) const {
-    return QString("%1:%2")
-        .arg(QString::fromStdString(m_processName),
-             QString::fromStdString(m_componentName));
+    return QString("%1")
+        .arg(QString::fromStdString(m_componentName));
 }
 
 QJsonObject mtsComponentModelQtNodes::save() const {

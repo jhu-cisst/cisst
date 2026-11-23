@@ -371,6 +371,7 @@ void cdgFile::GeneratePython(std::ostream & outputStream) const
     outputStream << "#include <pybind11/pybind11.h>" << std::endl
                  << "#include <pybind11/eigen.h>" << std::endl
                  << "#include <pybind11/stl.h>" << std::endl
+                 << "#include <cisstCommon/codePython/cmnEigenGeometryCaster.hpp>" << std::endl
                  << "#include <" << Header << ">" << std::endl
                  << std::endl
                  << "void cdgBind_" << bindName << "(pybind11::module & m)" << std::endl
