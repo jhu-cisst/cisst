@@ -661,6 +661,8 @@ if (WIN32)
   file (TO_NATIVE_PATH ${cisst_BINARY_DIR} cisst_BINARY_DIR_NATIVE)
   configure_file (${cisst_SOURCE_DIR}/utils/cisstvars.bat.in
                   ${cisst_BINARY_DIR}/cisstvars.bat)
+  configure_file (${cisst_SOURCE_DIR}/utils/cisstvars.ps1.in
+                  ${cisst_BINARY_DIR}/cisstvars.ps1)
   # Script to set Microsoft compiler environment variables
   get_filename_component (BUILD_TOOL_DIRECTORY ${CMAKE_MAKE_PROGRAM} PATH)
   find_program (VSVARS32_BAT

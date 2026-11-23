@@ -27,11 +27,16 @@ import getopt
 
 module = '@LIB@'
 pathTestCases = '@CMAKE_CURRENT_SOURCE_DIR@'
-pathLib = '@cisst_LIBRARY_PATH@/@config@'
+libraryPaths = ('@cisst_LIBRARY_PATH@/@config@', '@cisst_LIBRARY_PATH@')
 
 
 sys.path.append(pathTestCases)
-sys.path.append(pathLib)
+_dllDirectoryHandles = []
+for pathLib in libraryPaths:
+    if os.path.isdir(pathLib):
+        sys.path.insert(0, pathLib)
+        if hasattr(os, "add_dll_directory"):
+            _dllDirectoryHandles.append(os.add_dll_directory(pathLib))
 
 verbose = False
 listOfModules = []
@@ -165,7 +170,7 @@ def RunAllTests(prefix):
             print((result.failures[i])[1])
     else:
         print("successful")
-    return 0
+    return 0 if result.wasSuccessful() else 1
 
 
 

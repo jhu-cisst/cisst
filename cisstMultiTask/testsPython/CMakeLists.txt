@@ -25,6 +25,7 @@ cisst_add_pybind11_module (MODULE cisstMultiTaskPythonTest
          SOURCES cisstMultiTaskPythonTestPybind.cpp
            mtsPeriodicTaskTest.cpp
          MODULE_LINK_LIBRARIES cisstCommon cisstOSAbstraction cisstMultiTask)
+set_target_properties (cisstMultiTaskPythonTest PROPERTIES CXX_VISIBILITY_PRESET default)
 
 # Create the scripts from .in
 set (LIB cisstMultiTask)
@@ -43,7 +44,7 @@ endif (CMAKE_CONFIGURATION_TYPES)
 # Run the script to generate the list of tests automatically
 if (WIN32)
   add_custom_target (cisstMultiTask_CREATE_PYTHON_TESTS_LIST ALL
-                     COMMAND ${cisstTestsDriver_BINARY_DIR}/cisstTestsDriverPython.bat ${CMAKE_CFG_INTDIR}
+                     COMMAND ${cisst_BINARY_DIR}/cisstTestsDriver/cisstTestsDriverPython.bat ${CMAKE_CFG_INTDIR}
                              ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/cisstMultiTaskTests.py ${CTEST_TEST_FILE_AUTO}
                      SOURCES ${TEST_PROGRAMS})
 else (WIN32)

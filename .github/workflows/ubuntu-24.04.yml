@@ -21,7 +21,7 @@ jobs:
       CISST_WS: ${{ github.workspace }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup ROS 2 Jazzy
       uses: ros-tooling/setup-ros@v0.7
@@ -32,7 +32,7 @@ jobs:
       run: mkdir -p apt-cache
 
     - name: Cache APT packages
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: apt-cache
         key: ${{ runner.os }}-apt-jazzy-${{ hashFiles('.github/workflows/cmake-ubuntu-cache.cmake') }}
@@ -56,6 +56,9 @@ jobs:
           libcppunit-dev \
           libjsoncpp-dev \
           libcppunit-dev \
+          pybind11-dev \
+          python3-dev \
+          python3-numpy \
           qtbase5-dev \
           qtbase5-dev-tools \
           qt5-qmake-bin \
@@ -88,6 +91,7 @@ jobs:
         cmake .. \
           -DCMAKE_BUILD_TYPE=Release \
           -DCISST_QT_VERSION=${{ matrix.qt_version }} \
+          -DCISST_HAS_PYTHON=ON \
           -DCMAKE_C_COMPILER_LAUNCHER=ccache \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
           -C ../.github/workflows/cmake-ubuntu-cache.cmake
@@ -153,6 +157,7 @@ jobs:
         cisstOSAbstractionTests -r -v
         cisstParameterTypesTests -r -v
         cisstMultiTaskTests -r -v
+        ctest -R '^Python:' --output-on-failure
 
     - name: ccache stats (after)
       run: ccache -s

@@ -20,7 +20,7 @@ import time
 
 import cisstCommonPython as cisstCommon
 import cisstMultiTaskPython as cisstMultiTask
-import cisstMultiTaskPythonTestPython as cisstMultiTaskPythonTest # contains test classes
+import cisstMultiTaskPythonTest # contains test classes
 
 class PeriodicTaskTest(unittest.TestCase):
     def setUp(self):
@@ -75,16 +75,15 @@ class PeriodicTaskTest(unittest.TestCase):
         self.assertTrue(isinstance(taskManager, cisstMultiTask.mtsManagerLocal))
         # add the task
         self.assertTrue(taskManager.AddComponent(periodicTask))
-        # create and start the task(s)
+        # Wait for asynchronous task initialization before starting it.
         taskManager.CreateAll()
+        self.assertTrue(periodicTask.WaitToStart(10.0))
         taskManager.StartAll()
         # and now use the task ...
         # -1- set all to zero and check result
         periodicTask.MainInterface.ZeroAll()
         time.sleep(2 * period)
-        result1 = cisstMultiTask.mtsDouble()
-        executionResult = periodicTask.MainInterface.GetDouble.Execute(result1)
-        self.assertTrue(executionResult.IsOK())
+        result1 = periodicTask.MainInterface.GetDouble()
         timestamp1 = result1.GetTimestamp()
         self.assertTrue(result1.Data == 0.0)
         resultVector = periodicTask.MainInterface.GetVector()
@@ -95,9 +94,7 @@ class PeriodicTaskTest(unittest.TestCase):
         # -2- use the AddDouble to modify all and test
         periodicTask.MainInterface.AddDouble(1.0)
         time.sleep(2 * period)
-        result2 = cisstMultiTask.mtsDouble()
-        executionResult = periodicTask.MainInterface.GetDouble.Execute(result2)
-        self.assertTrue(executionResult.IsOK())
+        result2 = periodicTask.MainInterface.GetDouble()
         timestamp2 = result2.GetTimestamp()
         self.assertTrue(result2.Data == 1.0)
         resultVector = periodicTask.MainInterface.GetVector()
@@ -108,9 +105,7 @@ class PeriodicTaskTest(unittest.TestCase):
         # -3- set to zero again and test
         periodicTask.MainInterface.ZeroAll()
         time.sleep(2 * period)
-        result3 = cisstMultiTask.mtsDouble()
-        executionResult = periodicTask.MainInterface.GetDouble.Execute(result3)
-        self.assertTrue(executionResult.IsOK())
+        result3 = periodicTask.MainInterface.GetDouble()
         timestamp3 = result3.GetTimestamp()
         self.assertTrue(result3.Data == 0.0)
         resultVector = periodicTask.MainInterface.GetVector()
