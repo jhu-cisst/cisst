@@ -109,7 +109,7 @@ mtsExecutionResult mtsCommandQueuedVoidReturnBase<_Base>::Execute(mtsGenericObje
     if (!FinishedEventQueue.Put(finishedEventHandler)) {
         CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: FinishedEventQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        ReturnsQueue.Get();     // Remove the result that was already queued
+        ReturnsQueue.Pop();     // Remove the result that was already queued
         cmnThrow(GetClassName()+": Execute: FinishedEventQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -117,8 +117,8 @@ mtsExecutionResult mtsCommandQueuedVoidReturnBase<_Base>::Execute(mtsGenericObje
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: mailbox full for \""
                           << this->Name << "\"" <<  std::endl;
-        ReturnsQueue.Get();        // Remove the result that was already queued
-        FinishedEventQueue.Get();  // Remove the finished event handler that was already queued
+        ReturnsQueue.Pop();        // Remove the result that was already queued
+        FinishedEventQueue.Pop();  // Remove the finished event handler that was already queued
         cmnThrow(GetClassName()+": Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }

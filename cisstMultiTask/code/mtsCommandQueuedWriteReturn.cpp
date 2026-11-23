@@ -118,7 +118,7 @@ mtsExecutionResult mtsCommandQueuedWriteReturnBase<_Base>::Execute(const mtsGene
     if (!ReturnsQueue.Put(&result)) {
         CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: ReturnsQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();   // Remove the argument that was already queued
+        ArgumentsQueue.Pop();   // Remove the argument that was already queued
         cmnThrow(GetClassName()+": Execute: ReturnsQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -126,8 +126,8 @@ mtsExecutionResult mtsCommandQueuedWriteReturnBase<_Base>::Execute(const mtsGene
     if (!FinishedEventQueue.Put(finishedEventHandler)) {
         CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: FinishedEventQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();   // Remove the argument that was already queued
-        ReturnsQueue.Get();     // Remove the result that was already queued
+        ArgumentsQueue.Pop();   // Remove the argument that was already queued
+        ReturnsQueue.Pop();     // Remove the result that was already queued
         cmnThrow(GetClassName()+": Execute: FinishedEventQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -135,9 +135,9 @@ mtsExecutionResult mtsCommandQueuedWriteReturnBase<_Base>::Execute(const mtsGene
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: mailbox full for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();      // Remove the argument that was already queued
-        ReturnsQueue.Get();        // Remove the result that was already queued
-        FinishedEventQueue.Get();  // Remove the finished event handler that was already queued
+        ArgumentsQueue.Pop();      // Remove the argument that was already queued
+        ReturnsQueue.Pop();        // Remove the result that was already queued
+        FinishedEventQueue.Pop();  // Remove the finished event handler that was already queued
         cmnThrow(GetClassName()+": Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }

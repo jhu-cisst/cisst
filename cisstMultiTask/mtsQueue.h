@@ -29,359 +29,351 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
+#include <atomic>
+#include <limits>
+#include <stdexcept>
+#include <vector>
+
 /*!
   \ingroup cisstMultiTask
 
-  Defines a queue that can be accessed in a thread-safe manner,
-  assuming that there is only one reader and one writer and that
-  pointer updates are atomic.
+  Lock-free SPSC queue for one producer thread and one consumer thread, holding up
+  to GetSize() elements.  The producer calls Put; the consumer calls Peek and
+  then Pop (or Get).  The status methods are snapshots and are safe from either
+  thread.  SetSize and destruction require exclusive use.
+
+  The pointer returned by Peek remains valid until the matching Pop or Get.
 */
-template<class _elementType>
+template<typename value_type>
 class mtsQueue
 {
-public:
-    typedef _elementType value_type;
-    typedef value_type * pointer;
-    typedef const value_type * const_pointer;
-    typedef value_type & reference;
-    typedef const value_type & const_reference;
-    typedef size_t size_type;
-    typedef size_t index_type;
+    // Work around for annoying std::vector<bool> issue
+    class BoolWrapper {
+    public:
+        bool value;
+        BoolWrapper(bool v) : value(v) {}
+
+        operator bool() const noexcept { return value; }
+        bool* operator&() noexcept { return &value; }
+        const bool* operator&() const noexcept { return &value; }
+    };
+
+    // Map bool -> BoolWrapper, keep all other T as-is
+    template <typename T>
+    using StorageType = std::conditional_t<std::is_same_v<T, bool>, BoolWrapper, T>;
 
 protected:
-    pointer Data;
-    pointer Head;
-    pointer Tail;
-    pointer Sentinel;  // end marker
-    size_type Size;
+    size_t Capacity;
+    std::vector<StorageType<value_type>> Data; // Capacity + 1 slots, the spare one tells full from empty
+    std::atomic<size_t> Head;     // Next slot to write, only modified by the producer
+    std::atomic<size_t> Tail;     // Next slot to read, only modified by the consumer
 
-    // private method, can only be used once by constructor.  Doesn't support resize!
-    void Allocate(size_type size, const_reference value) {
-        this->Size = size;
-        if (this->Size > 0) {
-            this->Data = new value_type[this->Size];
-            index_type index;
-            for (index = 0; index < this->Size; index++) {
-                new(&this->Data[index]) value_type(value);
-            }
-        } else {
-            this->Data = 0;
+    size_t Advance(size_t index) const
+    {
+        ++index;
+        return index > Capacity ? 0 : index;
+    }
+
+    // Strong guarantee: on exception the queue is unchanged.
+    void Allocate(size_t capacity, const value_type & value)
+    {
+        std::vector<StorageType<value_type>> data;
+        if (capacity >= data.max_size()) {
+            throw std::length_error("mtsQueue: capacity too large");
         }
-        // head == tail implies empty queue
-        this->Head = this->Data;
-        this->Tail = this->Data;
-        this->Sentinel = this->Data + this->Size;
+        if (capacity > 0) {
+            data.assign(capacity + 1, value);
+        }
+        Data.swap(data);
+        Capacity = capacity;
+        Head.store(0, std::memory_order_relaxed);
+        Tail.store(0, std::memory_order_relaxed);
     }
 
 public:
-
-    inline mtsQueue(void):
-        Data(0),
+    mtsQueue():
+        Capacity(0),
         Head(0),
-        Tail(0),
-        Sentinel(0),
-        Size(0)
+        Tail(0)
     {}
 
-
-    inline mtsQueue(size_type size, const_reference value) {
-        Allocate(size, value);
-    }
-
-
-    inline ~mtsQueue() {
-        delete [] Data;
-    }
-
-
-    /*! Sets the size of the queue (destructive, i.e. won't preserve
-      previously queued elements). */
-    inline void SetSize(size_type size, const_reference value) {
-        delete [] Data;
-        this->Allocate(size, value);
-    }
-
-
-    /*! Returns size of queue. */
-    inline size_type GetSize(void) const {
-        return Size;
-    }
-
-
-    /*! Returns number of elements available in queue, i.e. the number
-      of slots used. */
-    inline size_type GetAvailable(void) const
+    mtsQueue(size_t capacity, const value_type& value):
+        Capacity(0),
+        Head(0),
+        Tail(0)
     {
-        ptrdiff_t available = Head - Tail;
-        if (available < 0) {
-            available += Size;
-        }
-        return available;
+        Allocate(capacity, value);
     }
 
+    mtsQueue(const mtsQueue&) = delete;
+    mtsQueue& operator=(const mtsQueue&) = delete;
 
-    /*! Returns true if queue is full. */
-    inline bool IsFull(void) const {
-        pointer oneAfterHead = this->Head + 1;
-        if (oneAfterHead >= this->Sentinel) {
-            oneAfterHead = this->Data;
-        }
-        return oneAfterHead == this->Tail;
-    }
-
-
-    /*! Returns true if queue is empty. */
-    inline bool IsEmpty(void) const {
-        return Head == Tail;
-    }
-
-
-    /*! Copy an object to the queue.
-      \param in reference to the object to be copied
-      \result Pointer to element in queue (use iterator instead?)
-    */
-    //inline const_pointer Put(const_reference newObject)
-    //Following signature is equivalent for types that are not Proxy types. If a Proxy type,
-    //then we use the ProxyBase instead, so that we can also accept ProxyRef objects.
-    inline const_pointer Put(const typename mtsGenericTypesUnwrap<value_type>::BaseType &newObject)
+    /*! Destructive resize, queued elements are discarded. */
+    void SetSize(size_t capacity, const value_type& value)
     {
-        pointer newHead = this->Head + 1;
-        // test if end of buffer (same as IsFull method)
-        if (newHead >= this->Sentinel) {
-            newHead = this->Data;
-        }
-        // test if full
-        if (newHead == this->Tail) {
-            return 0;    // queue full
-        }
-        // queue new object and move head
-        *(this->Head) = newObject;
-        this->Head = newHead;
-        return this->Head;
+        Allocate(capacity, value);
     }
 
+    size_t GetSize() const { return Capacity; }
 
-    /*! Get a pointer to the next object to be read, but do not
-        remove the item from the queue.
-        \result Pointer to top element in queue (use iterator instead?)
-     */
-    inline pointer Peek(void) const {
-        if (this->IsEmpty()) {
-            return 0;
-        }
-        return this->Tail;
+    size_t GetAvailable() const
+    {
+        const size_t tail = Tail.load(std::memory_order_acquire);
+        const size_t head = Head.load(std::memory_order_acquire);
+        return head >= tail ? head - tail : head + (Capacity + 1) - tail;
     }
 
-
-    /*! Pop the next object to be read from the queue.
-        \result Pointer to element just popped (use iterator instead?)
-     */
-    inline pointer Get(void) {
-        if (this->IsEmpty()) {
-            return 0;
-        }
-        pointer result = this->Tail;
-        this->Tail++;
-        if (this->Tail >= this->Sentinel) {
-            this->Tail = this->Data;
-        }
-        return result;
+    bool IsFull() const
+    {
+        const size_t head = Head.load(std::memory_order_acquire);
+        return Advance(head) == Tail.load(std::memory_order_acquire);
     }
 
+    bool IsEmpty() const
+    {
+        const size_t tail = Tail.load(std::memory_order_acquire);
+        return tail == Head.load(std::memory_order_acquire);
+    }
+
+    /*! Producer only. Returns nullptr if the queue is full. */
+    const value_type* Put(const typename mtsGenericTypesUnwrap<value_type>::BaseType& newObject)
+    {
+        const size_t head = Head.load(std::memory_order_relaxed);
+        const size_t next = Advance(head);
+        if (next == Tail.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
+        Data[head] = newObject;
+        Head.store(next, std::memory_order_release);
+        return &Data[head];
+    }
+
+    /*! Consumer only. Returns nullptr if the queue is empty. */
+    value_type* Peek()
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
+        return &Data[tail];
+    }
+
+    /*! Consumer only. Returns nullptr if the queue is empty. */
+    const value_type* Peek() const
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
+        return &Data[tail];
+    }
+
+    /*! Consumer only. Releases the element returned by Peek. */
+    bool Pop()
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return false;
+        }
+        Tail.store(Advance(tail), std::memory_order_release);
+        return true;
+    }
+
+    /*! Consumer only. Copies the oldest element to \c out and releases it. If the copy throws, the element stays queued. */
+    bool Get(value_type& out)
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return false;
+        }
+        out = Data[tail];
+        Tail.store(Advance(tail), std::memory_order_release);
+        return true;
+    }
 };
 
 
+/*!
+  \ingroup cisstMultiTask
 
-
+  Same contract as mtsQueue for polymorphic elements.  All slots are
+  preallocated copies of the prototype given to the constructor or SetSize, so
+  every element queued must have the prototype's class.
+*/
 class mtsQueueGeneric
 {
 public:
     typedef mtsGenericObject value_type;
-    typedef value_type * pointer;
-    typedef const value_type * const_pointer;
-    typedef value_type & reference;
-    typedef const value_type & const_reference;
-    typedef size_t size_type;
-    typedef size_t index_type;
 
 protected:
-    const cmnClassServicesBase * ClassServices;
-    pointer * Data;
-    pointer * Head;
-    pointer * Tail;
-    pointer * Sentinel;  // end marker
-    size_type Size;
+    const cmnClassServicesBase* ClassServices;
+    size_t Capacity;
+    mtsGenericObject** Data; // Capacity + 1 slots, the spare one tells full from empty
+    std::atomic<size_t> Head; // Next slot to write, only modified by the producer
+    std::atomic<size_t> Tail; // Next slot to read, only modified by the consumer
 
-    // private method, can only be used once by constructor.  Doesn't support resize!
-    void Allocate(size_type size, const_reference value) {
-        CMN_ASSERT(this->ClassServices);
-        this->Size = size;
-        if (this->Size > 0) {
-            this->Data = new pointer[size];
-            size_t index;
-            for (index = 0; index < size; index++) {
-                cmnGenericObject * genericPointer = this->ClassServices->Create(value);
-                if (!genericPointer) {
-                    CMN_LOG_RUN_ERROR << "class mtsQueueGeneric: Allocate failed to create generic object for "
-                                      << this->ClassServices->GetName() << std::endl;
-                }
-                pointer typedPointer = dynamic_cast<pointer>(genericPointer);
-                CMN_ASSERT(typedPointer);
-                this->Data[index] = typedPointer;
-            }
-        } else {
-            this->Data = 0;
-        }
-        // head == tail implies empty queue
-        this->Head = this->Data;
-        this->Tail = this->Data;
-        this->Sentinel = this->Data + this->Size;
+    size_t Advance(size_t index) const
+    {
+        ++index;
+        return index > Capacity ? 0 : index;
     }
 
-    void Free(void) {
-        size_t index;
-        for (index = 0; index < this->Size; index++) {
-            delete this->Data[index];
+    static void DestroySlots(mtsGenericObject** data, size_t count)
+    {
+        for (size_t index = 0; index < count; ++index) {
+            delete data[index];
         }
-        delete [] this->Data;
-        this->Data = 0;
+        delete[] data;
+    }
+
+    static mtsGenericObject** CreateSlots(
+        const cmnClassServicesBase* services,
+        size_t count,
+        const mtsGenericObject& value
+    )
+    {
+        mtsGenericObject** data = new mtsGenericObject * [count];
+        size_t created = 0;
+        try {
+            for (; created < count; ++created) {
+                cmnGenericObject* generic = services->Create(value);
+                if (!generic) {
+                    throw std::runtime_error("mtsQueueGeneric: unable to create an element of class "
+                                             + services->GetName());
+                }
+                mtsGenericObject* typed = dynamic_cast<mtsGenericObject *>(generic);
+                if (!typed) {
+                    delete generic;
+                    throw std::runtime_error("mtsQueueGeneric: class " + services->GetName()
+                                             + " is not derived from mtsGenericObject");
+                }
+                data[created] = typed;
+            }
+        } catch (...) {
+            DestroySlots(data, created);
+            throw;
+        }
+        return data;
+    }
+
+    // Strong guarantee: on exception the queue is unchanged.
+    void Allocate(size_t capacity, const mtsGenericObject& value)
+    {
+        const cmnClassServicesBase* services = value.Services();
+        if (!services) {
+            throw std::runtime_error("mtsQueueGeneric: element has no class services");
+        }
+        if (capacity >= std::numeric_limits<size_t>::max() / sizeof(mtsGenericObject *)) {
+            throw std::length_error("mtsQueueGeneric: capacity too large");
+        }
+        mtsGenericObject** data = capacity > 0 ? CreateSlots(services, capacity + 1, value) : nullptr;
+
+        // nothing below can throw
+        DestroySlots(Data, Data ? Capacity + 1 : 0);
+        Data = data;
+        Capacity = capacity;
+        ClassServices = services;
+        Head.store(0, std::memory_order_relaxed);
+        Tail.store(0, std::memory_order_relaxed);
     }
 
 public:
-
-    inline mtsQueueGeneric(void):
-        ClassServices(0),
-        Data(0),
+    mtsQueueGeneric():
+        ClassServices(nullptr),
+        Capacity(0),
+        Data(nullptr),
         Head(0),
-        Tail(0),
-        Sentinel(0),
-        Size(1)
+        Tail(0)
     {}
 
-
-    inline mtsQueueGeneric(size_type size, const_reference value) {
-        this->ClassServices = value.Services();
-        CMN_ASSERT(this->ClassServices);
-        CMN_LOG_INIT_DEBUG << "class mtsQueueGeneric: constructor, created queue of "
-                           << this->ClassServices->GetName() << std::endl;
-        Allocate(size + 1, value);
-    }
-
-
-    inline ~mtsQueueGeneric() {
-        this->Free();
-    }
-
-
-    /*! Sets the size of the queue (destructive, i.e. won't preserve
-        previously queued elements). */
-    inline void SetSize(size_type size, const_reference value) {
-        if (this->ClassServices != 0) { // if non zero, it has already been set
-            if (this->ClassServices != value.Services()) {
-                CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: type of elements expected \""
-                                     << this->ClassServices->GetName() << "\", now using \""
-                                     << value.Services()->GetName() << "\"" << std::endl;
-            }
-            this->Free();
-            if (this->Data != 0) {
-                CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: failed to delete data array for \""
-                                     << this->ClassServices->GetName() << "\"" << std::endl;
-            }
-        }
-        this->ClassServices = value.Services();
-        this->Allocate(size + 1, value);
-    }
-
-
-    /*! Returns size of queue. */
-    inline size_type GetSize(void) const {
-        return (Size - 1);
-    }
-
-
-    /*! Returns number of elements available in queue, i.e. the number
-      of slots used. */
-    inline size_type GetAvailable(void) const
+    mtsQueueGeneric(size_t capacity, const mtsGenericObject& value):
+        ClassServices(nullptr),
+        Capacity(0),
+        Data(nullptr),
+        Head(0),
+        Tail(0)
     {
-        ptrdiff_t available = Head - Tail;
-        if (available < 0) {
-            available += Size;
-        }
-        return available;
+        Allocate(capacity, value);
     }
 
+    mtsQueueGeneric(const mtsQueueGeneric&) = delete;
+    mtsQueueGeneric& operator=(const mtsQueueGeneric&) = delete;
 
-    /*! Returns true if queue is full. */
-    inline bool IsFull(void) const {
-        pointer * oneAfterHead = this->Head + 1;
-        if (oneAfterHead >= this->Sentinel) {
-            oneAfterHead = this->Data;
-        }
-        return oneAfterHead == this->Tail;
+    ~mtsQueueGeneric()
+    {
+        DestroySlots(Data, Data ? Capacity + 1 : 0);
     }
 
-
-    /*! Returns true if queue is empty. */
-    inline bool IsEmpty(void) const {
-        return Head == Tail;
+    /*! Destructive resize, queued elements are discarded. */
+    void SetSize(size_t capacity, const mtsGenericObject& value)
+    {
+        if (ClassServices && value.Services() != ClassServices) {
+            CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: type of elements expected \""
+                                 << ClassServices->GetName() << "\", now using \""
+                                 << value.Services()->GetName() << "\"" << std::endl;
+        }
+        Allocate(capacity, value);
     }
 
+    size_t GetSize() const { return Capacity; }
 
-    /*! Copy an object to the queue.
-      \param in reference to the object to be copied
-      \result Pointer to element in queue (use iterator instead?)
-    */
-    inline const_pointer Put(const_reference newObject) {
-        pointer * newHead = this->Head + 1;
-        // test if end of buffer (same as IsFull method)
-        if (newHead >= this->Sentinel) {
-            newHead = this->Data;
-        }
-        // test if full
-        if (newHead == this->Tail) {
-            return 0;    // queue full
-        }
-        // queue new object and move head
-        // using in place new to make sure copy constructor is used
-        if (!this->ClassServices->Create(*(this->Head), newObject)) {
-            // if Create fails, it does not modify the input parameter (this->Head)
-            CMN_LOG_RUN_ERROR << "mtsQueueGeneric::Put failed for " << newObject.Services()->GetName() << std::endl;
-            return 0;
-        }
-        this->Head = newHead;
-        return *(this->Head);
+    size_t GetAvailable() const
+    {
+        const size_t tail = Tail.load(std::memory_order_acquire);
+        const size_t head = Head.load(std::memory_order_acquire);
+        return head >= tail ? head - tail : head + (Capacity + 1) - tail;
     }
 
-
-    /*! Get a pointer to the next object to be read, but do not
-        remove the item from the queue.
-        \result Pointer to top element in queue (use iterator instead?)
-     */
-    inline pointer Peek(void) const {
-        if (this->IsEmpty()) {
-            return 0;
-        }
-        return *(this->Tail);
+    bool IsFull() const
+    {
+        const size_t head = Head.load(std::memory_order_acquire);
+        return Advance(head) == Tail.load(std::memory_order_acquire);
     }
 
-
-    /*! Pop the next object to be read from the queue.
-        \result Pointer to element just popped (use iterator instead?)
-     */
-    inline pointer Get(void) {
-        if (this->IsEmpty()) {
-            return 0;
-        }
-        pointer result = *(this->Tail);
-        this->Tail++;
-        if (this->Tail >= this->Sentinel) {
-            this->Tail = this->Data;
-        }
-        return result;
+    bool IsEmpty() const
+    {
+        const size_t tail = Tail.load(std::memory_order_acquire);
+        return tail == Head.load(std::memory_order_acquire);
     }
 
+    /*! Producer only.  Returns 0 if the queue is full or the class differs from the prototype's. */
+    const mtsGenericObject* Put(const mtsGenericObject& newObject)
+    {
+        const size_t head = Head.load(std::memory_order_relaxed);
+        const size_t next = Advance(head);
+        if (next == Tail.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
+        // Create destroys the slot before copy-constructing into it, a throwing copy constructor leaves it dead.
+        if (!ClassServices->Create(Data[head], newObject)) {
+            CMN_LOG_RUN_ERROR << "mtsQueueGeneric::Put failed for "
+                              << newObject.Services()->GetName() << std::endl;
+            return nullptr;
+        }
+        Head.store(next, std::memory_order_release);
+        return Data[head];
+    }
+
+    /*! Consumer only.  Returns 0 if the queue is empty. */
+    mtsGenericObject* Peek() const
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
+        return Data[tail];
+    }
+
+    /*! Consumer only.  Releases the element returned by Peek. */
+    bool Pop()
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return false;
+        }
+        Tail.store(Advance(tail), std::memory_order_release);
+        return true;
+    }
 };
 
-
 #endif // _mtsQueue_h
-

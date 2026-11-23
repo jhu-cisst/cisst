@@ -40,12 +40,16 @@ mtsExecutionResult mtsCommandQueuedWriteBase::Execute(const mtsGenericObject & a
 
 mtsBlockingType mtsCommandQueuedWriteBase::BlockingFlagGet(void)
 {
-    return *(this->BlockingFlagQueue.Get());
+    mtsBlockingType blocking = MTS_NOT_BLOCKING;
+    this->BlockingFlagQueue.Get(blocking);
+    return blocking;
 }
 
-mtsCommandWriteBase *mtsCommandQueuedWriteBase::FinishedEventGet(void)
+mtsCommandWriteBase* mtsCommandQueuedWriteBase::FinishedEventGet(void)
 {
-    return *(this->FinishedEventQueue.Get());
+    mtsCommandWriteBase* finishedEvent = 0;
+    this->FinishedEventQueue.Get(finishedEvent);
+    return finishedEvent;
 }
 
 
@@ -127,7 +131,7 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
     if (!BlockingFlagQueue.Put(blocking)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();   // Remove the argument that was already queued
+        ArgumentsQueue.Pop();   // Remove the argument that was already queued
         cmnThrow("mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -135,8 +139,8 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
     if (!FinishedEventQueue.Put(finishedEventHandler)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: FinishedEventQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();       // Remove the argument that was already queued
-        BlockingFlagQueue.Get();    // Remove the blocking flag that was already queued
+        ArgumentsQueue.Pop();       // Remove the argument that was already queued
+        BlockingFlagQueue.Pop();    // Remove the blocking flag that was already queued
         cmnThrow("mtsCommandQueuedWriteGeneric: Execute: FinishedEventQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -144,9 +148,9 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();      // Remove the argument that was already queued
-        BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
-        FinishedEventQueue.Get();  // Remove the finished event handler that was already queued
+        ArgumentsQueue.Pop();      // Remove the argument that was already queued
+        BlockingFlagQueue.Pop();   // Remove the blocking flag that was already queued
+        FinishedEventQueue.Pop();  // Remove the finished event handler that was already queued
         cmnThrow("mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }

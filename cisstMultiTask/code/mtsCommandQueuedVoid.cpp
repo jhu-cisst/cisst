@@ -86,7 +86,7 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
     if (!FinishedEventQueue.Put(finishedEventHandler)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: FinishedEventQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
+        BlockingFlagQueue.Pop();   // Remove the blocking flag that was already queued
         cmnThrow("mtsCommandQueuedVoid: Execute: FinishedEventQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -94,8 +94,8 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: Mailbox.Write failed for \""
                           << this->Name << "\"" <<  std::endl;
-        BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
-        FinishedEventQueue.Get();   // Remove the blocking flag that was already queued
+        BlockingFlagQueue.Pop();   // Remove the blocking flag that was already queued
+        FinishedEventQueue.Pop();   // Remove the blocking flag that was already queued
         cmnThrow("mtsCommandQueuedVoid: Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }
@@ -105,13 +105,17 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
 
 mtsBlockingType mtsCommandQueuedVoid::BlockingFlagGet(void)
 {
-    return *(this->BlockingFlagQueue.Get());
+    mtsBlockingType blocking = MTS_NOT_BLOCKING;
+    this->BlockingFlagQueue.Get(blocking);
+    return blocking;
 }
 
 
 mtsCommandWriteBase *mtsCommandQueuedVoid::FinishedEventGet(void)
 {
-    return *(this->FinishedEventQueue.Get());
+    mtsCommandWriteBase* finishedEvent = nullptr;
+    this->FinishedEventQueue.Get(finishedEvent);
+    return finishedEvent;
 }
 
 

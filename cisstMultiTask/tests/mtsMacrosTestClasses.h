@@ -37,7 +37,8 @@ public:
     static size_t DefaultConstructorCalls;
     static size_t DestructorCalls;
     static size_t CopyConstructorCalls;
-
+    /*! Copy construction throws std::runtime_error once CopyConstructorCalls reaches this value. */
+    static size_t CopyConstructorLimit;
     mtsMacrosTestClass();
     mtsMacrosTestClass(const mtsMacrosTestClass & other);
 
