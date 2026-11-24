@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QPushButton>
 
-#include <cisstVectorQt/vctQtWidgetDynamicVector.h>
+#include <eigenqt/VectorWidget.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmStateJoint.h>
 
@@ -59,7 +59,7 @@ public:
     mtsFunctionWrite * move_jp;
 
 protected:
-    vctQtWidgetDynamicVectorDoubleWrite * QVWPosition;
+    EigenQt::VectorEditor * QVWPosition;
     QPushButton * QPBRead;
     QPushButton * QPBMove;
 

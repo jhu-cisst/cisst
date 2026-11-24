@@ -23,7 +23,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <QWidget>
 
-#include <cisstVectorQt/vctPlot2DOpenGLQtWidget.h>
+#include <eigenqt/Plot2DWidget.h>
 
 #include <cisstMultiTask/mtsForwardDeclarations.h>
 #include <cisstMultiTask/mtsManagerLocal.h>
@@ -36,10 +36,10 @@ class CISST_EXPORT mtsQtVisualizerShell: public QWidget
     Q_OBJECT;
 
 public:
-    mtsQtVisualizerShell(mtsManagerLocal * componentManager, vctPlot2DOpenGLQtWidget * visualizer = 0, QWidget * parent = 0);
+    mtsQtVisualizerShell(mtsManagerLocal * componentManager, EigenQt::Plot2DWidget * visualizer = 0, QWidget * parent = 0);
 
 private:
-    vctPlot2DOpenGLQtWidget * Visualizer;
+    EigenQt::Plot2DWidget * Visualizer;
 };
 
 #endif

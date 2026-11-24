@@ -23,9 +23,9 @@ http://www.cisst.org/cisst/license.txt.
 displayQtWidget::displayQtWidget(void)
 {
     // create the widgets
-    Plot = new vctPlot2DOpenGLQtWidget(this);
-    vctPlot2DBase::Scale * scale = Plot->AddScale("Scale");
-    DataSignal = scale->AddSignal("Data");
+    Plot = new EigenQt::Plot2DWidget(this);
+    EigenQt::Plot2D::Scale * scale = Plot->addScale("Scale");
+    DataSignal = scale->addSignal("Data");
     DialAmplitude = new QDial(this);
     LabelAmplitude = new QLabel("Amplitude", this);
     ValueAmplitude = new QLabel("1", this);

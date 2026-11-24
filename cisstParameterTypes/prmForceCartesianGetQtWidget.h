@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmForceCartesianGetQtWidget_h
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstVectorQt/vctQtWidgetFrame.h>
+#include <eigenqt/FrameWidget.h>
 #include <cisstMultiTask/mtsComponent.h>
 #include <cisstParameterTypes/prmForceCartesianGet.h>
 
@@ -47,7 +47,7 @@ public:
     void SetValue(const prmForceCartesianGet & newValue);
 
 protected:
-    vctForceTorqueQtWidget * QForce;
+    EigenQt::WrenchWidget * QForce;
     QLabel * QLReferenceFrame;
     QLabel * QLTime; // time and valid using background color
 };

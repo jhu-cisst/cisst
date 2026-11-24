@@ -20,6 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsQtApplication.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 #include <cisstOSAbstraction/osaSleep.h>
+#include <cisstCommon/cmnQt.h>
 
 #include <QApplication>
 #include <QBasicTimer>
@@ -143,6 +144,7 @@ mtsQtApplication::mtsQtApplication(const std::string &name, int &argc, char **ar
     ArgvCopy(0)
 {
     QtApp = new QApplication(argc, argv);
+    cmnQt::EnableFontZoom();
     Timer = new QBasicTimer;
     TimerHandler = new BasicTimerHandler(this);
 }
@@ -154,6 +156,7 @@ mtsQtApplication::mtsQtApplication(const mtsQtApplicationConstructorArg &arg):
     ArgcCopy = arg.GetArgc();
     arg.GetArgv(&ArgvCopy);
     QtApp = new QApplication(ArgcCopy, ArgvCopy);
+    cmnQt::EnableFontZoom();
     Timer = new QBasicTimer;
     TimerHandler = new BasicTimerHandler(this);
 }

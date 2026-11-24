@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmPositionCartesianGetQtWidget_h
 
 #include <QWidget>
-#include <cisstVectorQt/vctQtWidgetFrame.h>
+#include <eigenqt/FrameWidget.h>
 #include <cisstParameterTypes/prmPositionCartesianGet.h>
 
 // Always include last
@@ -43,11 +43,11 @@ public:
     void SetValue(const prmPositionCartesianGet & newValue);
 
     inline void SetPrismaticRevoluteFactors(const double & prismatic, const double & revolute) {
-        QFPosition->SetPrismaticRevoluteFactors(prismatic, revolute);
+        QFPosition->setPrismaticRevoluteFactors(prismatic, revolute);
     }
 
 protected:
-    vctQtWidgetFrameDoubleRead * QFPosition;
+    EigenQt::FrameWidget * QFPosition;
     QLabel * QLReferenceFrame;
     QLabel * QLTime; // time and valid using background color
 };

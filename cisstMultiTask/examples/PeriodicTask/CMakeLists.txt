@@ -24,7 +24,7 @@ if (cisst_FOUND)
   # The Qt example uses additional components beyond the core example.
   if (CISST_HAS_QT)
     find_package (cisst REQUIRED COMPONENTS ${REQUIRED_CISST_LIBRARIES}
-                  cisstCommonQt cisstVectorQt cisstMultiTaskQt)
+                  cisstCommonQt cisstMultiTaskQt)
   endif ()
 
   # shared components used by either example

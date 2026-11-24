@@ -45,7 +45,7 @@ prmPositionCartesianGetQtWidget::prmPositionCartesianGetQtWidget(void):
     QLTime->setStyleSheet("QLabel { background-color: rgb(255, 100, 100) }");
     topLayout->addWidget(QLTime);
 
-    QFPosition = new vctQtWidgetFrameDoubleRead(vctQtWidgetRotationDoubleRead::OPENGL_WIDGET);
+    QFPosition = new EigenQt::FrameWidget(EigenQt::RotationWidget::OpenGL);
     layout->addWidget(QFPosition);
 }
 
@@ -64,7 +64,7 @@ void prmPositionCartesianGetQtWidget::SetValue(const prmPositionCartesianGet & n
         QLReferenceFrame->hide();
     }
     // position
-    QFPosition->SetValue(newValue.Position());
+    QFPosition->setValue(newValue.Position());
     // timestamp & valid
     QTime time(0, 0);
     QLTime->setText(time.addSecs(static_cast<int>(newValue.Timestamp())).toString("hh:mm:ss"));

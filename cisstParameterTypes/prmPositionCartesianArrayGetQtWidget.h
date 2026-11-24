@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 #define _prmPositionCartesianArrayGetQtWidget_h
 
 #include <cisstCommon/cmnUnits.h>
-#include <cisstVectorQt/vctForwardDeclarationsQt.h>
+#include <eigenqt/ForwardDeclarations.h>
 #include <cisstMultiTask/mtsComponent.h>
 
 #include <QWidget>
@@ -58,7 +58,7 @@ protected:
     } Controller;
 
 private:
-    vctPose3DQtWidget * QVPoses;
+    EigenQt::PositionsWidget * QVPoses;
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(prmPositionCartesianArrayGetQtWidget);

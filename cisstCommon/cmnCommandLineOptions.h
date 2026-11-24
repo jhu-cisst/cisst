@@ -53,6 +53,22 @@ bool cmnCommandLineOptionsConvert(const char * value, _elementType & element) {
 }
 
 
+// Boolean options accept both readable names and numeric values.
+template <>
+inline bool cmnCommandLineOptionsConvert<bool>(const char * value, bool & element) {
+    const std::string text(value);
+    if ((text == "true") || (text == "1")) {
+        element = true;
+        return true;
+    }
+    if ((text == "false") || (text == "0")) {
+        element = false;
+        return true;
+    }
+    return false;
+}
+
+
 // template specialization to make sure spaces in strings (\ ) don't
 // act as separators using >>
 template <>

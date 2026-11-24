@@ -36,7 +36,7 @@ void displayQtComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
     }
     Generator.GetData(Data);
     CentralWidget.ValueData->setNum(Data.Data);
-    CentralWidget.DataSignal->AppendPoint(Eigen::Vector2d(Data.Timestamp(), Data.Data));
+    CentralWidget.DataSignal->appendPoint(Eigen::Vector2d(Data.Timestamp(), Data.Data));
     CentralWidget.Plot->update();
 }
 

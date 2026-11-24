@@ -47,17 +47,17 @@ CMake for cisst Developers
 
 For the cisst libraries developers, we have a few important macros that should be used to maintain the consistency of the CMake configuration:
 
--  ``cisst_add_library``: this macro is used to add a new library. For example, the cisstVectorQt `CMakeLists.txt <https://github.com/jhu-cisst/cisst/blob/main/cisstVector/cisstVectorQt/CMakeLists.txt>`__ CMake configuration file contains:
+-  ``cisst_add_library``: this macro is used to add a new library. For example, a Qt library using EigenQt can declare its cisst dependencies separately from its external dependencies:
 
    .. code:: cmake
 
       cisst_add_library (
-        LIBRARY cisstVectorQt
-        LIBRARY_DIR cisstVector
-        DEPENDENCIES cisstCommon cisstVector
-        SOURCE_FILES vctPlot2DOpenGLQtWidget.cpp
-        HEADER_FILES vctPlot2DOpenGLQtWidget.h vctExportQt.h
-        ADDITIONAL_SOURCE_FILES ${QT_WRAPPED_CPP})
+        LIBRARY cisstParameterTypesQt
+        LIBRARY_DIR cisstParameterTypes
+        DEPENDENCIES cisstCommon cisstMultiTask cisstParameterTypes
+        SOURCE_FILES prmStateJointQtWidget.cpp
+        HEADER_FILES prmStateJointQtWidget.h prmExportQt.h)
+      target_link_libraries (cisstParameterTypesQt EigenQt::Widgets)
 
    In this example the following keywords are used:
 
@@ -65,5 +65,5 @@ For the cisst libraries developers, we have a few important macros that should b
    -  ``LIBRARY_DIR``: relative path to include files from the cisst source directory, i.e. ``cisst/``
    -  ``DEPENDENCIES``: list of cisst libraries required for this library
    -  ``SOURCE_FILES``: list of source files found in the current source directory, i.e. directory containing this CMakeLists.txt file
-   -  ``HEADER_FILES``: list of header files found in the ``LIBRARY_DIR``. In this example, header files are found in ``cisst/cisstVector``
+   -  ``HEADER_FILES``: list of header files found in the ``LIBRARY_DIR``. In this example, header files are found in ``cisst/cisstParameterTypes``
    -  ``ADDITIONAL_SOURCE_FILES`` (and ``ADDITIONAL_HEADER_FILES``): extra source (header) files not found in the default directories. These can be generated files, private header files, ...

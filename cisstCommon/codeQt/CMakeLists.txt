@@ -25,6 +25,7 @@ cisst_add_library (
   SOURCE_FILES cmnClassServicesQt.cpp
                cmnLoggerQtWidget.cpp
                cmnQt.cpp
+               cmnQtFontZoom.cpp
   HEADER_FILES cmnExportQt.h
                cmnLoggerQtWidget.h
                cmnQt.h)

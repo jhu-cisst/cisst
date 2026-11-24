@@ -15,7 +15,7 @@
 
 # Offer the option to compile a given application or remove the option
 # based on CISST_BUILD_APPLICATIONS
-# For example: cisst_offer_application (cisstMultiTask ComponentGenerator ON)
+# For example: cisst_offer_application (cisstMultiTask IREComponent ON)
 macro (cisst_offer_application library application default)
   set (coa_OPTION_NAME CISST_${library}_${application})
   if (CISST_BUILD_APPLICATIONS)
