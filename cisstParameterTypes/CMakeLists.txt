@@ -24,6 +24,5 @@ if (CISST_HAS_QT)
   add_subdirectory (codeQt)
 endif (CISST_HAS_QT)
 
-# build examples and tests, add an option to skip them
-cisst_offer_examples (cisstParameterTypes)
+# build tests, add an option to skip them
 cisst_offer_tests (cisstParameterTypes)

@@ -49,13 +49,6 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtScaleAndSignalTool.cpp
                                 mtsQtVisualizerShell.cpp
                                 mtsIntervalStatisticsQtWidget.cpp
-                                mtsQtWidgetFactory.cpp
-                                mtsQtWidgetGenericObject.cpp
-                                mtsQtWidgetGenericObjectProxy.cpp
-                                mtsQtWidgetComponent.cpp
-                                mtsQtWidgetInterfaceRequired.cpp
-                                mtsQtWidgetFunction.cpp
-                                mtsQtWidgetEvent.cpp
                                 mtsQtApplication.cpp
                                 ${QTNODES_SOURCE_FILES}
                    HEADER_FILES mtsForwardDeclarationsQt.h
@@ -67,13 +60,6 @@ cisst_add_library (LIBRARY cisstMultiTaskQt
                                 mtsQtScaleAndSignalTool.h
                                 mtsQtVisualizerShell.h
                                 mtsIntervalStatisticsQtWidget.h
-                                mtsQtWidgetFactory.h
-                                mtsQtWidgetGenericObject.h
-                                mtsQtWidgetGenericObjectProxy.h
-                                mtsQtWidgetComponent.h
-                                mtsQtWidgetInterfaceRequired.h
-                                mtsQtWidgetFunction.h
-                                mtsQtWidgetEvent.h
                                 mtsQtApplication.h
                                 ${QTNODES_HEADER_FILES}
                                 mtsExportQt.h)

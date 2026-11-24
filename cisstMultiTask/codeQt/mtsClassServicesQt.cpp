@@ -6,7 +6,7 @@
   Author(s):  Anton Deguet
   Created on: 2010-03-19
 
-  (C) Copyright 2010-2025 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -23,28 +23,3 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsCollectorFactoryQtWidget.h>
 CMN_IMPLEMENT_SERVICES(mtsCollectorFactoryQtWidget);
-
-#include <cisstMultiTask/mtsQtWidgetComponent.h>
-CMN_IMPLEMENT_SERVICES(mtsQtWidgetComponent);
-
-#include <cisstMultiTask/mtsQtWidgetInterfaceRequired.h>
-CMN_IMPLEMENT_SERVICES(mtsQtWidgetInterfaceRequired);
-
-#include <cisstMultiTask/mtsQtWidgetFunction.h>
-CMN_IMPLEMENT_SERVICES(mtsQtWidgetFunction);
-
-#include <cisstMultiTask/mtsQtWidgetEvent.h>
-CMN_IMPLEMENT_SERVICES(mtsQtWidgetEvent);
-
-#include <cisstMultiTask/mtsQtWidgetGenericObjectProxy.h>
-MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsInt, mtsQtWidgetIntRead, mtsQtWidgetIntWrite);
-MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBool, mtsQtWidgetBoolRead, mtsQtWidgetBoolWrite);
-MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDouble, mtsQtWidgetDoubleRead, mtsQtWidgetDoubleWrite);
-MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsStdString, mtsQtWidgetStdStringRead, mtsQtWidgetStdStringWrite);
-
-// TODO?
-// MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsDoubleVec, mtsQtWidgetDoubleVecRead, mtsQtWidgetDoubleVecWrite);
-// MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsBoolVec, mtsQtWidgetBoolVecRead, mtsQtWidgetBoolVecWrite);
-
-#include <cisstMultiTask/mtsStateIndex.h>
-MTS_QT_IMPLEMENT_SERVICES_AND_REGISTER_CREATORS(mtsStateIndex, mtsQtWidgetStateIndexRead, mtsQtWidgetStateIndexWrite);
