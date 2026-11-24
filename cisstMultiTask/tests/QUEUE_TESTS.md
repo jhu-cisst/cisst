@@ -74,21 +74,6 @@ Additional regression cases are excluded from the default build and disabled
 in CTest because they exercise known defects, including undefined behavior.
 Build them explicitly and run each case in a separate process:
 
-```sh
-cmake --build build --target cisstQueueRegressionTests
-build/bin/cisstQueueRegressionTests typed-lifetime
-build/bin/cisstQueueRegressionTests generic-default
-build/bin/cisstQueueRegressionTests typed-concurrent
-build/bin/cisstQueueRegressionTests generic-concurrent
-```
-
-The lifetime cases currently fail or crash. The concurrent cases race under
-the C++ memory model, so a successful run does not establish correctness.
-After the queue is fixed, enable these CTest cases and include the regression
-target in the normal build. Run the concurrent cases with ThreadSanitizer in
-a separately configured build that instruments both the test and libraries;
-run the lifetime cases with AddressSanitizer and UndefinedBehaviorSanitizer.
-
 Build with asan/ubsan:
 cmake -B build_asan \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -98,7 +83,7 @@ cmake -B build_asan \
   -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
   -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined"
 
-ASAN_OPTIONS=detect_leaks=0 cmake --build build_asan --target cisstMultiTaskTests cisstQueueRegressionTests cisstQueueBenchmark cisstQueueThreadedBenchmark -j 24
+ASAN_OPTIONS=detect_leaks=0 cmake --build build_asan -j 24
 
 Build with tsan:
 cmake -B build_tsan \
@@ -108,4 +93,4 @@ cmake -B build_tsan \
   -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer" \
   -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread" \
   -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=thread"
-setarch $(uname -m) -R cmake --build build_tsan --target cisstMultiTaskTests cisstQueueRegressionTests cisstQueueBenchmark cisstQueueThreadedBenchmark -j 24
+setarch $(uname -m) -R cmake --build build_tsan -j 24

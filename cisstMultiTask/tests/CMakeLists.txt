@@ -72,17 +72,11 @@ endif ()
 # to generate a CTest list of tests
 cisst_add_test (cisstMultiTaskTests ITERATIONS 1 INSTANCES 1)
 
-add_executable (cisstQueueRegressionTests EXCLUDE_FROM_ALL mtsQueueRegressionTests.cpp)
-target_link_libraries (cisstQueueRegressionTests cisstCommon cisstOSAbstraction cisstMultiTask)
-add_executable (cisstQueueBenchmark EXCLUDE_FROM_ALL mtsQueueBenchmark.cpp)
+# mtsQueue benchmarking tools - putting here in tests/ for convienence
+add_executable (cisstQueueBenchmark mtsQueueBenchmark.cpp)
 target_link_libraries (cisstQueueBenchmark cisstCommon cisstOSAbstraction cisstMultiTask)
-add_executable (cisstQueueThreadedBenchmark EXCLUDE_FROM_ALL mtsQueueThreadedBenchmark.cpp)
+add_executable (cisstQueueThreadedBenchmark mtsQueueThreadedBenchmark.cpp)
 target_link_libraries (cisstQueueThreadedBenchmark cisstCommon cisstOSAbstraction cisstMultiTask)
-foreach (queue_case typed-lifetime generic-default typed-concurrent generic-concurrent)
-  add_test (NAME cisstQueueRegression-${queue_case}
-            COMMAND $<TARGET_FILE:cisstQueueRegressionTests> ${queue_case})
-  set_tests_properties (cisstQueueRegression-${queue_case} PROPERTIES DISABLED TRUE TIMEOUT 40)
-endforeach ()
 
 # To find generated executables
 set_target_properties (cisstMultiTaskTests

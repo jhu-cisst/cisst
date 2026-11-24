@@ -20,10 +20,15 @@ http://www.cisst.org/cisst/license.txt.
 #include "mtsQueueTest.h"
 #include "mtsMacrosTestClasses.h"
 
+#include <atomic>
+#include <chrono>
 #include <deque>
+#include <iostream>
 #include <limits>
 #include <random>
 #include <stdexcept>
+#include <thread>
+
 
 namespace {
 
@@ -48,6 +53,51 @@ struct ThrowingValue
 
 int ThrowingValue::Budget = 0;
 int ThrowingValue::Alive = 0;
+
+// Tracks number of constructions and destructions
+class LifetimeValue
+{
+public:
+    static std::atomic<int> constructions;
+    static std::atomic<int> destructions;
+
+    LifetimeValue() { ++constructions; }
+    LifetimeValue(const LifetimeValue &) { ++constructions; }
+    ~LifetimeValue() { ++destructions; }
+};
+
+std::atomic<int> LifetimeValue::constructions = 0;
+std::atomic<int> LifetimeValue::destructions = 0;
+
+class TypedQueue
+{
+    mtsQueue<int> queue;
+public:
+    explicit TypedQueue(size_t capacity): queue(capacity, 0) {}
+    bool Put(int value) { return queue.Put(value) != 0; }
+    bool Peek(int & value) {
+        const int * element = queue.Peek();
+        if (!element) { return false; }
+        value = *element;
+        return true;
+    }
+    void Pop() { queue.Pop(); }
+};
+
+class GenericQueue
+{
+    mtsQueueGeneric queue;
+public:
+    explicit GenericQueue(size_t capacity): queue(capacity, mtsInt(0)) {}
+    bool Put(int value) { return queue.Put(mtsInt(value)) != 0; }
+    bool Peek(int & value) {
+        const mtsInt * element = dynamic_cast<const mtsInt *>(queue.Peek());
+        if (!element) { return false; }
+        value = element->Data;
+        return true;
+    }
+    void Pop() { queue.Pop(); }
+};
 
 }
 
@@ -98,7 +148,7 @@ void mtsQueueTest::TestTypedBoolQueue(void)
     CPPUNIT_ASSERT(!queue.Pop());
     bool element = false;
     CPPUNIT_ASSERT(!queue.Get(element));
-    CPPUNIT_ASSERT_EQUAL(true, element);
+    CPPUNIT_ASSERT_EQUAL(false, element);
 
     for (size_t count = 1; count <= 4; ++count) {
         CPPUNIT_ASSERT(queue.Put(static_cast<bool>(count % 2 == 0)));
@@ -108,11 +158,11 @@ void mtsQueueTest::TestTypedBoolQueue(void)
     CPPUNIT_ASSERT(queue.IsFull());
     CPPUNIT_ASSERT(!queue.Put(true));
     CPPUNIT_ASSERT(queue.Peek());
-    CPPUNIT_ASSERT_EQUAL(true, *queue.Peek());
-    CPPUNIT_ASSERT_EQUAL(true, *queue.Peek());
+    CPPUNIT_ASSERT_EQUAL(false, *queue.Peek());
+    CPPUNIT_ASSERT_EQUAL(false, *queue.Peek());
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), queue.GetAvailable());
     CPPUNIT_ASSERT(queue.Get(element));
-    CPPUNIT_ASSERT_EQUAL(true, element);
+    CPPUNIT_ASSERT_EQUAL(false, element);
     CPPUNIT_ASSERT(queue.Put(false));
     CPPUNIT_ASSERT(queue.IsFull());
 
@@ -522,3 +572,93 @@ void mtsQueueTest::TestConstructorDestructorCalls(void)
     CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::CopyConstructorCalls, static_cast<size_t>(0));
     CPPUNIT_ASSERT_EQUAL(mtsMacrosTestClass::DestructorCalls, 2 * size + 1);
 }
+
+
+void mtsQueueTest::TestTypedLifetimes()
+{
+    LifetimeValue::constructions = 0;
+    LifetimeValue::destructions = 0;
+    {
+        LifetimeValue prototype;
+        mtsQueue<LifetimeValue> queue(4, prototype);
+        queue.SetSize(2, prototype);
+    }
+
+    CPPUNIT_ASSERT_EQUAL(LifetimeValue::constructions, LifetimeValue::destructions);
+}
+
+
+void mtsQueueTest::TestGenericDefaultConstruction()
+{
+    mtsQueueGeneric queue;
+    CPPUNIT_ASSERT_EQUAL((size_t)0, queue.GetSize());
+    CPPUNIT_ASSERT(queue.IsEmpty());
+}
+
+
+namespace {
+
+template <class Queue>
+bool TestConcurrent()
+{
+    const int count = 100000;
+    const size_t capacities[] = {1, 2, 7};
+    for (size_t capacity : capacities) {
+        Queue queue(capacity);
+        std::atomic<bool> failed(false);
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+        std::thread producer([&]() {
+            for (int sequence = 0; sequence < count; ++sequence) {
+                while (!queue.Put(sequence)) {
+                    if (failed.load() || std::chrono::steady_clock::now() >= deadline) {
+                        failed.store(true);
+                        return;
+                    }
+                    std::this_thread::yield();
+                }
+            }
+        });
+        std::thread consumer([&]() {
+            for (int expected = 0; expected < count; ++expected) {
+                int actual = -1;
+                while (!queue.Peek(actual)) {
+                    if (failed.load() || std::chrono::steady_clock::now() >= deadline) {
+                        failed.store(true);
+                        return;
+                    }
+                    std::this_thread::yield();
+                }
+                if (actual != expected) {
+                    std::cerr << "Capacity " << capacity << ": expected " << expected
+                              << ", got " << actual << std::endl;
+                    failed.store(true);
+                    return;
+                }
+                queue.Pop();
+            }
+        });
+        producer.join();
+        consumer.join();
+        if (failed.load()) {
+            std::cerr << "Concurrent queue test failed or timed out" << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+}
+
+
+void mtsQueueTest::TestTypedConcurrentUsage()
+{
+    CPPUNIT_ASSERT(TestConcurrent<TypedQueue>());
+}
+
+
+void mtsQueueTest::TestGenericConcurrentUsage()
+{
+    CPPUNIT_ASSERT(TestConcurrent<GenericQueue>());
+}
+
+

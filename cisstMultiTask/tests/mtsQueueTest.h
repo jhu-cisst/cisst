@@ -2,12 +2,12 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  
-  Author(s):  Anton Deguet
-  Created on: 2009-04-29
-  
-  (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
-  Reserved.
+
+    Author(s):  Anton Deguet
+    Created on: 2009-04-29
+
+    (C) Copyright 2009 Johns Hopkins University (JHU), All Rights
+    Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -39,14 +39,23 @@ class mtsQueueTest: public CppUnit::TestFixture
     CPPUNIT_TEST(TestTypedExceptionSafety);
     CPPUNIT_TEST(TestGenericExceptionSafety);
     CPPUNIT_TEST(TestAgainstReferenceModel);
+    CPPUNIT_TEST(TestAgainstReferenceModel);
+    CPPUNIT_TEST(TestAgainstReferenceModel);
+    CPPUNIT_TEST(TestAgainstReferenceModel);
+
+    CPPUNIT_TEST(TestTypedLifetimes);
+    CPPUNIT_TEST(TestGenericDefaultConstruction);
+    CPPUNIT_TEST(TestTypedConcurrentUsage);
+    CPPUNIT_TEST(TestGenericConcurrentUsage);
+
     CPPUNIT_TEST(TestQueue_mtsDouble);
     CPPUNIT_TEST(TestConstructorDestructorCalls);
 
     CPPUNIT_TEST_SUITE_END();
-    
+
 public:
     void setUp(void) {}
-    
+
     void tearDown(void) {}
 
     void TestTypedQueue(void);
@@ -59,7 +68,12 @@ public:
     void TestTypedExceptionSafety(void);
     void TestGenericExceptionSafety(void);
     void TestAgainstReferenceModel(void);
-    
+
+    void TestTypedLifetimes(void);
+    void TestGenericDefaultConstruction(void);
+    void TestTypedConcurrentUsage(void);
+    void TestGenericConcurrentUsage(void);
+
     /*! Using a proxy class */
     void TestQueue_mtsDouble(void);
 
