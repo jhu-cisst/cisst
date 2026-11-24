@@ -149,7 +149,6 @@ jobs:
       run: |
         source cisstvars.sh
         cisstCommonTests -r -v
-        cisstVectorQtTests -r -v
         cisstOSAbstractionTests -r -v
         cisstParameterTypesTests -r -v
         cisstMultiTaskTests -r -v

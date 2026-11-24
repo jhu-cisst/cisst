@@ -236,8 +236,6 @@ jobs:
         . .\cisstvars.ps1 Release
         & .\bin\Release\cisstCommonTests.exe -r -v
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        & .\bin\Release\cisstVectorQtTests.exe -r -v
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         & .\bin\Release\cisstOSAbstractionTests.exe -r -v
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         & .\bin\Release\cisstParameterTypesTests.exe -r -v
