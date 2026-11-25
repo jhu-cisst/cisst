@@ -145,6 +145,7 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
         return mtsExecutionResult::UNDEFINED;
     }
     // finally try to queue to mailbox
+    // TODO BB: MailBox->Write doesn't seem to be multi-producer safe?
     if (!MailBox->Write(this)) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed for \""
                           << this->Name << "\"" << std::endl;

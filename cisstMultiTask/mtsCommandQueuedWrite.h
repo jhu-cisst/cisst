@@ -37,14 +37,15 @@ http://www.cisst.org/cisst/license.txt.
  */
 
 /*! Write queued command using templated _argumentType parameter. Currently, this is only used
-    for adding event handlers, and could perhaps be replaced by mtsCommandQueuedWriteGeneric. */
+    for adding event handlers, and could perhaps be replaced by mtsCommandQueuedWriteGeneric. TODO BB: Can we replace? */
 template <class _argumentType>
 class mtsCommandQueuedWrite: public mtsCommandQueuedWriteBase
 {
 public:
+    // TODO BB: evaluate how this interacts with mtsQueue<ArgumentQueueType>
     typedef mtsCommandQueuedWriteBase BaseType;
     typedef _argumentType ArgumentType;
-    typedef typename mtsGenericTypes<ArgumentType>::FinalType ArgumentQueueType;
+    typedef typename mtsGenericTypes<ArgumentType>::FinalType ArgumentQueueType; // TODO BB: why not ArgumentType? Is goal to propagate IsValid/Timestamp?
     typedef typename mtsGenericTypesUnwrap<ArgumentQueueType>::BaseType ArgumentQueueBaseType;
 
     /*! This type. */
@@ -201,7 +202,7 @@ public:
 /*! Write queued command using mtsGenericObject parameter. This is used for all
     queued write commands.  It is also used to create a generic event
     observer (combined with mtsMulticastCommandWriteBase) that can
-    accept any payload (derived from mtsGenericObject). */
+    accept any payload (derived from mtsGenericObject). TODO BB: This that true? Class services / zero-allocation queue doesn't seem to work that way */
 // PK: methods are defined in mtsCommandQueuedWriteBase.cpp
 class CISST_EXPORT mtsCommandQueuedWriteGeneric: public mtsCommandQueuedWriteBase
 {

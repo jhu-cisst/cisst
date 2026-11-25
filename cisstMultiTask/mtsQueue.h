@@ -30,9 +30,78 @@ http://www.cisst.org/cisst/license.txt.
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
 #include <atomic>
-#include <limits>
 #include <stdexcept>
-#include <vector>
+#include <new>
+
+// Should remove this eventually, but for now, we need to support older compilers
+// that don't have std::hardware_interference_size, e.g. Clang v18 on Ubuntu 24
+#ifdef __cpp_lib_hardware_interference_size
+    using std::hardware_constructive_interference_size;
+    using std::hardware_destructive_interference_size;
+#else
+    // 64 bytes on x86-64 │ L1_CACHE_BYTES │ L1_CACHE_SHIFT │ __cacheline_aligned │ ...
+    constexpr std::size_t hardware_constructive_interference_size = 64;
+    constexpr std::size_t hardware_destructive_interference_size = 64;
+#endif
+
+template <typename T, typename = void>
+struct mtsQueueUnwrapPointer {
+    using type = T;
+    static type* get(T& val) noexcept { return &val; }
+};
+
+// Specialization for any type with an `element_type` and `.get()` (unique_ptr, shared_ptr, etc.)
+template <typename T>
+struct mtsQueueUnwrapPointer<T, std::void_t<typename T::element_type, decltype(std::declval<T>().get())>> {
+    using type = typename T::element_type;
+    static type* get(const T& ptr) noexcept { return ptr.get(); }
+};
+
+// Default cloning is just copy construction, cannot fail
+template <typename T>
+struct mtsQueueDefaultClone {
+    // Allows us to accept mtsGenericObjectProxyRef for mtsGenericObejctProxy
+    using BaseType = typename mtsGenericTypesUnwrap<T>::BaseType;
+
+    static bool clone(T* place, const BaseType& value) {
+        *place = value;
+        return true;
+    }
+
+    static bool clone(T& place, const BaseType& value) {
+        place = value;
+        return true;
+    }
+};
+
+// mtsGenericObject cloning is ClassServices::Create. Note that this requires place and value to have same concrete type, which is not checked at compile time nor at runtime.
+template <>
+struct mtsQueueDefaultClone<std::unique_ptr<mtsGenericObject>> {
+    static bool clone(std::unique_ptr<mtsGenericObject>& place, const mtsGenericObject& value) {
+        const auto services = value.Services();
+
+        // delete without freeing memory, so we don't have to re-allocate memory
+        mtsGenericObject* raw = place.release();
+        if (raw) {
+            // Create takes care of deleting the existing object
+            const bool ok = services->Create(raw, value);
+            // If Create succeeds raw is new object, and if Create fails, raw is untouched, so either way we keep it
+            place.reset(std::launder(raw));
+            return ok;
+        } else {
+            mtsGenericObject* const ptr = dynamic_cast<mtsGenericObject*>(services->Create(value));
+            place.reset(ptr);
+            return ptr != nullptr;
+        }
+
+        return place.get();
+    }
+
+    static bool clone(mtsGenericObject& place, const mtsGenericObject& value) {
+        const auto services = value.Services();
+        return services->Create(&place, value);
+    }
+};
 
 /*!
   \ingroup cisstMultiTask
@@ -44,29 +113,19 @@ http://www.cisst.org/cisst/license.txt.
 
   The pointer returned by Peek remains valid until the matching Pop or Get.
 */
-template<typename value_type>
-class mtsQueue
+template<typename T, typename InPlaceClone = mtsQueueDefaultClone<T>>
+class mtsQueue final
 {
-    // Work around for annoying std::vector<bool> issue
-    class BoolWrapper {
-    public:
-        bool value;
-        BoolWrapper(bool v) : value(v) {}
-
-        operator bool() const noexcept { return value; }
-        bool* operator&() noexcept { return &value; }
-        const bool* operator&() const noexcept { return &value; }
-    };
-
-    // Map bool -> BoolWrapper, keep all other T as-is
-    template <typename T>
-    using StorageType = std::conditional_t<std::is_same_v<T, bool>, BoolWrapper, T>;
+public:
+    // TODO BB: why accept proxy-ref? versus making user dereference type...
+    using element_type = typename mtsQueueUnwrapPointer<T>::type;
+    using base_type = typename mtsGenericTypesUnwrap<element_type>::BaseType;
 
 protected:
-    size_t Capacity;
-    std::vector<StorageType<value_type>> Data; // Capacity + 1 slots, the spare one tells full from empty
-    std::atomic<size_t> Head;     // Next slot to write, only modified by the producer
-    std::atomic<size_t> Tail;     // Next slot to read, only modified by the consumer
+    size_t Capacity = 0;
+    std::unique_ptr<T[]> Data;                                                 // Capacity + 1 slots, the spare one tells full from empty
+    alignas(hardware_destructive_interference_size) std::atomic<size_t> Head{0};     // Next slot to write, only modified by the producer
+    alignas(hardware_destructive_interference_size) std::atomic<size_t> Tail{0};     // Next slot to read, only modified by the consumer
 
     size_t Advance(size_t index) const
     {
@@ -75,15 +134,19 @@ protected:
     }
 
     // Strong guarantee: on exception the queue is unchanged.
-    void Allocate(size_t capacity, const value_type & value)
+    void Allocate(size_t capacity, const base_type& value)
     {
-        std::vector<StorageType<value_type>> data;
-        if (capacity >= data.max_size()) {
-            throw std::length_error("mtsQueue: capacity too large");
-        }
+        std::unique_ptr<T[]> data = nullptr;
         if (capacity > 0) {
-            data.assign(capacity + 1, value);
+            data = std::make_unique<T[]>(capacity + 1);
+            for (size_t idx = 0; idx < capacity + 1; ++idx) {
+                const bool ok = InPlaceClone::clone(data[idx], value);
+                if (!ok) {
+                    throw std::runtime_error("mtsQueue: unable to clone an element of type " + std::string(typeid(T).name()));
+                }
+            }
         }
+
         Data.swap(data);
         Capacity = capacity;
         Head.store(0, std::memory_order_relaxed);
@@ -91,16 +154,9 @@ protected:
     }
 
 public:
-    mtsQueue():
-        Capacity(0),
-        Head(0),
-        Tail(0)
-    {}
+    mtsQueue() {}
 
-    mtsQueue(size_t capacity, const value_type& value):
-        Capacity(0),
-        Head(0),
-        Tail(0)
+    mtsQueue(size_t capacity, const base_type& value)
     {
         Allocate(capacity, value);
     }
@@ -109,7 +165,7 @@ public:
     mtsQueue& operator=(const mtsQueue&) = delete;
 
     /*! Destructive resize, queued elements are discarded. */
-    void SetSize(size_t capacity, const value_type& value)
+    void SetSize(size_t capacity, const base_type& value)
     {
         Allocate(capacity, value);
     }
@@ -136,36 +192,40 @@ public:
     }
 
     /*! Producer only. Returns nullptr if the queue is full. */
-    const value_type* Put(const typename mtsGenericTypesUnwrap<value_type>::BaseType& newObject)
+    const element_type* Put(const base_type& newObject)
     {
         const size_t head = Head.load(std::memory_order_relaxed);
         const size_t next = Advance(head);
         if (next == Tail.load(std::memory_order_acquire)) {
             return nullptr;
         }
-        Data[head] = newObject;
+
+        if (!InPlaceClone::clone(Data[head], newObject)) {
+            return nullptr;
+        }
+
         Head.store(next, std::memory_order_release);
-        return &Data[head];
+        return mtsQueueUnwrapPointer<T>::get(Data[head]);
     }
 
     /*! Consumer only. Returns nullptr if the queue is empty. */
-    value_type* Peek()
+    element_type* Peek()
     {
         const size_t tail = Tail.load(std::memory_order_relaxed);
         if (tail == Head.load(std::memory_order_acquire)) {
             return nullptr;
         }
-        return &Data[tail];
+        return mtsQueueUnwrapPointer<T>::get(Data[tail]);
     }
 
     /*! Consumer only. Returns nullptr if the queue is empty. */
-    const value_type* Peek() const
+    const element_type* Peek() const
     {
         const size_t tail = Tail.load(std::memory_order_relaxed);
         if (tail == Head.load(std::memory_order_acquire)) {
             return nullptr;
         }
-        return &Data[tail];
+        return mtsQueueUnwrapPointer<T>::get(Data[tail]);
     }
 
     /*! Consumer only. Releases the element returned by Peek. */
@@ -179,201 +239,22 @@ public:
         return true;
     }
 
-    /*! Consumer only. Copies the oldest element to \c out and releases it. If the copy throws, the element stays queued. */
-    bool Get(value_type& out)
+    /*! Consumer only. Copies the oldest element to \c out and releases it. If the copy throws, the element stays queued. If T is a smart pointer, we require caller to have allocated memory so we can get via copy */
+    bool Get(element_type& out)
     {
         const size_t tail = Tail.load(std::memory_order_relaxed);
         if (tail == Head.load(std::memory_order_acquire)) {
             return false;
         }
-        out = Data[tail];
-        Tail.store(Advance(tail), std::memory_order_release);
-        return true;
-    }
-};
-
-
-/*!
-  \ingroup cisstMultiTask
-
-  Same contract as mtsQueue for polymorphic elements.  All slots are
-  preallocated copies of the prototype given to the constructor or SetSize, so
-  every element queued must have the prototype's class.
-*/
-class mtsQueueGeneric
-{
-public:
-    typedef mtsGenericObject value_type;
-
-protected:
-    const cmnClassServicesBase* ClassServices;
-    size_t Capacity;
-    mtsGenericObject** Data; // Capacity + 1 slots, the spare one tells full from empty
-    std::atomic<size_t> Head; // Next slot to write, only modified by the producer
-    std::atomic<size_t> Tail; // Next slot to read, only modified by the consumer
-
-    size_t Advance(size_t index) const
-    {
-        ++index;
-        return index > Capacity ? 0 : index;
-    }
-
-    static void DestroySlots(mtsGenericObject** data, size_t count)
-    {
-        for (size_t index = 0; index < count; ++index) {
-            delete data[index];
-        }
-        delete[] data;
-    }
-
-    static mtsGenericObject** CreateSlots(
-        const cmnClassServicesBase* services,
-        size_t count,
-        const mtsGenericObject& value
-    )
-    {
-        mtsGenericObject** data = new mtsGenericObject * [count];
-        size_t created = 0;
-        try {
-            for (; created < count; ++created) {
-                cmnGenericObject* generic = services->Create(value);
-                if (!generic) {
-                    throw std::runtime_error("mtsQueueGeneric: unable to create an element of class "
-                                             + services->GetName());
-                }
-                mtsGenericObject* typed = dynamic_cast<mtsGenericObject *>(generic);
-                if (!typed) {
-                    delete generic;
-                    throw std::runtime_error("mtsQueueGeneric: class " + services->GetName()
-                                             + " is not derived from mtsGenericObject");
-                }
-                data[created] = typed;
-            }
-        } catch (...) {
-            DestroySlots(data, created);
-            throw;
-        }
-        return data;
-    }
-
-    // Strong guarantee: on exception the queue is unchanged.
-    void Allocate(size_t capacity, const mtsGenericObject& value)
-    {
-        const cmnClassServicesBase* services = value.Services();
-        if (!services) {
-            throw std::runtime_error("mtsQueueGeneric: element has no class services");
-        }
-        if (capacity >= std::numeric_limits<size_t>::max() / sizeof(mtsGenericObject *)) {
-            throw std::length_error("mtsQueueGeneric: capacity too large");
-        }
-        mtsGenericObject** data = capacity > 0 ? CreateSlots(services, capacity + 1, value) : nullptr;
-
-        // nothing below can throw
-        DestroySlots(Data, Data ? Capacity + 1 : 0);
-        Data = data;
-        Capacity = capacity;
-        ClassServices = services;
-        Head.store(0, std::memory_order_relaxed);
-        Tail.store(0, std::memory_order_relaxed);
-    }
-
-public:
-    mtsQueueGeneric():
-        ClassServices(nullptr),
-        Capacity(0),
-        Data(nullptr),
-        Head(0),
-        Tail(0)
-    {}
-
-    mtsQueueGeneric(size_t capacity, const mtsGenericObject& value):
-        ClassServices(nullptr),
-        Capacity(0),
-        Data(nullptr),
-        Head(0),
-        Tail(0)
-    {
-        Allocate(capacity, value);
-    }
-
-    mtsQueueGeneric(const mtsQueueGeneric&) = delete;
-    mtsQueueGeneric& operator=(const mtsQueueGeneric&) = delete;
-
-    ~mtsQueueGeneric()
-    {
-        DestroySlots(Data, Data ? Capacity + 1 : 0);
-    }
-
-    /*! Destructive resize, queued elements are discarded. */
-    void SetSize(size_t capacity, const mtsGenericObject& value)
-    {
-        if (ClassServices && value.Services() != ClassServices) {
-            CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: type of elements expected \""
-                                 << ClassServices->GetName() << "\", now using \""
-                                 << value.Services()->GetName() << "\"" << std::endl;
-        }
-        Allocate(capacity, value);
-    }
-
-    size_t GetSize() const { return Capacity; }
-
-    size_t GetAvailable() const
-    {
-        const size_t tail = Tail.load(std::memory_order_acquire);
-        const size_t head = Head.load(std::memory_order_acquire);
-        return head >= tail ? head - tail : head + (Capacity + 1) - tail;
-    }
-
-    bool IsFull() const
-    {
-        const size_t head = Head.load(std::memory_order_acquire);
-        return Advance(head) == Tail.load(std::memory_order_acquire);
-    }
-
-    bool IsEmpty() const
-    {
-        const size_t tail = Tail.load(std::memory_order_acquire);
-        return tail == Head.load(std::memory_order_acquire);
-    }
-
-    /*! Producer only.  Returns 0 if the queue is full or the class differs from the prototype's. */
-    const mtsGenericObject* Put(const mtsGenericObject& newObject)
-    {
-        const size_t head = Head.load(std::memory_order_relaxed);
-        const size_t next = Advance(head);
-        if (next == Tail.load(std::memory_order_acquire)) {
-            return nullptr;
-        }
-        // Create destroys the slot before copy-constructing into it, a throwing copy constructor leaves it dead.
-        if (!ClassServices->Create(Data[head], newObject)) {
-            CMN_LOG_RUN_ERROR << "mtsQueueGeneric::Put failed for "
-                              << newObject.Services()->GetName() << std::endl;
-            return nullptr;
-        }
-        Head.store(next, std::memory_order_release);
-        return Data[head];
-    }
-
-    /*! Consumer only.  Returns 0 if the queue is empty. */
-    mtsGenericObject* Peek() const
-    {
-        const size_t tail = Tail.load(std::memory_order_relaxed);
-        if (tail == Head.load(std::memory_order_acquire)) {
-            return nullptr;
-        }
-        return Data[tail];
-    }
-
-    /*! Consumer only.  Releases the element returned by Peek. */
-    bool Pop()
-    {
-        const size_t tail = Tail.load(std::memory_order_relaxed);
-        if (tail == Head.load(std::memory_order_acquire)) {
+        if (!InPlaceClone::clone(&out, Data[tail])) {
             return false;
         }
+
         Tail.store(Advance(tail), std::memory_order_release);
         return true;
     }
 };
+
+using mtsQueueGeneric = mtsQueue<std::unique_ptr<mtsGenericObject>>;
 
 #endif // _mtsQueue_h
