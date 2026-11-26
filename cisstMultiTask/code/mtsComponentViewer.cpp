@@ -41,6 +41,7 @@ mtsComponentViewer::mtsComponentViewer(const std::string & name) :
     if (required) {
         required->SetMailBoxAndArgumentQueuesSize(1024);
         ManagerComponentServices->AddComponentEventHandler(&mtsComponentViewer::AddComponentHandler, this);
+        ManagerComponentServices->RemoveComponentEventHandler(&mtsComponentViewer::RemoveComponentHandler, this);
         ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewer::ChangeStateHandler, this);
         ManagerComponentServices->AddConnectionEventHandler(&mtsComponentViewer::AddConnectionHandler, this);
         ManagerComponentServices->RemoveConnectionEventHandler(&mtsComponentViewer::RemoveConnectionHandler, this);
@@ -101,6 +102,17 @@ void mtsComponentViewer::AddComponentHandler(const mtsDescriptionComponent &comp
             CMN_LOG_CLASS_RUN_VERBOSE << "Sending " << buffer << std::endl;
             WriteString(UDrawPipe, buffer);
         }
+    }
+}
+
+void mtsComponentViewer::RemoveComponentHandler(const mtsDescriptionComponent &componentInfo)
+{
+    if (UDrawPipeConnected) {
+        std::string message("graph(update([delete_node(\"");
+        message.append(componentInfo.ProcessName + ":" + componentInfo.ComponentName);
+        message.append("\")], []))\n");
+        CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
+        WriteString(UDrawPipe, message);
     }
 }
 

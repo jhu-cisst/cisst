@@ -61,6 +61,7 @@ const std::string mtsManagerComponentBase::CommandNames::GetAbsoluteTimeInSecond
 
 // Names of events
 const std::string mtsManagerComponentBase::EventNames::AddComponent  = "AddComponentEvent";
+const std::string mtsManagerComponentBase::EventNames::RemoveComponent = "RemoveComponentEvent";
 const std::string mtsManagerComponentBase::EventNames::AddConnection = "AddConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::RemoveConnection = "RemoveConnectionEvent";
 const std::string mtsManagerComponentBase::EventNames::ChangeState   = "ChangeState";

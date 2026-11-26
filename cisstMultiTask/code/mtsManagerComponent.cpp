@@ -144,6 +144,8 @@ bool mtsManagerComponent::AddInterfaceComponent(void)
 
     provided->AddEventWrite(this->InterfaceComponentEvents_AddComponent,
                             mtsManagerComponentBase::EventNames::AddComponent, mtsDescriptionComponent());
+    provided->AddEventWrite(this->InterfaceComponentEvents_RemoveComponent,
+                            mtsManagerComponentBase::EventNames::RemoveComponent, mtsDescriptionComponent());
     provided->AddEventWrite(this->InterfaceComponentEvents_ChangeState,
                             mtsManagerComponentBase::EventNames::ChangeState, mtsComponentStateChange());
     provided->AddEventWrite(this->InterfaceComponentEvents_AddConnection,
@@ -293,8 +295,13 @@ void mtsManagerComponent::ComponentRemove(const std::string & componentName, boo
         CMN_LOG_CLASS_RUN_VERBOSE << "ComponentRemove: ignoring manager component " << componentName << std::endl;
     }
     else {
-        if (DisconnectFromManagerComponent(componentName))
+        if (DisconnectFromManagerComponent(componentName)) {
             result = ComponentMap.RemoveItem(componentName);
+            if (result) {
+                mtsDescriptionComponent componentDesc("", componentName);
+                InterfaceComponentEvents_RemoveComponent(componentDesc);
+            }
+        }
     }
 }
 

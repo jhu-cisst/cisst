@@ -6,7 +6,7 @@
   Author(s):  Min Yang Jung, Peter Kazanzides
   Created on: 2010-08-29
 
-  (C) Copyright 2010-2019 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -101,6 +101,8 @@ bool mtsManagerComponentServices::InitializeInterfaceInternalRequired(void)
         // Event receivers
         InternalInterfaceRequired->AddEventReceiver(mtsManagerComponentBase::EventNames::AddComponent,
                                                     EventReceivers.AddComponent);
+        InternalInterfaceRequired->AddEventReceiver(mtsManagerComponentBase::EventNames::RemoveComponent,
+                                                    EventReceivers.RemoveComponent);
         InternalInterfaceRequired->AddEventReceiver(mtsManagerComponentBase::EventNames::AddConnection,
                                                     EventReceivers.AddConnection);
         InternalInterfaceRequired->AddEventReceiver(mtsManagerComponentBase::EventNames::RemoveConnection,

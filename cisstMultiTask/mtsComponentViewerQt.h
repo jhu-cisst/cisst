@@ -63,6 +63,7 @@ class CISST_EXPORT mtsComponentViewerQt : public QWidget,
     void onAutoLayout(void);
 
     void AddComponentHandler(const mtsDescriptionComponent &component_description);
+    void RemoveComponentHandler(const mtsDescriptionComponent &component_description);
     void AddConnectionHandler(const mtsDescriptionConnection &connection_description);
     void RemoveConnectionHandler(const mtsDescriptionConnection &connection_description);
     void ChangeStateHandler(const mtsComponentStateChange &state_change);
