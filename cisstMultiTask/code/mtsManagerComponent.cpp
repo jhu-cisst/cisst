@@ -298,7 +298,7 @@ void mtsManagerComponent::ComponentRemove(const std::string & componentName, boo
         if (DisconnectFromManagerComponent(componentName)) {
             result = ComponentMap.RemoveItem(componentName);
             if (result) {
-                mtsDescriptionComponent componentDesc("", componentName);
+                mtsDescriptionComponent componentDesc(componentName);
                 InterfaceComponentEvents_RemoveComponent(componentDesc);
             }
         }

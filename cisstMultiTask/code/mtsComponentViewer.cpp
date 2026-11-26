@@ -109,7 +109,7 @@ void mtsComponentViewer::RemoveComponentHandler(const mtsDescriptionComponent &c
 {
     if (UDrawPipeConnected) {
         std::string message("graph(update([delete_node(\"");
-        message.append(componentInfo.ProcessName + ":" + componentInfo.ComponentName);
+        message.append(componentInfo.ComponentName);
         message.append("\")], []))\n");
         CMN_LOG_CLASS_INIT_VERBOSE << "Sending " << message << std::endl;
         WriteString(UDrawPipe, message);
