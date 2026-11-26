@@ -109,6 +109,7 @@ protected:
 
     /*! Event generators for InterfaceComponent's provided interface */
     mtsFunctionWrite InterfaceComponentEvents_AddComponent;
+    mtsFunctionWrite InterfaceComponentEvents_RemoveComponent;
     mtsFunctionWrite InterfaceComponentEvents_AddConnection;
     mtsFunctionWrite InterfaceComponentEvents_RemoveConnection;
     mtsFunctionWrite InterfaceComponentEvents_ChangeState;

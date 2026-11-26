@@ -5,7 +5,7 @@
   Author(s):  Peter Kazanzides
   Created on: 2010-09-07
 
-  (C) Copyright 2010-2023 Johns Hopkins University (JHU), All Rights Reserved.
+  (C) Copyright 2010-2026 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -81,6 +81,7 @@ protected:
 
     // Event Handlers
     virtual void AddComponentHandler(const mtsDescriptionComponent &componentInfo);
+    virtual void RemoveComponentHandler(const mtsDescriptionComponent &componentInfo);
     virtual void ChangeStateHandler(const mtsComponentStateChange &componentStateChange);
     virtual void AddConnectionHandler(const mtsDescriptionConnection &connectionInfo);
     virtual void RemoveConnectionHandler(const mtsDescriptionConnection &connectionInfo);

@@ -65,6 +65,8 @@ mtsComponentViewerQt::mtsComponentViewerQt(const std::string &componentName)
         required->SetMailBoxAndArgumentQueuesSize(1024);
         ManagerComponentServices->AddComponentEventHandler(
                                                            &mtsComponentViewerQt::AddComponentHandler, this);
+        ManagerComponentServices->RemoveComponentEventHandler(
+                                                           &mtsComponentViewerQt::RemoveComponentHandler, this);
         ManagerComponentServices->ChangeStateEventHandler(&mtsComponentViewerQt::ChangeStateHandler,
                                                           this);
         ManagerComponentServices->AddConnectionEventHandler(
@@ -447,6 +449,11 @@ void mtsComponentViewerQt::AddComponentHandler(
                                   }
                               },
                               Qt::QueuedConnection);
+}
+
+void mtsComponentViewerQt::RemoveComponentHandler(const mtsDescriptionComponent &component_description)
+{
+    // NOT IMPLEMENTED
 }
 
 void mtsComponentViewerQt::AddConnectionHandler(

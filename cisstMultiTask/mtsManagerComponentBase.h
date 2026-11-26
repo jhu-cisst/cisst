@@ -133,6 +133,7 @@ public:
     public:
         // Events
         const static std::string AddComponent;
+        const static std::string RemoveComponent;
         const static std::string AddConnection;
         const static std::string RemoveConnection;
         const static std::string ChangeState;

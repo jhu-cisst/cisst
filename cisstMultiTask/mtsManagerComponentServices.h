@@ -89,6 +89,7 @@ protected:
     // Event receivers
     struct EventStruct {
         mtsEventReceiverWrite    AddComponent;
+        mtsEventReceiverWrite    RemoveComponent;
         mtsEventReceiverWrite    AddConnection;
         mtsEventReceiverWrite    RemoveConnection;
         mtsEventReceiverWrite    ChangeState;
@@ -114,6 +115,14 @@ public:
                                   mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY)
     {
         return (EventReceivers.AddComponent.SetHandler(method, classInstantiation, queueingPolicy) != 0);
+    }
+
+    template <class __classType>
+    bool RemoveComponentEventHandler(void (__classType::*method)(const mtsDescriptionComponent &),
+                                     __classType * classInstantiation,
+                                     mtsEventQueueingPolicy queueingPolicy = MTS_INTERFACE_EVENT_POLICY)
+    {
+        return (EventReceivers.RemoveComponent.SetHandler(method, classInstantiation, queueingPolicy) != 0);
     }
 
     template <class __classType>
