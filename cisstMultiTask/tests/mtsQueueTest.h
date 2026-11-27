@@ -29,6 +29,8 @@ class mtsQueueTest: public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(mtsQueueTest);
 
+    CPPUNIT_TEST(TestReservationCommit);
+    CPPUNIT_TEST(TestReservationRollback);
     CPPUNIT_TEST(TestTypedQueue);
     CPPUNIT_TEST(TestTypedBoolQueue);
     CPPUNIT_TEST(TestTypedBoundariesAndResize);
@@ -58,6 +60,8 @@ public:
 
     void tearDown(void) {}
 
+    void TestReservationCommit(void);
+    void TestReservationRollback(void);
     void TestTypedQueue(void);
     void TestTypedBoolQueue(void);
     void TestTypedBoundariesAndResize(void);

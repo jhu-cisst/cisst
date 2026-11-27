@@ -262,7 +262,7 @@ public:
      * @throws std::exception Any exception thrown during the in-place copy/clone construction
      *         of `newObject` *(the reservation is automatically rolled back on throw)*.
      */
-    const Reservation Reserve(const base_type& newObject)
+    [[nodiscard]] Reservation Reserve(const base_type& newObject)
     {
         if (reserved) {
             return Reservation(*this, false);

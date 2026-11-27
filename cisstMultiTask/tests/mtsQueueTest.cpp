@@ -102,6 +102,61 @@ public:
 
 }
 
+void mtsQueueTest::TestReservationCommit(void)
+{
+    mtsQueue<int> queue(2, 0);
+    CPPUNIT_ASSERT(queue.Put(10));
+    auto reservation = queue.Reserve(20);
+    CPPUNIT_ASSERT(static_cast<bool>(reservation));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), queue.GetAvailable());
+    CPPUNIT_ASSERT(!queue.IsFull());
+    CPPUNIT_ASSERT(queue.Peek());
+    CPPUNIT_ASSERT_EQUAL(10, *queue.Peek());
+    CPPUNIT_ASSERT(!static_cast<bool>(queue.Reserve(30)));
+    CPPUNIT_ASSERT(!queue.Put(30));
+    reservation.commit();
+    CPPUNIT_ASSERT(!static_cast<bool>(reservation));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), queue.GetAvailable());
+    CPPUNIT_ASSERT(queue.IsFull());
+    int value = 0;
+    CPPUNIT_ASSERT(queue.Get(value));
+    CPPUNIT_ASSERT_EQUAL(10, value);
+    CPPUNIT_ASSERT(queue.Get(value));
+    CPPUNIT_ASSERT_EQUAL(20, value);
+    CPPUNIT_ASSERT(queue.IsEmpty());
+}
+
+void mtsQueueTest::TestReservationRollback(void)
+{
+    mtsQueue<int> queue(2, 0);
+    CPPUNIT_ASSERT(queue.Put(10));
+    auto reservation = queue.Reserve(20);
+    CPPUNIT_ASSERT(static_cast<bool>(reservation));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), queue.GetAvailable());
+    CPPUNIT_ASSERT_EQUAL(10, *queue.Peek());
+    CPPUNIT_ASSERT(!static_cast<bool>(queue.Reserve(30)));
+    CPPUNIT_ASSERT(!queue.Put(30));
+    reservation.rollback();
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), queue.GetAvailable());
+    CPPUNIT_ASSERT(queue.Put(30));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), queue.GetAvailable());
+    CPPUNIT_ASSERT(queue.IsFull());
+    int value = 0;
+    CPPUNIT_ASSERT(queue.Get(value));
+    CPPUNIT_ASSERT_EQUAL(10, value);
+    CPPUNIT_ASSERT(queue.Get(value));
+    CPPUNIT_ASSERT_EQUAL(30, value);
+    CPPUNIT_ASSERT(queue.IsEmpty());
+
+    {
+        auto reservation2 = queue.Reserve(40);
+        CPPUNIT_ASSERT(queue.IsEmpty());
+        CPPUNIT_ASSERT(!queue.Put(50));
+    }
+    CPPUNIT_ASSERT(queue.IsEmpty());
+    CPPUNIT_ASSERT(queue.Put(50));
+}
+
 void mtsQueueTest::TestTypedQueue(void)
 {
     mtsQueue<int> queue(4, 0);
