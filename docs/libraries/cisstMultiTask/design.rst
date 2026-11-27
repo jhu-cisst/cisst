@@ -126,7 +126,7 @@ The Manager Component ("MCS") is a task with its own thread. It is derived from 
      - mtsInterfaceRequiredDescription
      - Get details of required interface
 
-In addition, the provided interface generates four events (of type Write), called "AddComponentEvent", "AddConnectionEvent", "RemoveConnectionEvent", and "ChangeState". TODO: add an event "RemoveComponentEvent".
+In addition, the provided interface generates five events (of type Write), called "AddComponentEvent", "RemoveComponentEvent", "AddConnectionEvent", "RemoveConnectionEvent", and "ChangeState".
 
 Note, however, that users should never need to directly invoke these commands. Instead, there is a wrapper class ``mtsManagerComponentServices`` that provides a more convenient interface. In particular, many of the above commands refer to a process name (again, due to the historical support for multiple processes). Currently, it is sufficient to leave the process name empty (i.e., empty string) and this is handled by the methods in ``mtsManagerComponentServices``.
 
