@@ -19,6 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
+#include "cisstMultiTask/mtsCommandWriteBase.h"
+#include "cisstMultiTask/mtsForwardDeclarations.h"
 
 mtsCommandQueuedVoid::mtsCommandQueuedVoid(void):
     BaseType(),
@@ -75,30 +77,36 @@ mtsExecutionResult mtsCommandQueuedVoid::Execute(mtsBlockingType blocking,
                             << std::endl;
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
     }
+
     // copy the blocking flag to the local storage.
-    if (!BlockingFlagQueue.Put(blocking)) {
+    auto block_reservation = BlockingFlagQueue.Reserve(blocking);
+    if (!block_reservation) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: BlockingFlagQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
         cmnThrow("mtsCommandQueuedVoid: Execute: BlockingFlagQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
     // copy the finished event to the local storage.
-    if (!FinishedEventQueue.Put(finishedEventHandler)) {
+    auto finished_reservation = FinishedEventQueue.Reserve(finishedEventHandler);
+    if (!finished_reservation) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: FinishedEventQueue.Put failed for \""
                           << this->Name << "\"" << std::endl;
-        BlockingFlagQueue.Pop();   // Remove the blocking flag that was already queued
         cmnThrow("mtsCommandQueuedVoid: Execute: FinishedEventQueue.Put failed");
         return mtsExecutionResult::UNDEFINED;
     }
     // finally try to queue to mailbox
-    if (!MailBox->Write(this)) {
+    auto mailbox_reservation = MailBox->Write(this);
+    if (!mailbox_reservation) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedVoid: Execute: Mailbox.Write failed for \""
                           << this->Name << "\"" <<  std::endl;
-        BlockingFlagQueue.Pop();   // Remove the blocking flag that was already queued
-        FinishedEventQueue.Pop();   // Remove the blocking flag that was already queued
         cmnThrow("mtsCommandQueuedVoid: Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }
+
+    block_reservation.commit();
+    finished_reservation.commit();
+    mailbox_reservation.commit();
+
     return mtsExecutionResult::COMMAND_QUEUED;
 }
 

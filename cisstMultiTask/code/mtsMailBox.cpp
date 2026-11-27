@@ -45,14 +45,13 @@ const std::string & mtsMailBox::GetName(void) const
 }
 
 
-bool mtsMailBox::Write(mtsCommandBase * command)
+decltype(mtsMailBox::CommandQueue)::Reservation mtsMailBox::Write(mtsCommandBase * command)
 {
-    bool result;
-    result = (CommandQueue.Put(command) != 0);
+    auto handle = CommandQueue.Reserve(command);
     if (this->PostCommandQueuedCallable) {
         this->PostCommandQueuedCallable();
     }
-    return result;
+    return handle;
 }
 
 
@@ -79,7 +78,7 @@ bool mtsMailBox::ExecuteNext(void)
    mtsGenericObject *resultPointer = 0;
    mtsCommandWriteBase *finishedEvent = 0;
 
-   // TODO BB: yikes! replace with RAII
+   // TODO BB: yikes! replace with RAII In particular, the command itself should manage removing items from the queues.
    bool isBlocking = false;
    try {
        if (!command->Returns()) {

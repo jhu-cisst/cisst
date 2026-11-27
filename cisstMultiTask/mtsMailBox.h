@@ -73,7 +73,7 @@ public:
 
     /*! Write a command to the mailbox.  If a post command queued
       command has been provided, the command is executed. */
-    bool Write(mtsCommandBase * command);
+    decltype(CommandQueue)::Reservation Write(mtsCommandBase * command);
 
     /*! Execute the oldest command queued. */
     bool ExecuteNext(void);

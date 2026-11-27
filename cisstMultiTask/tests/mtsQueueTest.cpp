@@ -63,6 +63,7 @@ public:
 
     LifetimeValue() { ++constructions; }
     LifetimeValue(const LifetimeValue &) { ++constructions; }
+    LifetimeValue* operator=(const LifetimeValue &) { return this; }
     ~LifetimeValue() { ++destructions; }
 };
 
@@ -580,6 +581,7 @@ void mtsQueueTest::TestTypedLifetimes()
     LifetimeValue::constructions = 0;
     LifetimeValue::destructions = 0;
     {
+
         LifetimeValue prototype;
         mtsQueue<LifetimeValue> queue(4, prototype);
         queue.SetSize(2, prototype);

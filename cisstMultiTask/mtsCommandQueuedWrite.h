@@ -37,7 +37,7 @@ http://www.cisst.org/cisst/license.txt.
  */
 
 /*! Write queued command using templated _argumentType parameter. Currently, this is only used
-    for adding event handlers, and could perhaps be replaced by mtsCommandQueuedWriteGeneric. TODO BB: Can we replace? */
+    for adding event handlers, and could perhaps be replaced by mtsCommandQueuedWriteGeneric. TODO BB: Can/should we replace? */
 template <class _argumentType>
 class mtsCommandQueuedWrite: public mtsCommandQueuedWriteBase
 {
@@ -148,39 +148,43 @@ public:
             return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
         }
         // copy the argument to the local storage.
-        if (!ArgumentsQueue.Put(*argumentTyped)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: ArgumentsQueue full for \""
+        auto argument_reservation = ArgumentsQueue.Reserve(*argumentTyped);
+        if (!argument_reservation) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: ArgumentsQueue.Reserve failed for \""
                               << this->Name << "\"" << std::endl;
-            cmnThrow("mtsCommandQueuedWrite: Execute: ArgumentsQueue.Put failed");
+            cmnThrow("mtsCommandQueuedWrite: Execute: ArgumentsQueue.Reserve failed");
             return mtsExecutionResult::UNDEFINED;
         }
         // copy the blocking flag to the local storage.
-        if (!BlockingFlagQueue.Put(blocking)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: BlockingFlagQueue full for \""
+        auto block_reservation = BlockingFlagQueue.Reserve(blocking);
+        if (!block_reservation) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: BlockingFlagQueue.Reserve failed for \""
                               << this->Name << "\"" << std::endl;
-            ArgumentsQueue.Pop(); // pop argument
-            cmnThrow("mtsCommandQueuedWrite: Execute: BlockingFlagQueue.Put failed");
+            cmnThrow("mtsCommandQueuedWrite: Execute: BlockingFlagQueue.Reserve failed");
             return mtsExecutionResult::UNDEFINED;
         }
         // copy the finished event handler to the local storage.
-        if (!FinishedEventQueue.Put(finishedEventHandler)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: FinishedEventQueue.Put failed for \""
+        auto finished_reservation = FinishedEventQueue.Reserve(finishedEventHandler);
+        if (!finished_reservation) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: FinishedEventQueue.Reserve failed for \""
                               << this->Name << "\"" << std::endl;
-            ArgumentsQueue.Pop();       // Remove the argument that was already queued
-            BlockingFlagQueue.Pop();    // Remove the blocking flag that was already queued
-            cmnThrow("mtsCommandQueuedWrite: Execute: FinishedEventQueue.Put failed");
+            cmnThrow("mtsCommandQueuedWrite: Execute: FinishedEventQueue.Reserve failed");
             return mtsExecutionResult::UNDEFINED;
         }
         // finally try to queue to mailbox
-        if (!MailBox->Write(this)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: mailbox full for \""
+        auto mailbox_reservation = MailBox->Write(this);
+        if (!mailbox_reservation) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: MailBox.Write failed for \""
                               << this->Name << "\"" << std::endl;
-            ArgumentsQueue.Pop();  // pop argument, blocking flag, and finished event from local storage
-            BlockingFlagQueue.Pop();
-            FinishedEventQueue.Pop();
             cmnThrow("mtsCommandQueuedWrite: Execute: MailBox.Write failed");
             return mtsExecutionResult::UNDEFINED;
         }
+
+        argument_reservation.commit();
+        block_reservation.commit();
+        finished_reservation.commit();
+        mailbox_reservation.commit();
+
         return mtsExecutionResult::COMMAND_QUEUED;
     }
 
@@ -238,6 +242,7 @@ public:
 
     virtual void ToStream(std::ostream & outputStream) const;
 
+    // TODO BB: is this dangerous?
     virtual mtsCommandQueuedWriteGeneric * Clone(mtsMailBox * mailBox, size_t size) const {
         return new mtsCommandQueuedWriteGeneric(mailBox, this->ActualCommand, size);
     }

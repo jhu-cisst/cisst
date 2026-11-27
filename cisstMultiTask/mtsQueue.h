@@ -117,15 +117,59 @@ template<typename T, typename InPlaceClone = mtsQueueDefaultClone<T>>
 class mtsQueue final
 {
 public:
+    // RAII handle for a two-phase enqueue.  See Reserve() for details.
+    class Reservation
+    {
+    private:
+        mtsQueue<T, InPlaceClone>& queue;
+        bool primed;
+
+        Reservation(mtsQueue<T, InPlaceClone>& queue, bool primed=true) : queue(queue), primed(primed) {}
+
+    public:
+        // If user hasn't Commit'd before handle reaches end-of-scope
+        // (e.g. on exception/error), it automatically rolls back
+        // the transaction
+        ~Reservation() {
+            if (primed) {
+                rollback();
+            }
+        }
+
+        Reservation(const Reservation&) = delete;
+        Reservation& operator=(const Reservation&) = delete;
+
+        Reservation(Reservation&&) = default;
+        Reservation& operator=(Reservation&&) = default;
+
+        explicit operator bool() const { return primed; }
+
+        void commit() noexcept {
+            if (!primed) { return; }
+            queue.Commit();
+            primed = false;
+        }
+        void rollback() noexcept {
+            if (!primed) { return; }
+            queue.Rollback();
+            primed = false;
+        }
+
+        friend mtsQueue<T, InPlaceClone>;
+    };
+
+    friend Reservation;
+
     // TODO BB: why accept proxy-ref? versus making user dereference type...
     using element_type = typename mtsQueueUnwrapPointer<T>::type;
     using base_type = typename mtsGenericTypesUnwrap<element_type>::BaseType;
 
-protected:
+private:
     size_t Capacity = 0;
     std::unique_ptr<T[]> Data;                                                 // Capacity + 1 slots, the spare one tells full from empty
     alignas(hardware_destructive_interference_size) std::atomic<size_t> Head{0};     // Next slot to write, only modified by the producer
     alignas(hardware_destructive_interference_size) std::atomic<size_t> Tail{0};     // Next slot to read, only modified by the consumer
+    bool reserved = false; // True if a reservation is active, only accessed by the producer thread
 
     size_t Advance(size_t index) const
     {
@@ -151,7 +195,20 @@ protected:
         Capacity = capacity;
         Head.store(0, std::memory_order_relaxed);
         Tail.store(0, std::memory_order_relaxed);
+        reserved = false;
     }
+
+    /*! Producer only */
+    void Commit() noexcept
+    {
+        const size_t head = Head.load(std::memory_order_relaxed);
+        const size_t next = Advance(head);
+        Head.store(next, std::memory_order_release);
+        reserved = false;
+    }
+
+    /*! Producer only */
+    void Rollback() noexcept { reserved = false; }
 
 public:
     mtsQueue() {}
@@ -170,46 +227,96 @@ public:
         Allocate(capacity, value);
     }
 
-    size_t GetSize() const { return Capacity; }
+    size_t GetSize() const noexcept { return Capacity; }
 
-    size_t GetAvailable() const
+    size_t GetAvailable() const noexcept
     {
         const size_t tail = Tail.load(std::memory_order_acquire);
         const size_t head = Head.load(std::memory_order_acquire);
         return head >= tail ? head - tail : head + (Capacity + 1) - tail;
     }
 
-    bool IsFull() const
+    bool IsFull() const noexcept
     {
         const size_t head = Head.load(std::memory_order_acquire);
         return Advance(head) == Tail.load(std::memory_order_acquire);
     }
 
-    bool IsEmpty() const
+    bool IsEmpty() const noexcept
     {
         const size_t tail = Tail.load(std::memory_order_acquire);
         return tail == Head.load(std::memory_order_acquire);
     }
 
-    /*! Producer only. Returns nullptr if the queue is full. */
-    const element_type* Put(const base_type& newObject)
+    /*!
+     * @brief Reserves a slot and constructs a new element in place for a two-phase enqueue.
+     *
+     * **Producer only.** At most one uncommitted reservation may be active at a time.
+     *
+     * Complete the transaction using the returned `Reservation`:
+     * - Call `commit()` to publish the element to the queue.
+     * - Call `rollback()` (or let the handle reach end of scope) to cancel.
+     *
+     * @param newObject Element to copy/clone into the reserved queue slot.
+     * @return A valid `Reservation` on success, or an invalid `Reservation` if the queue is full.
+     * @throws std::exception Any exception thrown during the in-place copy/clone construction
+     *         of `newObject` *(the reservation is automatically rolled back on throw)*.
+     */
+    const Reservation Reserve(const base_type& newObject)
     {
+        if (reserved) {
+            return Reservation(*this, false);
+        }
+
         const size_t head = Head.load(std::memory_order_relaxed);
         const size_t next = Advance(head);
         if (next == Tail.load(std::memory_order_acquire)) {
-            return nullptr;
+            return Reservation(*this, false);
         }
 
         if (!InPlaceClone::clone(Data[head], newObject)) {
-            return nullptr;
+            return Reservation(*this, false);
+        }
+
+        reserved = true;
+        return Reservation(*this, true);
+    }
+
+    /*!
+     * @brief Enqueues an element
+     *
+     * **Producer only.** Cannot be used while uncommited Reserve() is active.
+     *
+     * @param newObject Element to copy/clone into the reserved queue slot.
+     * @return true if an element was enqueued, false if reservation is active, the queue is full or clone fails.
+     * @throws std::exception Any exception thrown during the in-place copy/clone construction
+     *         of `newObject` *(the queue is left unchanged on throw)*.
+     */
+    bool Put(const base_type& newObject)
+    {
+        if (reserved) { return false; }
+
+        const size_t head = Head.load(std::memory_order_relaxed);
+        const size_t next = Advance(head);
+        if (next == Tail.load(std::memory_order_acquire)) {
+            return false;
+        }
+
+        if (!InPlaceClone::clone(Data[head], newObject)) {
+            return false;
         }
 
         Head.store(next, std::memory_order_release);
-        return mtsQueueUnwrapPointer<T>::get(Data[head]);
+        return true;
     }
 
-    /*! Consumer only. Returns nullptr if the queue is empty. */
-    element_type* Peek()
+    /*!
+     * @brief Access next element without removing it from queue
+     *
+     * **Consumer only.**
+     * @return Pointer to next element, or nullptr if the queue is empty.
+     */
+    element_type* Peek() noexcept
     {
         const size_t tail = Tail.load(std::memory_order_relaxed);
         if (tail == Head.load(std::memory_order_acquire)) {
@@ -218,8 +325,13 @@ public:
         return mtsQueueUnwrapPointer<T>::get(Data[tail]);
     }
 
-    /*! Consumer only. Returns nullptr if the queue is empty. */
-    const element_type* Peek() const
+    /*!
+     * @brief Access next element without removing it from queue
+     *
+     * **Consumer only.**
+     * @return Pointer to next element, or nullptr if the queue is empty.
+     */
+    const element_type* Peek() const noexcept
     {
         const size_t tail = Tail.load(std::memory_order_relaxed);
         if (tail == Head.load(std::memory_order_acquire)) {
@@ -228,8 +340,12 @@ public:
         return mtsQueueUnwrapPointer<T>::get(Data[tail]);
     }
 
-    /*! Consumer only. Releases the element returned by Peek. */
-    bool Pop()
+    /*! @brief Releases the element returned by Peek.
+     *
+     * **Consumer only.**
+     * @return true if an element was released, false if the queue is empty.
+     */
+    bool Pop() noexcept
     {
         const size_t tail = Tail.load(std::memory_order_relaxed);
         if (tail == Head.load(std::memory_order_acquire)) {
@@ -239,7 +355,15 @@ public:
         return true;
     }
 
-    /*! Consumer only. Copies the oldest element to \c out and releases it. If the copy throws, the element stays queued. If T is a smart pointer, we require caller to have allocated memory so we can get via copy */
+    /*! @brief Combined Peek and Pop.
+     *
+     * **Consumer only**.  Returns false if the queue is empty.
+     *
+     * @param out Reference to an element of type T. The oldest element is cloned to this location.
+     *   If T is a smart pointer, we require caller to have allocated memory so we can Get() via copy
+     *   constructor. If the copy throws, the element stays queued.
+    * @return true if an element was returned, false if the queue is empty.
+    */
     bool Get(element_type& out)
     {
         const size_t tail = Tail.load(std::memory_order_relaxed);
