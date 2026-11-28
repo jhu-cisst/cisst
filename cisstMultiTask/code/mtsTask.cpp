@@ -150,6 +150,7 @@ void mtsTask::StartupInternal(void) {
     }
     CMN_LOG_CLASS_INIT_VERBOSE << "StartupInternal: ended for task \"" << this->GetName() << "\"" << std::endl;
     // advance all state tables (if automatic)
+    // TODO BB: Is this missing corresponding call to StartIfAutomatic?
     StateTables.ForEachVoid(&mtsStateTable::AdvanceIfAutomatic);
     RunEvent();
 }

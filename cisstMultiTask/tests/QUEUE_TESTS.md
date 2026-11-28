@@ -7,10 +7,6 @@ cmake --build build --target cisstMultiTaskTests
 ctest --test-dir build -R mtsQueueTest --output-on-failure
 ```
 
-The typed queue currently reserves one of its allocated slots; the generic
-queue allocates an extra slot. Tests characterize those differing capacities
-until a common capacity contract is chosen.
-
 ## Micro-benchmarks
 
 With cisstMultiTask tests enabled, build and run the opt-in benchmarks:
@@ -20,31 +16,6 @@ cmake --build build --target cisstQueueBenchmark cisstQueueThreadedBenchmark
 build/bin/cisstQueueBenchmark 10000 7
 build/bin/cisstQueueThreadedBenchmark 200000 5
 ```
-
-Arguments are optional: rounds or transfers per sample, followed by the number
-of samples. Both use the interface's configured size of 64; the typed queues
-currently hold 63 entries and the generic queue holds 64.
-
-- **Single-thread fill/drain:** Measures blocking flags, return pointers,
-	typed double arguments, and generic double arguments. Each transfer includes
-	Put, Peek, verification and Get. Each sample fills and drains the queue in
-	batches; allocation and 100 warmup rounds are outside the timed interval.
-- **Two-thread SPSC:** Measures typed and generic integer queues against bounded
-	`std::deque<int>` queues with matching effective capacities. One producer and
-	one consumer transfer a checked sequence, with 10,000 warmup transfers and a
-	cooperative 30-second timeout per sample. An external mutex protects every
-	queue operation, including the read and removal of a slot. Full/empty retries
-	yield the thread and are reported for the median-time sample.
-
-Both report wall-clock nanoseconds per completed transfer and throughput, not
-per-operation or end-to-end item latency. The threaded time includes mutex
-contention, scheduling, retries and verification; thread construction, joins,
-and queue construction are outside the measured interval. For an even sample
-count the threaded benchmark reports the upper middle sample as its median.
-No mailbox execution is measured. The mutex-protected results are not an
-unlocked SPSC baseline: the current implementation has data races, and its
-lifetime defects mean all measurements are exploratory. Use Release builds
-and record compiler, hardware, affinity and load when comparing results.
 
 ### Current results
 
@@ -67,30 +38,55 @@ transfers per second; timings vary considerably with scheduling and CPU frequenc
 | Generic integer | 64 | 201.75 (156.07-246.58) | 4.96 | 1523 / 11637 |
 | `std::deque`, generic capacity | 64 | 337.85 (281.34-368.00) | 2.96 | 12014 / 584 |
 
-These are a snapshot, not performance targets or evidence that one queue is
-consistently faster. Re-run under comparable conditions before drawing conclusions.
+### Sanitizer
 
-Additional regression cases are excluded from the default build and disabled
-in CTest because they exercise known defects, including undefined behavior.
-Build them explicitly and run each case in a separate process:
+Tests should be run under the Address, Undefined Behavior, Memory, and Thread sanitizers. It's recommended to use `clang` to compile the tests as it has the best support for these sanitizers.
 
 Build with asan/ubsan:
+```
 cmake -B build_asan \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-  -DCISST_BUILD_TESTS=On \
+  -DCISST_BUILD_TESTS=ON \
+  -DCISST_USE_EXTERNAL=ON \
   -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
   -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
   -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
   -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined"
-
+```
+```
 ASAN_OPTIONS=detect_leaks=0 cmake --build build_asan -j 24
+```
+
+Build with msan:
+```
+cmake -B build_msan \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  -DCISST_BUILD_TESTS=ON \
+  -DCISST_USE_EXTERNAL=ON \
+  -DCMAKE_C_FLAGS="-fsanitize=memory -fsanitize-memory-track-origins=2 -fno-omit-frame-pointer" \
+  -DCMAKE_CXX_FLAGS="-fsanitize=memory -fsanitize-memory-track-origins=2 -fno-omit-frame-pointer"
+```
+```
+MSAN_OPTIONS="exitcode=0:halt_on_error=0" cmake --build build_msan -j 24
+```
 
 Build with tsan:
+```
 cmake -B build_tsan \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++ \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-  -DCISST_BUILD_TESTS=On \
+  -DCISST_BUILD_TESTS=ON \
+  -DCISST_USE_EXTERNAL=ON \
   -DCMAKE_C_FLAGS="-fsanitize=thread -fno-omit-frame-pointer" \
   -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer" \
   -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread" \
   -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=thread"
+```
+```
 setarch $(uname -m) -R cmake --build build_tsan -j 24
+```

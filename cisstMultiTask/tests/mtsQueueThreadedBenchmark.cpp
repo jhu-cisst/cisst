@@ -26,7 +26,7 @@ class TypedQueue
     mtsQueue<int> queue;
 public:
     explicit TypedQueue(size_t): queue(configuredSize, 0) {}
-    bool Put(int value) { return queue.Put(value) != 0; }
+    bool Put(int value) { return queue.Put(value); }
     ReadResult Consume(int expected) {
         const int * value = queue.Peek();
         if (!value) { return ReadResult::Empty; }
@@ -40,7 +40,7 @@ class GenericQueue
     mtsQueueGeneric queue;
 public:
     explicit GenericQueue(size_t): queue(configuredSize, mtsInt(0)) {}
-    bool Put(int value) { return queue.Put(mtsInt(value)) != 0; }
+    bool Put(int value) { return queue.Put(mtsInt(value)); }
     ReadResult Consume(int expected) {
         const mtsInt * value = static_cast<const mtsInt *>(queue.Peek());
         if (!value) { return ReadResult::Empty; }
