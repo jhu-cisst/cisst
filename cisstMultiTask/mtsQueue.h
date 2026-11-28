@@ -29,359 +29,364 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstMultiTask/mtsGenericObjectProxy.h>
 
+#include <atomic>
+#include <stdexcept>
+#include <new>
+
+// Should remove this eventually, but for now, we need to support older compilers
+// that don't have std::hardware_interference_size, e.g. Clang v18 on Ubuntu 24
+#ifdef __cpp_lib_hardware_interference_size
+    using std::hardware_constructive_interference_size;
+    using std::hardware_destructive_interference_size;
+#else
+    // 64 bytes on x86-64 │ L1_CACHE_BYTES │ L1_CACHE_SHIFT │ __cacheline_aligned │ ...
+    constexpr std::size_t hardware_constructive_interference_size = 64;
+    constexpr std::size_t hardware_destructive_interference_size = 64;
+#endif
+
+// Helper utiltity to unwrap smart pointer to their underlying type, making the mtsQueue API nicer to use.
+template <typename T, typename = void>
+struct mtsQueueUnwrapPointer {
+    using type = T;
+    static type* get(T& val) noexcept { return &val; }
+};
+
+// Specialization for any type with an `element_type` and `.get()` (unique_ptr, shared_ptr, etc.)
+template <typename T>
+struct mtsQueueUnwrapPointer<T, std::void_t<typename T::element_type, decltype(std::declval<T>().get())>> {
+    using type = typename T::element_type;
+    static type* get(const T& ptr) noexcept { return ptr.get(); }
+};
+
+// Helper utilities for in-place cloning of types.
+// Default cloning is just copy construction, cannot fail
+template <typename T>
+struct mtsQueueDefaultClone {
+    // Allows us to accept mtsGenericObjectProxyRef for mtsGenericObejctProxy
+    using BaseType = typename mtsGenericTypesUnwrap<T>::BaseType;
+
+    static bool clone(T* place, const BaseType& value) {
+        *place = value;
+        return true;
+    }
+
+    static bool clone(T& place, const BaseType& value) {
+        place = value;
+        return true;
+    }
+};
+
+// mtsGenericObject cloning is ClassServices::Create. Note that this requires place and value
+// to have same concrete type, which is not checked at compile time nor at runtime.
+template <>
+struct mtsQueueDefaultClone<std::unique_ptr<mtsGenericObject>> {
+    static bool clone(std::unique_ptr<mtsGenericObject>& place, const mtsGenericObject& value) {
+        const auto services = value.Services();
+
+        // delete without freeing memory, so we don't have to re-allocate memory
+        mtsGenericObject* raw = place.release();
+        if (raw) {
+            // Create takes care of deleting the existing object
+            const bool ok = services->Create(raw, value);
+            // If Create succeeds raw is new object, and if Create fails, raw is untouched, so either way we keep it
+            place.reset(std::launder(raw));
+            return ok;
+        } else {
+            mtsGenericObject* const ptr = dynamic_cast<mtsGenericObject*>(services->Create(value));
+            place.reset(ptr);
+            return ptr != nullptr;
+        }
+
+        return place.get();
+    }
+
+    static bool clone(mtsGenericObject& place, const mtsGenericObject& value) {
+        const auto services = value.Services();
+        return services->Create(&place, value);
+    }
+};
+
 /*!
   \ingroup cisstMultiTask
 
-  Defines a queue that can be accessed in a thread-safe manner,
-  assuming that there is only one reader and one writer and that
-  pointer updates are atomic.
+  Lock-free SPSC queue for one producer thread and one consumer thread, holding up
+  to GetSize() elements. The producer calls Put or Reserve+commit/rollback; the
+  consumer calls Peek and then Pop (or Get). The status methods (IsFull, IsEmpty,
+  GetAvailable) are snapshots and are safe to call from either thread. SetSize
+  and destruction require exclusive use.
+
+  The pointer returned by Peek remains valid until the matching Pop or Get.
 */
-template<class _elementType>
-class mtsQueue
+template<typename T, typename InPlaceClone = mtsQueueDefaultClone<T>>
+class mtsQueue final
 {
 public:
-    typedef _elementType value_type;
-    typedef value_type * pointer;
-    typedef const value_type * const_pointer;
-    typedef value_type & reference;
-    typedef const value_type & const_reference;
-    typedef size_t size_type;
-    typedef size_t index_type;
+    // RAII handle for a two-phase enqueue.  See Reserve() for details.
+    class Reservation
+    {
+    private:
+        mtsQueue<T, InPlaceClone>& queue;
+        bool primed;
 
-protected:
-    pointer Data;
-    pointer Head;
-    pointer Tail;
-    pointer Sentinel;  // end marker
-    size_type Size;
+        Reservation(mtsQueue<T, InPlaceClone>& queue, bool primed=true) : queue(queue), primed(primed) {}
 
-    // private method, can only be used once by constructor.  Doesn't support resize!
-    void Allocate(size_type size, const_reference value) {
-        this->Size = size;
-        if (this->Size > 0) {
-            this->Data = new value_type[this->Size];
-            index_type index;
-            for (index = 0; index < this->Size; index++) {
-                new(&this->Data[index]) value_type(value);
+    public:
+        // If user hasn't Commit'd before handle reaches end-of-scope
+        // (e.g. on exception/error), it automatically rolls back
+        // the transaction
+        ~Reservation() {
+            if (primed) {
+                rollback();
             }
-        } else {
-            this->Data = 0;
         }
-        // head == tail implies empty queue
-        this->Head = this->Data;
-        this->Tail = this->Data;
-        this->Sentinel = this->Data + this->Size;
-    }
 
-public:
+        Reservation(const Reservation&) = delete;
+        Reservation& operator=(const Reservation&) = delete;
 
-    inline mtsQueue(void):
-        Data(0),
-        Head(0),
-        Tail(0),
-        Sentinel(0),
-        Size(0)
-    {}
+        Reservation(Reservation&&) = default;
+        Reservation& operator=(Reservation&&) = default;
 
+        explicit operator bool() const { return primed; }
 
-    inline mtsQueue(size_type size, const_reference value) {
-        Allocate(size, value);
-    }
+        void commit() noexcept {
+            if (!primed) { return; }
+            queue.Commit();
+            primed = false;
+        }
+        void rollback() noexcept {
+            if (!primed) { return; }
+            queue.Rollback();
+            primed = false;
+        }
 
+        friend mtsQueue<T, InPlaceClone>;
+    };
 
-    inline ~mtsQueue() {
-        delete [] Data;
-    }
+    friend Reservation;
 
+    // TODO BB: why accept proxy-ref? versus making user dereference type...
+    using element_type = typename mtsQueueUnwrapPointer<T>::type;
+    using base_type = typename mtsGenericTypesUnwrap<element_type>::BaseType;
 
-    /*! Sets the size of the queue (destructive, i.e. won't preserve
-      previously queued elements). */
-    inline void SetSize(size_type size, const_reference value) {
-        delete [] Data;
-        this->Allocate(size, value);
-    }
+private:
+    size_t Capacity = 0;
+    std::unique_ptr<T[]> Data; // Capacity + 1 slots, the spare one tells full from empty
+    bool reserved = false; // True if a reservation is active, only accessed by the producer thread
 
+    // Separating Head and Tail onto different cache lines avoids false sharing,
+    // which provided modest performance improvements on my machine.
+    static constexpr std::size_t cache_line_size = hardware_destructive_interference_size; 
+    alignas(cache_line_size) std::atomic<size_t> Head{0}; // Next slot to write, only modified by the producer
+    alignas(cache_line_size) std::atomic<size_t> Tail{0}; // Next slot to read, only modified by the consumer
 
-    /*! Returns size of queue. */
-    inline size_type GetSize(void) const {
-        return Size;
-    }
-
-
-    /*! Returns number of elements available in queue, i.e. the number
-      of slots used. */
-    inline size_type GetAvailable(void) const
+    size_t Advance(size_t index) const
     {
-        ptrdiff_t available = Head - Tail;
-        if (available < 0) {
-            available += Size;
-        }
-        return available;
+        ++index;
+        return index > Capacity ? 0 : index;
     }
 
-
-    /*! Returns true if queue is full. */
-    inline bool IsFull(void) const {
-        pointer oneAfterHead = this->Head + 1;
-        if (oneAfterHead >= this->Sentinel) {
-            oneAfterHead = this->Data;
-        }
-        return oneAfterHead == this->Tail;
-    }
-
-
-    /*! Returns true if queue is empty. */
-    inline bool IsEmpty(void) const {
-        return Head == Tail;
-    }
-
-
-    /*! Copy an object to the queue.
-      \param in reference to the object to be copied
-      \result Pointer to element in queue (use iterator instead?)
-    */
-    //inline const_pointer Put(const_reference newObject)
-    //Following signature is equivalent for types that are not Proxy types. If a Proxy type,
-    //then we use the ProxyBase instead, so that we can also accept ProxyRef objects.
-    inline const_pointer Put(const typename mtsGenericTypesUnwrap<value_type>::BaseType &newObject)
+    // Strong guarantee: on exception the queue is unchanged.
+    void Allocate(size_t capacity, const base_type& value)
     {
-        pointer newHead = this->Head + 1;
-        // test if end of buffer (same as IsFull method)
-        if (newHead >= this->Sentinel) {
-            newHead = this->Data;
-        }
-        // test if full
-        if (newHead == this->Tail) {
-            return 0;    // queue full
-        }
-        // queue new object and move head
-        *(this->Head) = newObject;
-        this->Head = newHead;
-        return this->Head;
-    }
-
-
-    /*! Get a pointer to the next object to be read, but do not
-        remove the item from the queue.
-        \result Pointer to top element in queue (use iterator instead?)
-     */
-    inline pointer Peek(void) const {
-        if (this->IsEmpty()) {
-            return 0;
-        }
-        return this->Tail;
-    }
-
-
-    /*! Pop the next object to be read from the queue.
-        \result Pointer to element just popped (use iterator instead?)
-     */
-    inline pointer Get(void) {
-        if (this->IsEmpty()) {
-            return 0;
-        }
-        pointer result = this->Tail;
-        this->Tail++;
-        if (this->Tail >= this->Sentinel) {
-            this->Tail = this->Data;
-        }
-        return result;
-    }
-
-};
-
-
-
-
-class mtsQueueGeneric
-{
-public:
-    typedef mtsGenericObject value_type;
-    typedef value_type * pointer;
-    typedef const value_type * const_pointer;
-    typedef value_type & reference;
-    typedef const value_type & const_reference;
-    typedef size_t size_type;
-    typedef size_t index_type;
-
-protected:
-    const cmnClassServicesBase * ClassServices;
-    pointer * Data;
-    pointer * Head;
-    pointer * Tail;
-    pointer * Sentinel;  // end marker
-    size_type Size;
-
-    // private method, can only be used once by constructor.  Doesn't support resize!
-    void Allocate(size_type size, const_reference value) {
-        CMN_ASSERT(this->ClassServices);
-        this->Size = size;
-        if (this->Size > 0) {
-            this->Data = new pointer[size];
-            size_t index;
-            for (index = 0; index < size; index++) {
-                cmnGenericObject * genericPointer = this->ClassServices->Create(value);
-                if (!genericPointer) {
-                    CMN_LOG_RUN_ERROR << "class mtsQueueGeneric: Allocate failed to create generic object for "
-                                      << this->ClassServices->GetName() << std::endl;
+        std::unique_ptr<T[]> data = nullptr;
+        if (capacity > 0) {
+            data = std::make_unique<T[]>(capacity + 1);
+            for (size_t idx = 0; idx < capacity + 1; ++idx) {
+                const bool ok = InPlaceClone::clone(data[idx], value);
+                if (!ok) {
+                    throw std::runtime_error("mtsQueue: unable to clone an element of type " + std::string(typeid(T).name()));
                 }
-                pointer typedPointer = dynamic_cast<pointer>(genericPointer);
-                CMN_ASSERT(typedPointer);
-                this->Data[index] = typedPointer;
             }
-        } else {
-            this->Data = 0;
         }
-        // head == tail implies empty queue
-        this->Head = this->Data;
-        this->Tail = this->Data;
-        this->Sentinel = this->Data + this->Size;
+
+        Data.swap(data);
+        Capacity = capacity;
+        Head.store(0, std::memory_order_relaxed);
+        Tail.store(0, std::memory_order_relaxed);
+        reserved = false;
     }
 
-    void Free(void) {
-        size_t index;
-        for (index = 0; index < this->Size; index++) {
-            delete this->Data[index];
-        }
-        delete [] this->Data;
-        this->Data = 0;
+    /*! Producer only */
+    void Commit() noexcept
+    {
+        const size_t head = Head.load(std::memory_order_relaxed);
+        const size_t next = Advance(head);
+        Head.store(next, std::memory_order_release);
+        reserved = false;
     }
+
+    /*! Producer only */
+    void Rollback() noexcept { reserved = false; }
 
 public:
+    mtsQueue() {}
 
-    inline mtsQueueGeneric(void):
-        ClassServices(0),
-        Data(0),
-        Head(0),
-        Tail(0),
-        Sentinel(0),
-        Size(1)
-    {}
-
-
-    inline mtsQueueGeneric(size_type size, const_reference value) {
-        this->ClassServices = value.Services();
-        CMN_ASSERT(this->ClassServices);
-        CMN_LOG_INIT_DEBUG << "class mtsQueueGeneric: constructor, created queue of "
-                           << this->ClassServices->GetName() << std::endl;
-        Allocate(size + 1, value);
-    }
-
-
-    inline ~mtsQueueGeneric() {
-        this->Free();
-    }
-
-
-    /*! Sets the size of the queue (destructive, i.e. won't preserve
-        previously queued elements). */
-    inline void SetSize(size_type size, const_reference value) {
-        if (this->ClassServices != 0) { // if non zero, it has already been set
-            if (this->ClassServices != value.Services()) {
-                CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: type of elements expected \""
-                                     << this->ClassServices->GetName() << "\", now using \""
-                                     << value.Services()->GetName() << "\"" << std::endl;
-            }
-            this->Free();
-            if (this->Data != 0) {
-                CMN_LOG_INIT_WARNING << "mtsQueueGeneric::SetSize: failed to delete data array for \""
-                                     << this->ClassServices->GetName() << "\"" << std::endl;
-            }
-        }
-        this->ClassServices = value.Services();
-        this->Allocate(size + 1, value);
-    }
-
-
-    /*! Returns size of queue. */
-    inline size_type GetSize(void) const {
-        return (Size - 1);
-    }
-
-
-    /*! Returns number of elements available in queue, i.e. the number
-      of slots used. */
-    inline size_type GetAvailable(void) const
+    mtsQueue(size_t capacity, const base_type& value)
     {
-        ptrdiff_t available = Head - Tail;
-        if (available < 0) {
-            available += Size;
+        Allocate(capacity, value);
+    }
+
+    mtsQueue(const mtsQueue&) = delete;
+    mtsQueue& operator=(const mtsQueue&) = delete;
+
+    /*! Destructive resize, queued elements are discarded. */
+    void SetSize(size_t capacity, const base_type& value)
+    {
+        Allocate(capacity, value);
+    }
+
+    size_t GetSize() const noexcept { return Capacity; }
+
+    size_t GetAvailable() const noexcept
+    {
+        const size_t tail = Tail.load(std::memory_order_acquire);
+        const size_t head = Head.load(std::memory_order_acquire);
+        return head >= tail ? head - tail : head + (Capacity + 1) - tail;
+    }
+
+    bool IsFull() const noexcept
+    {
+        const size_t head = Head.load(std::memory_order_acquire);
+        return Advance(head) == Tail.load(std::memory_order_acquire);
+    }
+
+    bool IsEmpty() const noexcept
+    {
+        const size_t tail = Tail.load(std::memory_order_acquire);
+        return tail == Head.load(std::memory_order_acquire);
+    }
+
+    /*!
+     * @brief Reserves a slot and constructs a new element in place for a two-phase enqueue.
+     *
+     * **Producer only.** At most one uncommitted reservation may be active at a time.
+     *
+     * Complete the transaction using the returned `Reservation`:
+     * - Call `commit()` to publish the element to the queue.
+     * - Call `rollback()` (or let the handle reach end of scope) to cancel.
+     *
+     * @param newObject Element to copy/clone into the reserved queue slot.
+     * @return A valid `Reservation` on success, or an invalid `Reservation` if the queue is full.
+     * @throws std::exception Any exception thrown during the in-place copy/clone construction
+     *         of `newObject` *(the reservation is automatically rolled back on throw)*.
+     */
+    [[nodiscard]] Reservation Reserve(const base_type& newObject)
+    {
+        if (reserved) {
+            return Reservation(*this, false);
         }
-        return available;
-    }
 
-
-    /*! Returns true if queue is full. */
-    inline bool IsFull(void) const {
-        pointer * oneAfterHead = this->Head + 1;
-        if (oneAfterHead >= this->Sentinel) {
-            oneAfterHead = this->Data;
+        const size_t head = Head.load(std::memory_order_relaxed);
+        const size_t next = Advance(head);
+        if (next == Tail.load(std::memory_order_acquire)) {
+            return Reservation(*this, false);
         }
-        return oneAfterHead == this->Tail;
+
+        if (!InPlaceClone::clone(Data[head], newObject)) {
+            return Reservation(*this, false);
+        }
+
+        reserved = true;
+        return Reservation(*this, true);
     }
 
+    /*!
+     * @brief Enqueues an element
+     *
+     * **Producer only.** Cannot be used while uncommited Reserve() is active.
+     *
+     * @param newObject Element to copy/clone into the reserved queue slot.
+     * @return true if an element was enqueued, false if reservation is active, the queue is full or clone fails.
+     * @throws std::exception Any exception thrown during the in-place copy/clone construction
+     *         of `newObject` *(the queue is left unchanged on throw)*.
+     */
+    bool Put(const base_type& newObject)
+    {
+        if (reserved) { return false; }
 
-    /*! Returns true if queue is empty. */
-    inline bool IsEmpty(void) const {
-        return Head == Tail;
+        const size_t head = Head.load(std::memory_order_relaxed);
+        const size_t next = Advance(head);
+        if (next == Tail.load(std::memory_order_acquire)) {
+            return false;
+        }
+
+        if (!InPlaceClone::clone(Data[head], newObject)) {
+            return false;
+        }
+
+        Head.store(next, std::memory_order_release);
+        return true;
     }
 
+    /*!
+     * @brief Access next element without removing it from queue
+     *
+     * **Consumer only.**
+     * @return Pointer to next element, or nullptr if the queue is empty.
+     */
+    element_type* Peek() noexcept
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
+        return mtsQueueUnwrapPointer<T>::get(Data[tail]);
+    }
 
-    /*! Copy an object to the queue.
-      \param in reference to the object to be copied
-      \result Pointer to element in queue (use iterator instead?)
+    /*!
+     * @brief Access next element without removing it from queue
+     *
+     * **Consumer only.**
+     * @return Pointer to next element, or nullptr if the queue is empty.
+     */
+    const element_type* Peek() const noexcept
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return nullptr;
+        }
+        return mtsQueueUnwrapPointer<T>::get(Data[tail]);
+    }
+
+    /*! @brief Releases the element returned by Peek.
+     *
+     * **Consumer only.**
+     * @return true if an element was released, false if the queue is empty.
+     */
+    bool Pop() noexcept
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return false;
+        }
+        Tail.store(Advance(tail), std::memory_order_release);
+        return true;
+    }
+
+    /*! @brief Combined Peek and Pop.
+     *
+     * **Consumer only**.  Returns false if the queue is empty.
+     *
+     * @param out Reference to an element of type T. The oldest element is cloned to this location.
+     *   If T is a smart pointer, we require caller to have allocated memory so we can Get() via copy
+     *   constructor. If the copy throws, the element stays queued.
+    * @return true if an element was returned, false if the queue is empty.
     */
-    inline const_pointer Put(const_reference newObject) {
-        pointer * newHead = this->Head + 1;
-        // test if end of buffer (same as IsFull method)
-        if (newHead >= this->Sentinel) {
-            newHead = this->Data;
+    bool Get(element_type& out)
+    {
+        const size_t tail = Tail.load(std::memory_order_relaxed);
+        if (tail == Head.load(std::memory_order_acquire)) {
+            return false;
         }
-        // test if full
-        if (newHead == this->Tail) {
-            return 0;    // queue full
+        if (!InPlaceClone::clone(&out, Data[tail])) {
+            return false;
         }
-        // queue new object and move head
-        // using in place new to make sure copy constructor is used
-        if (!this->ClassServices->Create(*(this->Head), newObject)) {
-            // if Create fails, it does not modify the input parameter (this->Head)
-            CMN_LOG_RUN_ERROR << "mtsQueueGeneric::Put failed for " << newObject.Services()->GetName() << std::endl;
-            return 0;
-        }
-        this->Head = newHead;
-        return *(this->Head);
+
+        Tail.store(Advance(tail), std::memory_order_release);
+        return true;
     }
-
-
-    /*! Get a pointer to the next object to be read, but do not
-        remove the item from the queue.
-        \result Pointer to top element in queue (use iterator instead?)
-     */
-    inline pointer Peek(void) const {
-        if (this->IsEmpty()) {
-            return 0;
-        }
-        return *(this->Tail);
-    }
-
-
-    /*! Pop the next object to be read from the queue.
-        \result Pointer to element just popped (use iterator instead?)
-     */
-    inline pointer Get(void) {
-        if (this->IsEmpty()) {
-            return 0;
-        }
-        pointer result = *(this->Tail);
-        this->Tail++;
-        if (this->Tail >= this->Sentinel) {
-            this->Tail = this->Data;
-        }
-        return result;
-    }
-
 };
 
+using mtsQueueGeneric = mtsQueue<std::unique_ptr<mtsGenericObject>>;
 
 #endif // _mtsQueue_h
-

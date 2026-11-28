@@ -45,26 +45,27 @@ const std::string & mtsMailBox::GetName(void) const
 }
 
 
-bool mtsMailBox::Write(mtsCommandBase * command)
+decltype(mtsMailBox::CommandQueue)::Reservation mtsMailBox::Write(mtsCommandBase * command)
 {
-    bool result;
-    result = (CommandQueue.Put(command) != 0);
+    auto handle = CommandQueue.Reserve(command);
     if (this->PostCommandQueuedCallable) {
         this->PostCommandQueuedCallable();
     }
-    return result;
+    return handle;
 }
 
 
 // return false if nothing to execute; true otherwise.
 bool mtsMailBox::ExecuteNext(void)
 {
-   mtsCommandBase** command = CommandQueue.Peek();
-
+   mtsCommandBase** slot = CommandQueue.Peek();
    // test for empty queue
-   if (!command) {
+   if (!slot) {
        return false;
    }
+
+   // the slot is released by Pop, so keep a copy of the pointer
+   mtsCommandBase* const command = *slot;
 
    mtsCommandQueuedVoid * commandVoid;
    mtsCommandQueuedWriteBase * commandWrite;
@@ -77,20 +78,20 @@ bool mtsMailBox::ExecuteNext(void)
    mtsGenericObject *resultPointer = 0;
    mtsCommandWriteBase *finishedEvent = 0;
 
-   // TODO BB: yikes! replace with RAII
+   // TODO BB: yikes! replace with RAII In particular, the command itself should manage removing items from the queues.
    bool isBlocking = false;
    try {
-       if (!(*command)->Returns()) {
-           switch ((*command)->NumberOfArguments()) {
+       if (!command->Returns()) {
+           switch (command->NumberOfArguments()) {
            case 0:
-               commandVoid = dynamic_cast<mtsCommandQueuedVoid *>(*command);
+               commandVoid = dynamic_cast<mtsCommandQueuedVoid *>(command);
                CMN_ASSERT(commandVoid);
                isBlocking = (commandVoid->BlockingFlagGet() == MTS_BLOCKING);
                finishedEvent = commandVoid->FinishedEventGet();
                result = commandVoid->GetCallable()();
                break;
            case 1:
-               commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(*command);
+               commandWrite = dynamic_cast<mtsCommandQueuedWriteBase *>(command);
                if (commandWrite) {
                    isBlocking = (commandWrite->BlockingFlagGet() == MTS_BLOCKING);
                    finishedEvent = commandWrite->FinishedEventGet();
@@ -98,15 +99,15 @@ bool mtsMailBox::ExecuteNext(void)
                        result = commandWrite->GetActualCommand()->Execute(*(commandWrite->ArgumentPeek()), MTS_NOT_BLOCKING);
                    }
                    catch (...) {
-                       commandWrite->ArgumentGet();  // Remove from parameter queue
+                       commandWrite->ArgumentPop();  // Remove from parameter queue
                        throw;
                    }
-                   commandWrite->ArgumentGet();  // Remove from parameter queue
+                   commandWrite->ArgumentPop();  // Remove from parameter queue
                }
                else {
                    // For the Read command, NumberOfArguments() is 1, and Returns() is false.
                    // But, we will handle a queued Read command the same as a queued Void Return
-                   commandRead = dynamic_cast<mtsCommandQueuedRead *>(*command);
+                   commandRead = dynamic_cast<mtsCommandQueuedRead *>(command);
                    CMN_ASSERT(commandRead);
                    resultPointer = commandRead->ReturnGet();
                    finishedEvent = commandRead->FinishedEventGet();
@@ -116,7 +117,7 @@ bool mtsMailBox::ExecuteNext(void)
            case 2:
                // For the Qualified Read command, NumberOfArguments() is 2, and Returns() is false.
                // But, we will handle a queued Qualified Read command the same as a queued Write Return.
-               commandQualifiedRead = dynamic_cast<mtsCommandQueuedQualifiedRead *>(*command);
+               commandQualifiedRead = dynamic_cast<mtsCommandQueuedQualifiedRead *>(command);
                CMN_ASSERT(commandQualifiedRead);
                resultPointer = commandQualifiedRead->ReturnGet();
                finishedEvent = commandQualifiedRead->FinishedEventGet();
@@ -124,26 +125,26 @@ bool mtsMailBox::ExecuteNext(void)
                    result = commandQualifiedRead->GetCallable()( *(commandQualifiedRead->ArgumentPeek()), *resultPointer);
                }
                catch (...) {
-                   commandQualifiedRead->ArgumentGet();  // Remove from parameter queue
+                   commandQualifiedRead->ArgumentPop();  // Remove from parameter queue
                    throw;
                }
-               commandQualifiedRead->ArgumentGet();  // Remove from parameter queue
+               commandQualifiedRead->ArgumentPop();  // Remove from parameter queue
                break;
            default:
                CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
                return false;
            }
        } else {
-           switch ((*command)->NumberOfArguments()) {
+           switch (command->NumberOfArguments()) {
            case 0:
-               commandVoidReturn = dynamic_cast<mtsCommandQueuedVoidReturn *>(*command);
+               commandVoidReturn = dynamic_cast<mtsCommandQueuedVoidReturn *>(command);
                CMN_ASSERT(commandVoidReturn);
                resultPointer = commandVoidReturn->ReturnGet();
                finishedEvent = commandVoidReturn->FinishedEventGet();
                result = commandVoidReturn->GetCallable()(*resultPointer);
                break;
            case 1:
-               commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(*command);
+               commandWriteReturn = dynamic_cast<mtsCommandQueuedWriteReturn *>(command);
                CMN_ASSERT(commandWriteReturn);
                resultPointer = commandWriteReturn->ReturnGet();
                finishedEvent = commandWriteReturn->FinishedEventGet();
@@ -151,10 +152,10 @@ bool mtsMailBox::ExecuteNext(void)
                    result = commandWriteReturn->GetCallable()( *(commandWriteReturn->ArgumentPeek()), *resultPointer);
                }
                catch (...) {
-                   commandWriteReturn->ArgumentGet();  // Remove from parameter queue
+                   commandWriteReturn->ArgumentPop();  // Remove from parameter queue
                    throw;
                }
-               commandWriteReturn->ArgumentGet();  // Remove from parameter queue
+               commandWriteReturn->ArgumentPop();  // Remove from parameter queue
                break;
            default:
                CMN_LOG_RUN_ERROR << "Class mtsMailBox: Invalid parameter in ExecuteNext" << std::endl;
@@ -163,28 +164,29 @@ bool mtsMailBox::ExecuteNext(void)
        }
    }
    catch (std::exception & exceptionCaught) {
-       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
+       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << command->GetName()
                            << "\" caught exception \"" << exceptionCaught.what() << "\"" << std::endl;
-       CommandQueue.Get();  // Remove command from mailbox queue
+       CommandQueue.Pop();  // Remove command from mailbox queue
        if (resultPointer || isBlocking)
-          TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
+          TriggerFinishedEventIfNeeded(command->GetName(), finishedEvent, resultPointer, result);
        throw;
    }
    catch (...) {
-       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
+       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << command->GetName()
                            << "\" caught exception, blocking = " << isBlocking << std::endl;
-       CommandQueue.Get();  // Remove command from mailbox queue
+       CommandQueue.Pop();  // Remove command from mailbox queue
        if (resultPointer || isBlocking)
-           TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
+           TriggerFinishedEventIfNeeded(command->GetName(), finishedEvent, resultPointer, result);
        throw;
    }
    if (!result.IsOK()) {
-       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << (*command)->GetName()
+       CMN_LOG_RUN_WARNING << "mtsMailbox \"" << GetName() << "\": ExecuteNext for command \"" << command->GetName()
                            << "\" failed, execution result is \"" << result << "\"" << std::endl;
    }
-   CommandQueue.Get();  // Remove command from mailbox queue
-   if (resultPointer || isBlocking)
-       TriggerFinishedEventIfNeeded((*command)->GetName(), finishedEvent, resultPointer, result);
+   CommandQueue.Pop();  // Remove command from mailbox queue
+   if (resultPointer || isBlocking) {
+       TriggerFinishedEventIfNeeded(command->GetName(), finishedEvent, resultPointer, result);
+   }
    return true;
 }
 

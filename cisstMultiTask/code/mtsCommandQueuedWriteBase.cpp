@@ -40,12 +40,16 @@ mtsExecutionResult mtsCommandQueuedWriteBase::Execute(const mtsGenericObject & a
 
 mtsBlockingType mtsCommandQueuedWriteBase::BlockingFlagGet(void)
 {
-    return *(this->BlockingFlagQueue.Get());
+    mtsBlockingType blocking = MTS_NOT_BLOCKING;
+    this->BlockingFlagQueue.Get(blocking);
+    return blocking;
 }
 
-mtsCommandWriteBase *mtsCommandQueuedWriteBase::FinishedEventGet(void)
+mtsCommandWriteBase* mtsCommandQueuedWriteBase::FinishedEventGet(void)
 {
-    return *(this->FinishedEventQueue.Get());
+    mtsCommandWriteBase* finishedEvent = 0;
+    this->FinishedEventQueue.Get(finishedEvent);
+    return finishedEvent;
 }
 
 
@@ -117,39 +121,43 @@ mtsExecutionResult mtsCommandQueuedWriteGeneric::Execute(const mtsGenericObject 
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
     }
     // copy the argument to the local storage.
-    if (!ArgumentsQueue.Put(argument)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue.Put failed for \""
+    auto arguments_reservation = ArgumentsQueue.Reserve(argument);
+    if (!arguments_reservation) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue.Reserve failed for \""
                           << this->Name << "\"" << std::endl;
-        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue.Put failed");
+        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: ArgumentsQueue.Reserve failed");
         return mtsExecutionResult::UNDEFINED;
     }
     // copy the blocking flag to the local storage.
-    if (!BlockingFlagQueue.Put(blocking)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed for \""
+    auto blocking_reservation = BlockingFlagQueue.Reserve(blocking);
+    if (!blocking_reservation) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Reserve failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();   // Remove the argument that was already queued
-        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Put failed");
+        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: BlockingFlagQueue.Reserve failed");
         return mtsExecutionResult::UNDEFINED;
     }
     // copy the finished event handler to the local storage.
-    if (!FinishedEventQueue.Put(finishedEventHandler)) {
-        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: FinishedEventQueue.Put failed for \""
+    auto finished_reservation = FinishedEventQueue.Reserve(finishedEventHandler);
+    if (!finished_reservation) {
+        CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: FinishedEventQueue.Reserve failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();       // Remove the argument that was already queued
-        BlockingFlagQueue.Get();    // Remove the blocking flag that was already queued
-        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: FinishedEventQueue.Put failed");
+        cmnThrow("mtsCommandQueuedWriteGeneric: Execute: FinishedEventQueue.Reserve failed");
         return mtsExecutionResult::UNDEFINED;
     }
     // finally try to queue to mailbox
-    if (!MailBox->Write(this)) {
+    auto mailbox_reservation = MailBox->Write(this);
+    if (!mailbox_reservation) {
         CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();      // Remove the argument that was already queued
-        BlockingFlagQueue.Get();   // Remove the blocking flag that was already queued
-        FinishedEventQueue.Get();  // Remove the finished event handler that was already queued
         cmnThrow("mtsCommandQueuedWriteGeneric: Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }
+
+    arguments_reservation.commit();
+    blocking_reservation.commit();
+    finished_reservation.commit();
+    mailbox_reservation.commit();
+
     return mtsExecutionResult::COMMAND_QUEUED;
 }
 

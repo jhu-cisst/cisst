@@ -102,7 +102,7 @@ public:
     virtual const mtsGenericObject * ArgumentPeek(void) const = 0;
 
 
-    virtual mtsGenericObject * ArgumentGet(void) = 0;
+    virtual void ArgumentPop(void) = 0;
 
     mtsBlockingType BlockingFlagGet(void);
 

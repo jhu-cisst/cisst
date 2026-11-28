@@ -37,14 +37,15 @@ http://www.cisst.org/cisst/license.txt.
  */
 
 /*! Write queued command using templated _argumentType parameter. Currently, this is only used
-    for adding event handlers, and could perhaps be replaced by mtsCommandQueuedWriteGeneric. */
+    for adding event handlers, and could perhaps be replaced by mtsCommandQueuedWriteGeneric. TODO BB: Can/should we replace? */
 template <class _argumentType>
 class mtsCommandQueuedWrite: public mtsCommandQueuedWriteBase
 {
 public:
+    // TODO BB: evaluate how this interacts with mtsQueue<ArgumentQueueType>
     typedef mtsCommandQueuedWriteBase BaseType;
     typedef _argumentType ArgumentType;
-    typedef typename mtsGenericTypes<ArgumentType>::FinalType ArgumentQueueType;
+    typedef typename mtsGenericTypes<ArgumentType>::FinalType ArgumentQueueType; // TODO BB: why not ArgumentType? Is goal to propagate IsValid/Timestamp?
     typedef typename mtsGenericTypesUnwrap<ArgumentQueueType>::BaseType ArgumentQueueBaseType;
 
     /*! This type. */
@@ -56,23 +57,22 @@ protected:
 
 private:
     /*! Private copy constructor to prevent copies */
-    inline mtsCommandQueuedWrite(const ThisType & CMN_UNUSED(other));
+    mtsCommandQueuedWrite(const ThisType & CMN_UNUSED(other)) = delete;
 
 public:
-
-    inline mtsCommandQueuedWrite(void):
+    mtsCommandQueuedWrite(void):
         BaseType(),
         ArgumentsQueue(0, ArgumentQueueType())
     {}
 
 
-    inline mtsCommandQueuedWrite(mtsCommandWriteBase * actualCommand):
+    mtsCommandQueuedWrite(mtsCommandWriteBase * actualCommand):
         BaseType(0, actualCommand, 0),
         ArgumentsQueue(0, ArgumentQueueType())
     {}
 
 
-    inline mtsCommandQueuedWrite(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
+    mtsCommandQueuedWrite(mtsMailBox * mailBox, mtsCommandWriteBase * actualCommand, size_t size):
         BaseType(mailBox, actualCommand, size),
         ArgumentsQueue(0, ArgumentQueueType())
     {
@@ -89,17 +89,16 @@ public:
     }
 
 
-    // ArgumentsQueue destructor should get called
-    inline virtual ~mtsCommandQueuedWrite() {}
+    virtual ~mtsCommandQueuedWrite() = default;
 
 
-    inline virtual mtsCommandQueuedWriteBase * Clone(mtsMailBox * mailBox, size_t size) const {
+    virtual mtsCommandQueuedWriteBase * Clone(mtsMailBox * mailBox, size_t size) const {
         return new mtsCommandQueuedWrite(mailBox, this->ActualCommand, size);
     }
 
 
     // Allocate should be called when a task calls GetMethodXXX().
-    inline virtual void Allocate(size_t size) {
+    virtual void Allocate(size_t size) {
         if (ArgumentsQueue.GetSize() != size) {
             if (ArgumentsQueue.GetSize() > 0) {
                 // Probably should never happen
@@ -149,39 +148,43 @@ public:
             return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
         }
         // copy the argument to the local storage.
-        if (!ArgumentsQueue.Put(*argumentTyped)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: ArgumentsQueue full for \""
+        auto argument_reservation = ArgumentsQueue.Reserve(*argumentTyped);
+        if (!argument_reservation) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: ArgumentsQueue.Reserve failed for \""
                               << this->Name << "\"" << std::endl;
-            cmnThrow("mtsCommandQueuedWrite: Execute: ArgumentsQueue.Put failed");
+            cmnThrow("mtsCommandQueuedWrite: Execute: ArgumentsQueue.Reserve failed");
             return mtsExecutionResult::UNDEFINED;
         }
         // copy the blocking flag to the local storage.
-        if (!BlockingFlagQueue.Put(blocking)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: BlockingFlagQueue full for \""
+        auto block_reservation = BlockingFlagQueue.Reserve(blocking);
+        if (!block_reservation) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: BlockingFlagQueue.Reserve failed for \""
                               << this->Name << "\"" << std::endl;
-            ArgumentsQueue.Get(); // pop argument
-            cmnThrow("mtsCommandQueuedWrite: Execute: BlockingFlagQueue.Put failed");
+            cmnThrow("mtsCommandQueuedWrite: Execute: BlockingFlagQueue.Reserve failed");
             return mtsExecutionResult::UNDEFINED;
         }
         // copy the finished event handler to the local storage.
-        if (!FinishedEventQueue.Put(finishedEventHandler)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: FinishedEventQueue.Put failed for \""
+        auto finished_reservation = FinishedEventQueue.Reserve(finishedEventHandler);
+        if (!finished_reservation) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: FinishedEventQueue.Reserve failed for \""
                               << this->Name << "\"" << std::endl;
-            ArgumentsQueue.Get();       // Remove the argument that was already queued
-            BlockingFlagQueue.Get();    // Remove the blocking flag that was already queued
-            cmnThrow("mtsCommandQueuedWrite: Execute: FinishedEventQueue.Put failed");
+            cmnThrow("mtsCommandQueuedWrite: Execute: FinishedEventQueue.Reserve failed");
             return mtsExecutionResult::UNDEFINED;
         }
         // finally try to queue to mailbox
-        if (!MailBox->Write(this)) {
-            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: mailbox full for \""
+        auto mailbox_reservation = MailBox->Write(this);
+        if (!mailbox_reservation) {
+            CMN_LOG_RUN_ERROR << "Class mtsCommandQueuedWrite: Execute: MailBox.Write failed for \""
                               << this->Name << "\"" << std::endl;
-            ArgumentsQueue.Get();  // pop argument, blocking flag, and finished event from local storage
-            BlockingFlagQueue.Get();
-            FinishedEventQueue.Get();
             cmnThrow("mtsCommandQueuedWrite: Execute: MailBox.Write failed");
             return mtsExecutionResult::UNDEFINED;
         }
+
+        argument_reservation.commit();
+        block_reservation.commit();
+        finished_reservation.commit();
+        mailbox_reservation.commit();
+
         return mtsExecutionResult::COMMAND_QUEUED;
     }
 
@@ -190,13 +193,12 @@ public:
         return this->ActualCommand->GetArgumentPrototype();
     }
 
-    inline virtual const mtsGenericObject * ArgumentPeek(void) const {
+    virtual const mtsGenericObject * ArgumentPeek(void) const {
         return ArgumentsQueue.Peek();
     }
 
-
-    inline virtual mtsGenericObject * ArgumentGet(void) {
-        return ArgumentsQueue.Get();
+    virtual void ArgumentPop(void) {
+        ArgumentsQueue.Pop();
     }
 };
 
@@ -204,7 +206,7 @@ public:
 /*! Write queued command using mtsGenericObject parameter. This is used for all
     queued write commands.  It is also used to create a generic event
     observer (combined with mtsMulticastCommandWriteBase) that can
-    accept any payload (derived from mtsGenericObject). */
+    accept any payload (derived from mtsGenericObject). TODO BB: This that true? Class services / zero-allocation queue doesn't seem to work that way */
 // PK: methods are defined in mtsCommandQueuedWriteBase.cpp
 class CISST_EXPORT mtsCommandQueuedWriteGeneric: public mtsCommandQueuedWriteBase
 {
@@ -218,10 +220,10 @@ class CISST_EXPORT mtsCommandQueuedWriteGeneric: public mtsCommandQueuedWriteBas
 
 private:
     /*! Private default constructor to prevent use. */
-    inline mtsCommandQueuedWriteGeneric(void);
+    mtsCommandQueuedWriteGeneric() = default;
 
     /*! Private copy constructor to prevent copies */
-    inline mtsCommandQueuedWriteGeneric(const ThisType & CMN_UNUSED(other));
+    mtsCommandQueuedWriteGeneric(const ThisType & CMN_UNUSED(other)) = delete;
 
 public:
     /*! Constructor, requires a mailbox to queue commands, a pointer
@@ -235,12 +237,13 @@ public:
 
 
     /*! Destructor */
-    inline virtual ~mtsCommandQueuedWriteGeneric() {}
+    virtual ~mtsCommandQueuedWriteGeneric() {}
 
 
     virtual void ToStream(std::ostream & outputStream) const;
 
-    inline virtual mtsCommandQueuedWriteGeneric * Clone(mtsMailBox * mailBox, size_t size) const {
+    // TODO BB: is this dangerous?
+    virtual mtsCommandQueuedWriteGeneric * Clone(mtsMailBox * mailBox, size_t size) const {
         return new mtsCommandQueuedWriteGeneric(mailBox, this->ActualCommand, size);
     }
 
@@ -266,13 +269,13 @@ public:
     }
 
 
-    inline virtual const mtsGenericObject * ArgumentPeek(void) const {
+    virtual const mtsGenericObject * ArgumentPeek(void) const {
         return ArgumentsQueue.Peek();
     }
 
 
-    inline virtual mtsGenericObject * ArgumentGet(void) {
-        return ArgumentsQueue.Get();
+    virtual void ArgumentPop(void) {
+        ArgumentsQueue.Pop();
     }
 };
 

@@ -20,17 +20,24 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "mtsMacrosTestClasses.h"
 
+#include <limits>
+#include <stdexcept>
+
 CMN_IMPLEMENT_SERVICES(mtsMacrosTestClass);
 
 size_t mtsMacrosTestClass::DefaultConstructorCalls = 0;
 size_t mtsMacrosTestClass::DestructorCalls = 0;
 size_t mtsMacrosTestClass::CopyConstructorCalls = 0;
+size_t mtsMacrosTestClass::CopyConstructorLimit = std::numeric_limits<size_t>::max();
 
 mtsMacrosTestClass::mtsMacrosTestClass(void) {
     DefaultConstructorCalls++;
 }
 
 mtsMacrosTestClass::mtsMacrosTestClass(const mtsMacrosTestClass & other) : mtsGenericObject() {
+    if (CopyConstructorCalls >= CopyConstructorLimit) {
+        throw std::runtime_error("mtsMacrosTestClass: copy constructor limit reached");
+    }
     Value() = other.Value();
     CopyConstructorCalls++;
 }
@@ -43,4 +50,5 @@ void mtsMacrosTestClass::ResetAllCounters(void) {
     DefaultConstructorCalls = 0;
     DestructorCalls = 0;
     CopyConstructorCalls = 0;
+    CopyConstructorLimit = std::numeric_limits<size_t>::max();
 }

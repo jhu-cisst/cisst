@@ -93,12 +93,16 @@ public:
 
     std::string GetMailBoxName(void) const;
 
-    inline virtual mtsGenericObject * ReturnGet(void) {
-        return *(ReturnsQueue.Get());
+    virtual mtsGenericObject * ReturnGet(void) {
+        mtsGenericObject* result = nullptr;
+        ReturnsQueue.Get(result);
+        return result;
     }
 
-    inline virtual mtsCommandWriteBase * FinishedEventGet(void) {
-        return *(FinishedEventQueue.Get());
+    virtual mtsCommandWriteBase * FinishedEventGet(void) {
+        mtsCommandWriteBase* finishedEvent = nullptr;
+        FinishedEventQueue.Get(finishedEvent);
+        return finishedEvent;
     }
 
     void ToStream(std::ostream & outputStream) const;

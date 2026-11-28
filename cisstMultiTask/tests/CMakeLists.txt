@@ -72,6 +72,15 @@ endif ()
 # to generate a CTest list of tests
 cisst_add_test (cisstMultiTaskTests ITERATIONS 1 INSTANCES 1)
 
+# mtsQueue benchmarking tools - putting here in tests/ for convienence
+add_executable (cisstQueueBenchmark mtsQueueBenchmark.cpp)
+target_link_libraries (cisstQueueBenchmark cisstCommon cisstOSAbstraction cisstMultiTask)
+target_compile_features(cisstQueueBenchmark PUBLIC c_std_99 cxx_std_17)
+
+add_executable (cisstQueueThreadedBenchmark mtsQueueThreadedBenchmark.cpp)
+target_link_libraries (cisstQueueThreadedBenchmark cisstCommon cisstOSAbstraction cisstMultiTask)
+target_compile_features(cisstQueueThreadedBenchmark PUBLIC c_std_99 cxx_std_17)
+
 # To find generated executables
 set_target_properties (cisstMultiTaskTests
                        PROPERTIES COMPILE_DEFINITIONS "CISST_BINARY_DIR=\"${cisst_BINARY_DIR}/\"")

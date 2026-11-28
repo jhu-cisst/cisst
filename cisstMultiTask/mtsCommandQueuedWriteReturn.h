@@ -100,20 +100,24 @@ public:
 
     std::string GetMailBoxName(void) const;
 
-    inline virtual mtsGenericObject * ArgumentPeek(void) {
+    virtual mtsGenericObject * ArgumentPeek(void) {
         return ArgumentsQueue.Peek();
     }
 
-    inline virtual mtsGenericObject * ArgumentGet(void) {
-        return ArgumentsQueue.Get();
+    virtual void ArgumentPop(void) {
+        ArgumentsQueue.Pop();
     }
 
-    inline virtual mtsGenericObject * ReturnGet(void) {
-        return *(ReturnsQueue.Get());
+    virtual mtsGenericObject * ReturnGet(void) {
+        mtsGenericObject * result = 0;
+        ReturnsQueue.Get(result);
+        return result;
     }
 
-    inline virtual mtsCommandWriteBase * FinishedEventGet(void) {
-        return *(FinishedEventQueue.Get());
+    virtual mtsCommandWriteBase * FinishedEventGet(void) {
+        mtsCommandWriteBase * finishedEvent = 0;
+        FinishedEventQueue.Get(finishedEvent);
+        return finishedEvent;
     }
 
     void ToStream(std::ostream & outputStream) const;

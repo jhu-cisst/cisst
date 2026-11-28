@@ -108,39 +108,43 @@ mtsExecutionResult mtsCommandQueuedWriteReturnBase<_Base>::Execute(const mtsGene
         return mtsExecutionResult::COMMAND_ARGUMENT_QUEUE_FULL;
     }
     // copy the argument to the local storage.
-    if (!ArgumentsQueue.Put(argument)) {
-        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: ArgumentsQueue.Put failed for \""
+    auto argument_reservation = ArgumentsQueue.Reserve(argument);
+    if (!argument_reservation) {
+        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: ArgumentsQueue.Reserve failed for \""
                           << this->Name << "\"" << std::endl;
-        cmnThrow(GetClassName()+": Execute: ArgumentsQueue.Put failed");
+        cmnThrow(GetClassName()+": Execute: ArgumentsQueue.Reserve failed");
         return mtsExecutionResult::UNDEFINED;
     }
     // copy the result to the local storage.
-    if (!ReturnsQueue.Put(&result)) {
-        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: ReturnsQueue.Put failed for \""
+    auto returns_reservation = ReturnsQueue.Reserve(&result);
+    if (!returns_reservation) {
+        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: ReturnsQueue.Reserve failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();   // Remove the argument that was already queued
-        cmnThrow(GetClassName()+": Execute: ReturnsQueue.Put failed");
+        cmnThrow(GetClassName()+": Execute: ReturnsQueue.Reserve failed");
         return mtsExecutionResult::UNDEFINED;
     }
     // copy the finished event handler to the local storage.
-    if (!FinishedEventQueue.Put(finishedEventHandler)) {
-        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: FinishedEventQueue.Put failed for \""
+    auto finished_reservation = FinishedEventQueue.Reserve(finishedEventHandler);
+    if (!finished_reservation) {
+        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: FinishedEventQueue.Reserve failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();   // Remove the argument that was already queued
-        ReturnsQueue.Get();     // Remove the result that was already queued
-        cmnThrow(GetClassName()+": Execute: FinishedEventQueue.Put failed");
+        cmnThrow(GetClassName()+": Execute: FinishedEventQueue.Reserve failed");
         return mtsExecutionResult::UNDEFINED;
     }
     // finally try to queue to mailbox
-    if (!MailBox->Write(this)) {
-        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: mailbox full for \""
+    auto mailbox_reservation = MailBox->Write(this);
+    if (!mailbox_reservation) {
+        CMN_LOG_RUN_ERROR << GetClassName() << ": Execute: MailBox.Write failed for \""
                           << this->Name << "\"" << std::endl;
-        ArgumentsQueue.Get();      // Remove the argument that was already queued
-        ReturnsQueue.Get();        // Remove the result that was already queued
-        FinishedEventQueue.Get();  // Remove the finished event handler that was already queued
         cmnThrow(GetClassName()+": Execute: MailBox.Write failed");
         return mtsExecutionResult::UNDEFINED;
     }
+
+    argument_reservation.commit();
+    returns_reservation.commit();
+    finished_reservation.commit();
+    mailbox_reservation.commit();
+
     return mtsExecutionResult::COMMAND_QUEUED;
 }
 
