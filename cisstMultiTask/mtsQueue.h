@@ -44,6 +44,7 @@ http://www.cisst.org/cisst/license.txt.
     constexpr std::size_t hardware_destructive_interference_size = 64;
 #endif
 
+// Helper utiltity to unwrap smart pointer to their underlying type, making the mtsQueue API nicer to use.
 template <typename T, typename = void>
 struct mtsQueueUnwrapPointer {
     using type = T;
@@ -57,6 +58,7 @@ struct mtsQueueUnwrapPointer<T, std::void_t<typename T::element_type, decltype(s
     static type* get(const T& ptr) noexcept { return ptr.get(); }
 };
 
+// Helper utilities for in-place cloning of types.
 // Default cloning is just copy construction, cannot fail
 template <typename T>
 struct mtsQueueDefaultClone {
@@ -74,7 +76,8 @@ struct mtsQueueDefaultClone {
     }
 };
 
-// mtsGenericObject cloning is ClassServices::Create. Note that this requires place and value to have same concrete type, which is not checked at compile time nor at runtime.
+// mtsGenericObject cloning is ClassServices::Create. Note that this requires place and value
+// to have same concrete type, which is not checked at compile time nor at runtime.
 template <>
 struct mtsQueueDefaultClone<std::unique_ptr<mtsGenericObject>> {
     static bool clone(std::unique_ptr<mtsGenericObject>& place, const mtsGenericObject& value) {
@@ -107,9 +110,10 @@ struct mtsQueueDefaultClone<std::unique_ptr<mtsGenericObject>> {
   \ingroup cisstMultiTask
 
   Lock-free SPSC queue for one producer thread and one consumer thread, holding up
-  to GetSize() elements.  The producer calls Put; the consumer calls Peek and
-  then Pop (or Get).  The status methods are snapshots and are safe from either
-  thread.  SetSize and destruction require exclusive use.
+  to GetSize() elements. The producer calls Put or Reserve+commit/rollback; the
+  consumer calls Peek and then Pop (or Get). The status methods (IsFull, IsEmpty,
+  GetAvailable) are snapshots and are safe to call from either thread. SetSize
+  and destruction require exclusive use.
 
   The pointer returned by Peek remains valid until the matching Pop or Get.
 */
@@ -166,10 +170,14 @@ public:
 
 private:
     size_t Capacity = 0;
-    std::unique_ptr<T[]> Data;                                                 // Capacity + 1 slots, the spare one tells full from empty
-    alignas(hardware_destructive_interference_size) std::atomic<size_t> Head{0};     // Next slot to write, only modified by the producer
-    alignas(hardware_destructive_interference_size) std::atomic<size_t> Tail{0};     // Next slot to read, only modified by the consumer
+    std::unique_ptr<T[]> Data; // Capacity + 1 slots, the spare one tells full from empty
     bool reserved = false; // True if a reservation is active, only accessed by the producer thread
+
+    // Separating Head and Tail onto different cache lines avoids false sharing,
+    // which provided modest performance improvements on my machine.
+    static constexpr std::size_t cache_line_size = hardware_destructive_interference_size; 
+    alignas(cache_line_size) std::atomic<size_t> Head{0}; // Next slot to write, only modified by the producer
+    alignas(cache_line_size) std::atomic<size_t> Tail{0}; // Next slot to read, only modified by the consumer
 
     size_t Advance(size_t index) const
     {

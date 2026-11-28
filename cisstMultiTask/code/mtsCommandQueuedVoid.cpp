@@ -19,8 +19,8 @@ http://www.cisst.org/cisst/license.txt.
 
 
 #include <cisstMultiTask/mtsCommandQueuedVoid.h>
-#include "cisstMultiTask/mtsCommandWriteBase.h"
-#include "cisstMultiTask/mtsForwardDeclarations.h"
+#include <cisstMultiTask/mtsCommandWriteBase.h>
+#include <cisstMultiTask/mtsForwardDeclarations.h>
 
 mtsCommandQueuedVoid::mtsCommandQueuedVoid(void):
     BaseType(),
